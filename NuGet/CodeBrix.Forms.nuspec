@@ -10,6 +10,7 @@
         <iconUrl>https://raw.githubusercontent.com/ellisnet/CodeBrix/master/images/icon-codebrix-128.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>CodeBrix is a comprehensive rapid-application development (RAD) platform for quickly creating apps for iOS, Android and Windows (UWP); and is based on Xamarin.Forms and Prism.</description>
+        <releaseNotes>v1.0.23 - Initial release.</releaseNotes>
         <copyright>Copyright 2018 Ellisnet - Jeremy Ellis</copyright>
         <tags>xamarin rapid application development prism forms mobile app</tags>
         <dependencies>

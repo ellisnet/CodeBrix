@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.3</TargetFramework>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <AssemblyVersion>1.0.23.0</AssemblyVersion>
+    <FileVersion>1.0.23.0</FileVersion>
+    <Version>1.0.23</Version>
+    <Authors>Jeremy Ellis</Authors>
+    <Company>Ellisnet</Company>
+    <Product>(netstandard1.3)</Product>
+    <Description>CodeBrix is a comprehensive rapid-application development (RAD) platform for quickly creating apps for iOS, Android and Windows (UWP); and is based on Xamarin.Forms and Prism.</Description>
+    <Copyright>Copyright 2018 Ellisnet - Jeremy Ellis</Copyright>
+    <PackageLicenseUrl>https://github.com/ellisnet/CodeBrix/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/ellisnet/CodeBrix</PackageProjectUrl>
+    <PackageIconUrl />
+    <RepositoryUrl>https://github.com/ellisnet/CodeBrix</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>xamarin;rapid;application;development;prism;forms;mobile;app</PackageTags>
+    <NeutralLanguage>en</NeutralLanguage>
+    <PackageReleaseNotes>v1.0.23 - Initial release.</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netstandard1.3\CodeBrix.Forms.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\..\..\NuGet\Forms\</OutputPath>
+    <DocumentationFile>..\..\..\NuGet\Forms\netstandard1.3\CodeBrix.Forms.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Modularity\DELETE_ModuleInitializer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Acr.UserDialogs" Version="6.5.1" />
+    <PackageReference Include="Prism.Forms" Version="7.0.0.362" />
+    <PackageReference Include="Splat" Version="2.0.0" />
+    <PackageReference Include="Xamarin.FFImageLoading.Svg.Forms" Version="2.2.25" />
+    <PackageReference Include="Xamarin.FFImageLoading.Transformations" Version="2.2.25" />
+  </ItemGroup>
+
+  <ItemGroup>
+		<PackageReference Include="Xamarin.Forms" Version="2.5.0.122203" />
+	</ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\CodeBrix.Core\CodeBrix.Core.csproj" />
+  </ItemGroup>
+
+</Project>

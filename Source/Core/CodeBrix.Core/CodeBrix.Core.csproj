@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.3</TargetFramework>
+    <RootNamespace>CodeBrix</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.23</Version>
+    <AssemblyVersion>1.0.23.0</AssemblyVersion>
+    <FileVersion>1.0.23.0</FileVersion>
+    <Authors>Jeremy Ellis</Authors>
+    <Company>Ellisnet</Company>
+    <Product>(netstandard1.3)</Product>
+    <Description>CodeBrix is a comprehensive rapid-application development (RAD) platform for quickly creating apps for iOS, Android and Windows (UWP); and is based on Xamarin.Forms and Prism.</Description>
+    <Copyright>Copyright 2018 Ellisnet - Jeremy Ellis</Copyright>
+    <PackageLicenseUrl>https://github.com/ellisnet/CodeBrix/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/ellisnet/CodeBrix</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ellisnet/CodeBrix</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>xamarin;rapid;application;development;prism;forms;mobile;app</PackageTags>
+    <NeutralLanguage>en</NeutralLanguage>
+    <PackageReleaseNotes>v1.0.23 - Initial release.</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netstandard1.3\CodeBrix.Core.xml</DocumentationFile>
+    <OutputPath>bin\Debug\netstandard1.3\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;NETSTANDARD1_3</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\..\..\NuGet\Core\</OutputPath>
+    <DocumentationFile>..\..\..\NuGet\Core\netstandard1.3\CodeBrix.Core.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Colors\PortableColor.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Splat" Version="2.0.0" />
+  </ItemGroup>
+
+</Project>

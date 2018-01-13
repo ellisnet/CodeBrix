@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+    <metadata>
+        <id>CodeBrix.Forms</id>
+        <version>1.0.23</version>
+        <authors>Jeremy Ellis</authors>
+        <owners>Jeremy Ellis</owners>
+        <licenseUrl>https://github.com/ellisnet/CodeBrix/blob/master/LICENSE</licenseUrl>
+        <projectUrl>https://github.com/ellisnet/CodeBrix</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>CodeBrix is a comprehensive rapid-application development (RAD) platform for quickly creating apps for iOS, Android and Windows (UWP); and is based on Xamarin.Forms and Prism.</description>
+        <copyright>Copyright 2018 Ellisnet - Jeremy Ellis</copyright>
+        <tags>xamarin rapid application development prism forms mobile app</tags>
+        <dependencies>
+            <group targetFramework=".NETStandard1.3">
+                <dependency id="CodeBrix.Core" version="1.0.23" exclude="Build,Analyzers" />
+                <dependency id="Xamarin.Forms" version="2.5.0" exclude="Build,Analyzers" />
+                <dependency id="Xamarin.FFImageLoading.Svg.Forms" version="2.2.25" exclude="Build,Analyzers" />
+                <dependency id="Xamarin.FFImageLoading.Transformations" version="2.2.25" exclude="Build,Analyzers" />
+                <dependency id="NETStandard.Library" version="1.6.1" exclude="Build,Analyzers" />
+                <dependency id="Splat" version="[2.0.0, 3.0.0)" exclude="Build,Analyzers" />
+                <dependency id="Prism.Forms" version="[7.0.0.362, 7.1.0.0)" exclude="Build,Analyzers" />
+                <dependency id="Acr.UserDialogs" version="[6.5.1, 7.0.0)" exclude="Build,Analyzers" />
+            </group>
+            <group targetFramework=".NETStandard2.0">
+                <dependency id="CodeBrix.Core" version="1.0.23" exclude="Build,Analyzers" />
+                <dependency id="Xamarin.Forms" version="2.5.0" exclude="Build,Analyzers" />
+                <dependency id="Xamarin.FFImageLoading.Svg.Forms" version="2.2.25" exclude="Build,Analyzers" />
+                <dependency id="Xamarin.FFImageLoading.Transformations" version="2.2.25" exclude="Build,Analyzers" />
+                <dependency id="Splat" version="[2.0.0, 3.0.0)" exclude="Build,Analyzers" />
+                <dependency id="Prism.Forms" version="[7.0.0.362, 7.1.0.0)" exclude="Build,Analyzers" />
+                <dependency id="Acr.UserDialogs" version="[6.5.1, 7.0.0)" exclude="Build,Analyzers" />
+            </group>
+            <group targetFramework="Xamarin.iOS1.0">
+                <dependency id="CodeBrix.Core" version="1.0.23" exclude="Build,Analyzers" />
+                <dependency id="Xamarin.Forms" version="2.5.0" exclude="Build,Analyzers" />
+                <dependency id="Xamarin.FFImageLoading.Svg.Forms" version="2.2.25" exclude="Build,Analyzers" />
+                <dependency id="Xamarin.FFImageLoading.Transformations" version="2.2.25" exclude="Build,Analyzers" />
+                <dependency id="NETStandard.Library" version="1.6.1" exclude="Build,Analyzers" />
+                <dependency id="Splat" version="[2.0.0, 3.0.0)" exclude="Build,Analyzers" />
+                <dependency id="Prism.Forms" version="[7.0.0.362, 7.1.0.0)" exclude="Build,Analyzers" />
+                <dependency id="Acr.UserDialogs" version="[6.5.1, 7.0.0)" exclude="Build,Analyzers" />
+            </group>
+            <group targetFramework="MonoAndroid1.0">
+                <dependency id="CodeBrix.Core" version="1.0.23" exclude="Build,Analyzers" />
+                <dependency id="Xamarin.Forms" version="2.5.0" exclude="Build,Analyzers" />
+                <dependency id="Xamarin.FFImageLoading.Svg.Forms" version="2.2.25" exclude="Build,Analyzers" />
+                <dependency id="Xamarin.FFImageLoading.Transformations" version="2.2.25" exclude="Build,Analyzers" />
+                <dependency id="NETStandard.Library" version="1.6.1" exclude="Build,Analyzers" />
+                <dependency id="Splat" version="[2.0.0, 3.0.0)" exclude="Build,Analyzers" />
+                <dependency id="Prism.Forms" version="[7.0.0.362, 7.1.0.0)" exclude="Build,Analyzers" />
+                <dependency id="Acr.UserDialogs" version="[6.5.1, 7.0.0)" exclude="Build,Analyzers" />
+            </group>
+            <group targetFramework="UAP10.0">
+                <dependency id="CodeBrix.Core" version="1.0.23" exclude="Build,Analyzers" />
+                <dependency id="Xamarin.Forms" version="2.5.0" exclude="Build,Analyzers" />
+                <dependency id="Xamarin.FFImageLoading.Svg.Forms" version="2.2.25" exclude="Build,Analyzers" />
+                <dependency id="Xamarin.FFImageLoading.Transformations" version="2.2.25" exclude="Build,Analyzers" />
+                <dependency id="Splat" version="[2.0.0, 3.0.0)" exclude="Build,Analyzers" />
+                <dependency id="Prism.Forms" version="[7.0.0.362, 7.1.0.0)" exclude="Build,Analyzers" />
+                <dependency id="Acr.UserDialogs" version="[6.5.1, 7.0.0)" exclude="Build,Analyzers" />
+                <dependency id="SkiaSharp" version="1.59.1" exclude="Build,Analyzers" />
+            </group>
+        </dependencies>
+        <references>
+            <group targetFramework=".NETStandard1.3">
+                <reference file="CodeBrix.Forms.dll" />
+            </group>
+            <group targetFramework=".NETStandard2.0">
+                <reference file="CodeBrix.Forms.dll" />
+            </group>
+            <group targetFramework="Xamarin.iOS1.0">
+                <reference file="CodeBrix.Forms.dll" />
+                <reference file="CodeBrix.Forms.iOS.dll" />
+            </group>
+            <group targetFramework="MonoAndroid1.0">
+                <reference file="CodeBrix.Forms.dll" />
+                <reference file="CodeBrix.Forms.Android.dll" />
+            </group>
+            <group targetFramework="UAP10.0">
+                <reference file="CodeBrix.Forms.dll" />
+                <reference file="CodeBrix.Forms.UWP.dll" />
+            </group>
+        </references>
+    </metadata>
+    <files>
+        <file src="Forms.Android\CodeBrix.Forms.Android.dll" target="lib\MonoAndroid10\CodeBrix.Forms.Android.dll" />
+        <file src="Forms.Android\CodeBrix.Forms.Android.xml" target="lib\MonoAndroid10\CodeBrix.Forms.Android.xml" />
+        <file src="Forms.Android\CodeBrix.Forms.dll" target="lib\MonoAndroid10\CodeBrix.Forms.dll" />
+        <file src="Forms.Android\CodeBrix.Forms.xml" target="lib\MonoAndroid10\CodeBrix.Forms.xml" />
+        <file src="Forms\netstandard1.3\CodeBrix.Forms.dll" target="lib\netstandard2.0\CodeBrix.Forms.dll" />
+        <file src="Forms\netstandard1.3\CodeBrix.Forms.xml" target="lib\netstandard2.0\CodeBrix.Forms.xml" />
+        <file src="Forms\netstandard1.3\CodeBrix.Forms.dll" target="lib\netstandard1.3\CodeBrix.Forms.dll" />
+        <file src="Forms\netstandard1.3\CodeBrix.Forms.xml" target="lib\netstandard1.3\CodeBrix.Forms.xml" />
+        <file src="Forms.UWP\AnyCPU\CodeBrix.Forms.dll" target="lib\uap10.0\CodeBrix.Forms.dll" />
+        <file src="Forms.UWP\AnyCPU\CodeBrix.Forms.UWP.dll" target="lib\uap10.0\CodeBrix.Forms.UWP.dll" />
+        <file src="Forms.UWP\AnyCPU\CodeBrix.Forms.UWP.xml" target="lib\uap10.0\CodeBrix.Forms.UWP.xml" />
+        <file src="Forms.UWP\AnyCPU\CodeBrix.Forms.xml" target="lib\uap10.0\CodeBrix.Forms.xml" />
+        <file src="Forms.iOS\CodeBrix.Forms.dll" target="lib\xamarinios10\CodeBrix.Forms.dll" />
+        <file src="Forms.iOS\CodeBrix.Forms.iOS.dll" target="lib\xamarinios10\CodeBrix.Forms.iOS.dll" />
+        <file src="Forms.iOS\CodeBrix.Forms.iOS.xml" target="lib\xamarinios10\CodeBrix.Forms.iOS.xml" />
+        <file src="Forms.iOS\CodeBrix.Forms.xml" target="lib\xamarinios10\CodeBrix.Forms.xml" />
+    </files>
+</package>

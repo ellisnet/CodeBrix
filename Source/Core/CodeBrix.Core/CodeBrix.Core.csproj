@@ -14,6 +14,7 @@
     <Copyright>Copyright 2018 Ellisnet - Jeremy Ellis</Copyright>
     <PackageLicenseUrl>https://github.com/ellisnet/CodeBrix/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/ellisnet/CodeBrix</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/ellisnet/CodeBrix/master/images/icon-codebrix-128.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/ellisnet/CodeBrix</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>xamarin;rapid;application;development;prism;forms;mobile;app</PackageTags>

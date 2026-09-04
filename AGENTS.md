@@ -1,0 +1,5 @@
+This repository is the documentation home for the CodeBrix family of .NET libraries and the CodeBrix.Platform application framework. Its guidance for AI coding agents — the reading order for building a CodeBrix.Platform application, the rules for writing that code, and how to find the authoritative AGENT-README for every library in the family — is maintained in one Markdown file:
+
+→ **[./AGENT-README.md](./AGENT-README.md)**
+
+Read that file first, then follow its links to the documentation pages in this repository and to each library's own AGENT-README.txt.

@@ -1,4 +1,4 @@
-# CodeBrix
+# <img src="icon-codebrix-128.png" alt="CodeBrix icon" width="48" height="48"> CodeBrix
 
 **CodeBrix is a family of open source .NET libraries built around CodeBrix.Platform, an application framework whose desktop applications run natively on Windows, Linux and macOS from a single codebase.** You write the application once against the WinUI XAML API surface - the same `Microsoft.UI.Xaml.*` controls, XAML, code-behind and data binding you would use in a Windows App SDK application - and CodeBrix.Platform renders it through a Skia-based engine on six platform heads. Around the framework sits a catalog of general-purpose libraries - PDF documents and spreadsheets, audio and video, imaging and SVG, cryptography, SQLite, Redis, SSH, Docker, parsing, charts, testing - that are equally usable from a console application, a background service or a native WinUI application. Everything in the family requires .NET 10 or later.
 

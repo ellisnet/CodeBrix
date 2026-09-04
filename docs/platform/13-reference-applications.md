@@ -1,0 +1,176 @@
+<sub>[CodeBrix](../../README.md) › [Build a CodeBrix.Platform application](README.md) › Reference applications</sub>
+
+# Reference applications
+
+**By the end of this chapter you will know which complete application to open for the thing you are building, and what each one is worth reading for.** Every application named here starts, does its whole job, and consumes the libraries as packages exactly as your application will - so the shape you copy is the shape that ships.
+
+They live in three sample repositories, split by the license the applications land on, plus the samples and tools that sit inside individual library repositories. The [samples index](../samples/README.md) is the catalog; this chapter is the reading order.
+
+Four of these applications are pictured, as captured on the Linux X11 head, in [What they look like](../samples/README.md#what-they-look-like).
+
+## Start with these two
+
+**JustBetweenUs** is the "one view model, many heads" reference. A text encryption utility - enter text, enter a key, encrypt or decrypt - whose single `MainViewModel` under `Shared/ViewModels/` drives the six CodeBrix.Platform heads, native WinUI and WPF heads, and a .NET MAUI head, with the encryption work behind an injected `IEncryptionService` in its own library. Read it when you want to understand the head model itself, and read [14 - Sharing code with native frameworks](14-sharing-code-with-native-frameworks.md) beside it.
+
+**MediaPlayerDemo** is the smallest six-head skeleton in the repository: one page with an address box, a stretch picker and the media element's own transport controls. Read it when you want the minimum shape of a working application with nothing else in the way.
+
+> [!TIP]
+> Every application requires .NET 10 or later, and for most that is the only prerequisite. Each application folder is self-contained - its own solution, its own guide, its own attribution record - so you can copy one out and build it on its own.
+
+## The permissively licensed applications
+
+Everything in [CodeBrix.Samples](https://github.com/ellisnet/CodeBrix.Samples) is licensed under the Apache License, Version 2.0. The house style is the same in every one: one shared view model layer and one shared XAML UI drive every head, and each head is a thin project supplying only its platform plumbing and one runtime package.
+
+| Application | What it is | What it shows | Source |
+| --- | --- | --- | --- |
+| CodeBrixVideoTool | Desktop video converter and player for AV1 media, with chapter and caption drop-downs, a resolution and quality ladder, and long conversions run with live progress and cancellation | The [VideoPlayer](add-ins/VideoPlayer.md) add-in, [CodeBrix.VideoPlayback](../libraries/CodeBrix.VideoPlayback.md) with its authoring library, [CodeBrix.VideoProcessing](../libraries/CodeBrix.VideoProcessing.md); the canonical "Core carries the packages" layout | [CodeBrixVideoTool/](https://github.com/ellisnet/CodeBrix.Samples/tree/main/CodeBrixVideoTool) |
+| JustBetweenUs | Text-encryption utility - AES, Triple DES and Twofish - and the repository's one-view-model-many-heads reference, the only application that also runs on mobile | [CodeBrix.Cryptography](../libraries/CodeBrix.Cryptography.md), [CodeBrix.SkiaSvg](../libraries/CodeBrix.SkiaSvg.md), [CodeBrix.Platform](../libraries/CodeBrix.Platform.md) with its WinUI, WPF and Mobile toolkits; three per-operating-system solutions | [JustBetweenUs/](https://github.com/ellisnet/CodeBrix.Samples/tree/main/JustBetweenUs) |
+| KenneyAssetBrowser | Browser for downloaded Kenney game-asset packs: reads each zip without extracting it and previews images, SVG art, font specimens, tile maps, 3D models and audio | [CodeBrix.Compression](../libraries/CodeBrix.Compression.md), [CodeBrix.Imaging](../libraries/CodeBrix.Imaging.md), [CodeBrix.SkiaSvg](../libraries/CodeBrix.SkiaSvg.md); the [Graphics3DGL](add-ins/Graphics3DGL.md), [AudioPlayer](add-ins/AudioPlayer.md), [FlexPanel](add-ins/FlexPanel.md) and [AppSettings](add-ins/AppSettings.md) add-ins | [KenneyAssetBrowser/](https://github.com/ellisnet/CodeBrix.Samples/tree/main/KenneyAssetBrowser) |
+| MediaPlayerDemo | One-page media player - an address box, a stretch picker and the element's own transport controls | The [MediaPlayer](add-ins/MediaPlayer.md) add-in, and the smallest six-head skeleton here | [MediaPlayerDemo/](https://github.com/ellisnet/CodeBrix.Samples/tree/main/MediaPlayerDemo) |
+| NotionDocumentCreator | Turns selected pages from a Notion workspace into a single print-ready, book-designed PDF | [CodeBrix.NotionApi](../libraries/CodeBrix.NotionApi.md), [CodeBrix.PdfDocuments](../libraries/CodeBrix.PdfDocuments.md) document authoring, [CodeBrix.Imaging](../libraries/CodeBrix.Imaging.md), [CodeBrix.VideoProcessing](../libraries/CodeBrix.VideoProcessing.md) | [NotionDocumentCreator/](https://github.com/ellisnet/CodeBrix.Samples/tree/main/NotionDocumentCreator) |
+| PainDiagram | Interactive pain- and symptom-mapping over a medical body map, drawn on three translucent highlighter layers and exported as a PNG | [CodeBrix.Imaging.Drawing](../libraries/CodeBrix.Imaging.Drawing.md); native WinUI and WPF heads beside the six, and the embedded-asset technique | [PainDiagram/](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PainDiagram) |
+| PalmVisualizer | Webcam toy whose shader-driven plasma and starfield visual chases the open palms a hand-tracking pipeline finds in the live camera feed | [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md), [CodeBrix.Platform.MediaPlayerCore](../libraries/CodeBrix.Platform.MediaPlayerCore.md) webcam capture, [CodeBrix.VideoProcessing.OpenCV5](../libraries/CodeBrix.VideoProcessing.OpenCV5.md); the reference `src/libs` plus `tests/libs` layout | [PalmVisualizer/](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PalmVisualizer) |
+| PdfSideBySide | Opens two PDF documents side by side and steps, zooms and nudges them together or independently, so two editions can be compared page by page | [CodeBrix.PdfDocuments](../libraries/CodeBrix.PdfDocuments.md) rasterizing, [CodeBrix.Imaging](../libraries/CodeBrix.Imaging.md); the shared-project pair and the internals-visible file | [PdfSideBySide/](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PdfSideBySide) |
+| Pinta.Brix | Layered raster painting and image editor - tools, selections, adjustments and effects with live preview, and a scrubbable history | [CodeBrix.Imaging](../libraries/CodeBrix.Imaging.md), [CodeBrix.SkiaSvg](../libraries/CodeBrix.SkiaSvg.md), [CodeBrix.PolygonTools](../libraries/CodeBrix.PolygonTools.md); the [AppSettings](add-ins/AppSettings.md) and [TextLayout](add-ins/TextLayout.md) add-ins | [Pinta.Brix/](https://github.com/ellisnet/CodeBrix.Samples/tree/main/Pinta.Brix) |
+| PolyHavenBrowser | Catalog browser for the Poly Haven CC0 3D model library, with a lazily filled card grid, real-progress downloads, a live on-screen 3D preview and a generated one-page PDF | The [Graphics3DGL](add-ins/Graphics3DGL.md) and [FlexPanel](add-ins/FlexPanel.md) add-ins, [CodeBrix.Imaging](../libraries/CodeBrix.Imaging.md), [CodeBrix.PdfDocuments](../libraries/CodeBrix.PdfDocuments.md) | [PolyHavenBrowser/](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PolyHavenBrowser) |
+| PolyHavenBrowser_viewer_only | Three curated Poly Haven samples - a PBR texture, an HDRI panorama and a glTF model - rendered off screen through a graphics backend the user can swap while the application runs | The [Graphics3DGL](add-ins/Graphics3DGL.md) add-in, [CodeBrix.Imaging](../libraries/CodeBrix.Imaging.md); backend selection at run time | [PolyHavenBrowser_viewer_only/](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PolyHavenBrowser_viewer_only) |
+| WebcamPainter | Hand-gesture painting: grab a still from the webcam, then spread highlighter ink across it by moving an open palm in front of the camera | [CodeBrix.Platform.MediaPlayerCore](../libraries/CodeBrix.Platform.MediaPlayerCore.md) webcam capture, [CodeBrix.Imaging.Drawing](../libraries/CodeBrix.Imaging.Drawing.md), [CodeBrix.VideoProcessing.OpenCV5](../libraries/CodeBrix.VideoProcessing.OpenCV5.md); the six-head native fan-out | [WebcamPainter/](https://github.com/ellisnet/CodeBrix.Samples/tree/main/WebcamPainter) |
+| WikipediaPublisher | Turns a Wikipedia article, chosen in an embedded WebView, into a book-designed print-ready PDF | [CodeBrix.MarkupParse](../libraries/CodeBrix.MarkupParse.md), [CodeBrix.Imaging](../libraries/CodeBrix.Imaging.md), [CodeBrix.PdfDocuments](../libraries/CodeBrix.PdfDocuments.md); the [WebView](add-ins/WebView.md) add-in and a Windows-superset solution | [WikipediaPublisher/](https://github.com/ellisnet/CodeBrix.Samples/tree/main/WikipediaPublisher) |
+
+Three of them - JustBetweenUs, PainDiagram and WikipediaPublisher - carry native WinUI and WPF heads that reuse the same view model without the CodeBrix.Platform UI stack, and JustBetweenUs adds the only .NET MAUI head. One goes the other way: CodeBrixVideoTool builds four of the six heads.
+
+Some need more than the SDK, and their own READMEs say exactly what: the .NET MAUI workloads for JustBetweenUs, the WPE WebKit system packages for the Linux WebView in WikipediaPublisher, a webcam for WebcamPainter and PalmVisualizer, network access for the applications that download content, a workspace integration token for NotionDocumentCreator, and the FFmpeg executables on the host for CodeBrixVideoTool.
+
+## The classic games
+
+Everything in [CodeBrix.Samples.Gpl2](https://github.com/ellisnet/CodeBrix.Samples.Gpl2) is licensed under the GNU General Public License, version 2. Both applications are games, both run on CodeBrix.Platform and [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md) - the fixed-rate game loop, the software framebuffer presenter and the game surface canvas, the input pollers and the game audio channels - and each codebase builds all six heads.
+
+| Application | What it is | What it shows | Source |
+| --- | --- | --- | --- |
+| Doom.Brix | Plays the original DOOM shareware episode as a CodeBrix.Platform desktop application, with platform backends for video, sound, music and input | [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md) with its SDL2 add-on, the [WebView](add-ins/WebView.md) and [AppSettings](add-ins/AppSettings.md) add-ins, [CodeBrix.Audio](../libraries/CodeBrix.Audio.md), [CodeBrix.Compression](../libraries/CodeBrix.Compression.md) | [Doom.Brix/](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/tree/main/Doom.Brix) |
+| Wolfenstein.Brix | A playable recreation of the Wolfenstein 3D shareware episode, from the original game logic and data formats, with a bit-exact FM synthesizer for its music and effects | [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md) with its SDL2 add-on, the [WebView](add-ins/WebView.md) and [AppSettings](add-ins/AppSettings.md) add-ins, [CodeBrix.Compression](../libraries/CodeBrix.Compression.md) | [Wolfenstein.Brix/](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/tree/main/Wolfenstein.Brix) |
+
+Read them for the boundary they draw. The engine internals are a plain object graph on the game-loop thread, and that is correct there; the shell around each game - startup, Assets Mode, the download pipeline, settings and the page itself - is ordinary MVVM, with view models derived from `SimpleViewModel` and platform capabilities reaching them through interfaces.
+
+Neither game ships its game data. On first launch each one opens its Assets Mode: an embedded browser that downloads the original shareware release, verifies it against known checksums and unpacks it into a folder you choose; every later launch re-verifies that folder and boots straight into the game. That is the pattern to copy for any application that needs data it cannot redistribute. Each game also copies its notices and license texts into a `ThirdPartyAssets` folder in the build output, so a shipped build carries its own attribution.
+
+## The GPL-3.0 application
+
+Everything in [CodeBrix.Samples.Gpl3](https://github.com/ellisnet/CodeBrix.Samples.Gpl3) is licensed under the GNU General Public License, version 3. The repository exists to isolate licensing: an aggregate takes the narrower of the terms it combines, so the applications whose libraries land on GPL-3.0 live here rather than setting the terms for every other sample.
+
+| Application | What it is | What it shows | Source |
+| --- | --- | --- | --- |
+| Fresco.Brix | A desktop music-notation editor and engraving environment: write music in the notation language in a language-aware code editor, engrave it in process, then read, play, annotate and export the score | [CodeBrix.LilyPort](../libraries/CodeBrix.LilyPort.md), the [AdvancedTextEdit](add-ins/AdvancedTextEdit.md) and [AppSettings](add-ins/AppSettings.md) add-ins, [CodeBrix.Audio](../libraries/CodeBrix.Audio.md), [CodeBrix.SkiaSvg](../libraries/CodeBrix.SkiaSvg.md), [CodeBrix.PdfDocuments](../libraries/CodeBrix.PdfDocuments.md) rasterizing and writing PDFs | [Fresco.Brix/](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/tree/main/Fresco.Brix) |
+
+Its own sources are GPL-3.0-or-later; the application as conveyed is GPL-3.0-only, because the library it links is conveyed on those terms.
+
+Two details are worth borrowing whatever you are building. A head accepts file paths on the command line, and if the application is already running those files open as tabs in the running window while the second process exits. And the programs under `tools/` are deliberately outside the solution: they ship nothing, and are built and run on demand.
+
+## Samples and tools inside the library repositories
+
+Several libraries carry their own reference application or their own tooling, and those are often the closest thing to a specification for the library. Nothing in the table below is packed into a NuGet package.
+
+| Sample or tool | Repository | What it demonstrates | Source |
+| --- | --- | --- | --- |
+| build_native_libraries | [CodeBrix.Audio](../libraries/CodeBrix.Audio.md) | Builds the bundled native audio backend for every runtime identifier the package ships, in containers on Linux and natively elsewhere | [tools/build_native_libraries](https://github.com/ellisnet/CodeBrix.Audio/tree/main/tools/build_native_libraries) |
+| sfz_opcode_survey | [CodeBrix.Audio](../libraries/CodeBrix.Audio.md) | Decides the scope of SFZ support by counting rather than guessing: parses a folder of real instrument libraries with the library's own parser and writes coverage reports | [tools/sfz_opcode_survey](https://github.com/ellisnet/CodeBrix.Audio/tree/main/tools/sfz_opcode_survey) |
+| RedisSetupTool | [CodeBrix.Docker](../libraries/CodeBrix.Docker.md) | A six-head CodeBrix.Platform application that stands up, manages and tears down Redis databases across a catalog of topologies, manages any container on the daemon and opens a real shell inside one through the [TerminalView](add-ins/TerminalView.md) add-in | [samples/RedisSetupTool](https://github.com/ellisnet/CodeBrix.Docker/tree/main/samples/RedisSetupTool) |
+| PainDiagram | [CodeBrix.Imaging.Drawing](../libraries/CodeBrix.Imaging.Drawing.md) | The template for building a new application on the drawing library: one `DrawingSession` owned by one view model serving six Skia heads plus native WinUI and WPF heads, with bridge interfaces for the file dialog and canvas invalidation | [samples/PainDiagram](https://github.com/ellisnet/CodeBrix.Imaging.Drawing/tree/main/samples/PainDiagram) |
+| Lily.Shell | [CodeBrix.LilyPort](../libraries/CodeBrix.LilyPort.md) | The interactive engine shell - a six-head CodeBrix.Platform application whose commands parse, engrave, convert and import notation source and render the manuals | [tools/Lily.Shell](https://github.com/ellisnet/CodeBrix.LilyPort/tree/main/tools/Lily.Shell) |
+| Lily.Docs | [CodeBrix.LilyPort](../libraries/CodeBrix.LilyPort.md) | Generates the library's documentation set and renders its manuals as print-shaped HTML and PDF through the [CodeBrix.Texinfo](../libraries/CodeBrix.Texinfo.md) packages, with every music snippet engraved by the engine | [tools/Lily.Docs](https://github.com/ellisnet/CodeBrix.LilyPort/tree/main/tools/Lily.Docs) |
+| regression-harness | [CodeBrix.LilyPort](../libraries/CodeBrix.LilyPort.md) | Grades the engine's output page by page against a reference, with a committed per-file ratchet | [tools/regression-harness](https://github.com/ellisnet/CodeBrix.LilyPort/tree/main/tools/regression-harness) |
+| unicode-names | [CodeBrix.LilyScheme](../libraries/CodeBrix.LilyScheme.md) | Regenerates the Unicode formal-name table the library embeds, and verifies the shipped table against its source | [tools/unicode-names](https://github.com/ellisnet/CodeBrix.LilyScheme/tree/main/tools/unicode-names) |
+| Spot.Brix | [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md) | The recommended hosting shape: scenes, sprites, tilesheets, engine input, a title-card overlay, a new-game dialog driving the engine from the UI thread, persisted options and a saved game | [samples/Spot.Brix](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/Spot.Brix) |
+| Platformer.Brix | [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md) | Fixed layer-tile colliders: collision profiles and insets, a foot probe, gravity and velocity movement, a camera dead zone and a procedural tilesheet painted in code | [samples/Platformer.Brix](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/Platformer.Brix) |
+| SpaceDuel.Brix | [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md) | The GPU tier: sprite rotation, a wrap-around world, parallax star layers, particle bursts, health bars, and the same game on the CPU path behind one environment variable | [samples/SpaceDuel.Brix](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/SpaceDuel.Brix) |
+| Slider | [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md) | Driving the engine directly with no host base class: sprites built on the engine thread, engine mouse events, and rebuilding the board while the engine keeps running | [samples/Slider](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/Slider) |
+| CoordinateTest | [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md) | Orthogonal, isometric and hex coordinate systems, plus cameras and views | [samples/CoordinateTest](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/CoordinateTest) |
+| ParticleTest | [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md) | Particle surfaces and emitters, direct drawing primitives, movement easing, and UI-level pointer input with letterbox mapping toggling a global pause | [samples/ParticleTest](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/ParticleTest) |
+| SoftRender | [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md) | The software-rendered shape end to end: a pixel-frame presenter, the input pump, raw-PCM blips, a streamed drone, a zero-allocation frame loop and loop-health statistics | [samples/SoftRender](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/SoftRender) |
+| GpuRender | [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md) | The GPU counterpart: a resolution-independent shader backdrop, live frame statistics, click-to-pause with a paused-frame snapshot, and window-tracking resolution | [samples/GpuRender](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/GpuRender) |
+| MusicDemo | [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md) | The music system: volume buses, fades and equal-power crossfades, ducking, stingers, playlists, layered adaptive stems, bar-quantized transitions and marker jumps - generating every asset it plays on first run | [samples/MusicDemo](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/MusicDemo) |
+| padcheck | [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md) | An interactive hardware check for the SDL2 gamepad add-on, driving the real manager so what it prints is what a game would see - button names, stick directions, analog ranges and hotplug | [tools/padcheck](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tools/padcheck) |
+| sdl2_library_building | [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md) | The run-by-hand cross-compile that produces the Windows-on-ARM64 native library the gamepad package ships, with a pinned source checksum and a provenance record beside the output | [tools/sdl2_library_building](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tools/sdl2_library_building) |
+| WebcamViewer | [CodeBrix.Platform.MediaPlayerCore](../libraries/CodeBrix.Platform.MediaPlayerCore.md) | A live webcam viewer across every UI stack the family targets - six Skia heads plus native WinUI and WPF - with one shared view model, one shared Skia video canvas, camera enumeration, an audio-monitor gate and frame capture | [samples/WebcamViewer](https://github.com/ellisnet/CodeBrix.Platform.MediaPlayerCore/tree/main/samples/WebcamViewer) |
+| DRAKON.Brix | [CodeBrix.Platform.TclTk](../libraries/CodeBrix.Platform.TclTk.md) | A large third-party Tcl/Tk diagram editor, vendored and booted on the managed interpreter inside one host view as a six-head CodeBrix.Platform application - the end-to-end proof that a real Tcl/Tk program runs on the family | [samples/DRAKON.Brix](https://github.com/ellisnet/CodeBrix.Platform.TclTk/tree/main/samples/DRAKON.Brix) |
+| TkCanvas_Testing | [CodeBrix.Platform.TclTk](../libraries/CodeBrix.Platform.TclTk.md) | The XAML path: a whole Tk user interface declared in `MainPage.xaml` with the Tk elements and driven from a view model through a bridge interface, with no Tcl script at all | [samples/TkCanvas_Testing](https://github.com/ellisnet/CodeBrix.Platform.TclTk/tree/main/samples/TkCanvas_Testing) |
+| layout-oracle | [CodeBrix.Platform.TclTk](../libraries/CodeBrix.Platform.TclTk.md) | Captures the behavior fixtures the layout, canvas, binding and theming tests replay headlessly, by running scenarios against a real shell | [tools/layout-oracle](https://github.com/ellisnet/CodeBrix.Platform.TclTk/tree/main/tools/layout-oracle) |
+| PicoScope | [CodeBrix.Plotter](../libraries/CodeBrix.Plotter.md) | Live oscilloscope traces streamed into a chart, with a WPF head and a WinUI head sharing one plot model - and a simulated device when no hardware is attached | [samples/PicoScope](https://github.com/ellisnet/CodeBrix.Plotter/tree/main/samples/PicoScope) |
+| Remote Terminal | [CodeBrix.Terminal](../libraries/CodeBrix.Terminal.md) | One end-to-end demonstration in three projects: a WinUI client that renders a terminal, a shared message-contract library, and a web host that runs the real process and streams it over a hub | [samples/](https://github.com/ellisnet/CodeBrix.Terminal/tree/main/samples) |
+| SimpleCbxVideoPlayer | [CodeBrix.VideoPlayback](../libraries/CodeBrix.VideoPlayback.md) | The reference consumer: an eight-head player - the six CodeBrix.Platform heads plus native WinUI and WPF heads - that plays the sample corpus and grades the picture with a chain of color lookup tables, consuming the published packages rather than project references | [samples/SimpleCbxVideoPlayer](https://github.com/ellisnet/CodeBrix.VideoPlayback/tree/main/samples/SimpleCbxVideoPlayer) |
+| ConsumerShape | [CodeBrix.VideoPlayback](../libraries/CodeBrix.VideoPlayback.md) | The smallest honest application: plays a file with sound and no display, draws every frame into an off-screen surface and writes one PNG - so its publish output is a directory listing that proves which natives a build really carries | [samples/CodeBrix.VideoPlayback.ConsumerShape](https://github.com/ellisnet/CodeBrix.VideoPlayback/tree/main/samples/CodeBrix.VideoPlayback.ConsumerShape) |
+| CodeBrix.VideoPlayback.Tools | [CodeBrix.VideoPlayback](../libraries/CodeBrix.VideoPlayback.md) | One console executable with four verbs: inspect a container, decode headlessly to a reproducible stream hash, build a container from an encoder's output, and fold color lookup tables into one effective table | [tools/CodeBrix.VideoPlayback.Tools](https://github.com/ellisnet/CodeBrix.VideoPlayback/tree/main/tools/CodeBrix.VideoPlayback.Tools) |
+| AssetAuthoring | [CodeBrix.VideoPlayback](../libraries/CodeBrix.VideoPlayback.md) | The authoring library's reference consumer: it turns a plan entry into an authoring request and nothing else, regenerating the sample corpus and its manifest | [tools/CodeBrix.VideoPlayback.AssetAuthoring](https://github.com/ellisnet/CodeBrix.VideoPlayback/tree/main/tools/CodeBrix.VideoPlayback.AssetAuthoring) |
+| dav1d-native-tools | [CodeBrix.VideoPlayback.Dav1d](../libraries/CodeBrix.VideoPlayback.Dav1d.md) | Everything needed to build the bundled AV1 decoder for each runtime identifier, self-contained, with conformance streams, a smoke test and a provenance record - no build in the repository compiles any of it | [dav1d-native-tools](https://github.com/ellisnet/CodeBrix.VideoPlayback.Dav1d/tree/main/dav1d-native-tools) |
+| build_native_libraries | [CodeBrix.VideoProcessing.OpenCV5](../libraries/CodeBrix.VideoProcessing.OpenCV5.md) | The Linux native build pipeline, in a container so the library baseline is the oldest practical one, with required-feature, forbidden-link and smoke checks a build must pass | [tools/build_native_libraries](https://github.com/ellisnet/CodeBrix.VideoProcessing.OpenCV5/tree/main/tools/build_native_libraries) |
+| Sample app | [FreePPlus](../libraries/FreePPlus.md) | A console application whose numbered scenarios build workbooks from scratch, fill chart templates, insert rows and pivots, apply conditional formatting and sparklines, protect and encrypt, and register custom worksheet functions | [samples/FreePPlus.OfficeOpenXml.SampleApp](https://github.com/ellisnet/FreePPlus/tree/main/samples/FreePPlus.OfficeOpenXml.SampleApp) |
+
+The desktop ones run the same way every CodeBrix.Platform application does - pick the head that matches the machine:
+
+```bash
+dotnet run --project samples/RedisSetupTool/src/RedisSetupTool.LinuxX11
+dotnet run --project samples/RedisSetupTool/src/RedisSetupTool.MacOS
+dotnet run --project samples/RedisSetupTool/src/RedisSetupTool.Win32Skia
+```
+
+The console ones take their work on the command line:
+
+```bash
+dotnet run -- --run:1,5,9
+```
+
+A few carry an unattended mode worth knowing about, because it is a pattern you can copy: RedisSetupTool runs a scripted pass through its own commands when `REDISSETUP_AUTOMATION` names a script, and writes a step-by-step log to the file `REDISSETUP_AUTOMATION_LOG` names.
+
+Where a library has no sample of its own, its test project is the worked-example set, and its `AGENT-README.txt` maps each feature area to the test file that exercises it. That is deliberate: a library that registers a font, or parses a document format, has nothing to show in a window that its tests do not show better.
+
+## Demos inside the framework repository
+
+The CodeBrix.Platform repository carries a demo per add-in plus a few that exercise the framework itself - `AdvancedTextEditDemo`, `AudioPlayerDemo`, `FlexPanelDemo`, `MediaPlayerDemo`, `PlotterViewDemo`, `TerminalViewDemo`, `VideoPlayerDemo`, `WebViewDemo`, alongside `FileFolderDialogDemo` for the pickers, `ParityDemo` for X11-versus-Wayland behavior, `EmulateFrameBufferDemo` for frame-buffer options, and an in-repository copy of JustBetweenUs. They are the shortest path from "what does this element do" to running code, and the [samples index](../samples/README.md) lists what each one shows.
+
+> [!IMPORTANT]
+> With one exception those samples reference the framework by project path into `src/` rather than by package. Copy their project structure and their XAML and C#, not their reference lines. The exception is `EmulateFrameBufferDemo`, which consumes the framework from NuGet packages exactly as an application does.
+
+## Reading a sample
+
+Every application folder has a `README.md` - the detailed guide to that application, what it does, how it is laid out, what it uses, and what is worth studying in it - and a `THIRD-PARTY-NOTICES.txt`, its attribution record. At the root of each sample repository the blueprint files collect the how-tos mined from all of the applications, indexed task by task in the [blueprints](../samples/blueprints.md).
+
+Read them in that order: the blueprint recipe tells you which application and which file solves your problem, the application's README tells you how that file fits its application, and the file itself is the code. Nothing in the blueprints is invented - every code block comes from a file in one of these repositories, and a block introduced by "From" is verbatim while one introduced by "Adapted from" was recast from the file it names.
+
+One practical note about running an application's tests. The test projects use the Microsoft.Testing.Platform runner, and test assemblies are self-executing binaries, so a plain `dotnet test` can report that zero tests ran. When it does, build the test project and run the executable it produces:
+
+```bash
+dotnet build tests/libs/<Project>.Tests/<Project>.Tests.csproj -c Release
+./tests/libs/<Project>.Tests/bin/Release/net10.0/<Project>.Tests
+```
+
+Each application's README gives the working form for that application, along with what its individual test projects need. [10 - Testing your application](10-testing-your-application.md) covers writing your own.
+
+## What no sample covers yet
+
+The sample repositories keep an explicit list of what they do not yet demonstrate, so that a reader looking for one of these knows the gap is known rather than hidden in another file:
+
+- Navigating between several pages with a back stack, rather than one page per application.
+- Opening a second top-level window from a running application.
+- Localized user-interface strings, and formatting for a culture other than the running machine's.
+- Printing a document or a page from a Skia head.
+- Drag and drop between the application and the desktop.
+- A database-backed data layer, beyond the settings store the [AppSettings](add-ins/AppSettings.md) add-in provides.
+- Publishing and installers for the Skia heads; only the native WinUI head's packaging configuration appears in the samples.
+- Accessibility: naming elements for a screen reader, or a keyboard-only path through a page.
+
+## Checklist
+
+- [ ] The application you are copying from is the one whose problem matches yours, not the first one that opened
+- [ ] You copied its project structure and its XAML and C#, and not the reference lines of a framework-repository sample
+- [ ] Anything you borrowed from a GPL-licensed sample is accounted for in your own licensing
+- [ ] The extra prerequisites its README names are installed before you judge whether it works
+- [ ] Your own application folder ends up with the same three files at its root: a solution, a `README.md` and a `THIRD-PARTY-NOTICES.txt`
+
+---
+
+**Where to go next**
+
+- [14 - Sharing code with native frameworks](14-sharing-code-with-native-frameworks.md) - the next chapter: the same view model on WinUI, WPF and .NET MAUI
+- [Samples index](../samples/README.md) - every application in one place, with what each head set looks like
+- [Blueprints](../samples/blueprints.md) - the task-shaped index into every recipe these applications teach
+- [CodeBrix.Samples on GitHub](https://github.com/ellisnet/CodeBrix.Samples) - source, tests and per-application guides

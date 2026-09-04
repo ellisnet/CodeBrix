@@ -1,0 +1,582 @@
+<sub>[CodeBrix](../../README.md) › [Samples](README.md) › Blueprints</sub>
+
+# Blueprints
+
+**A blueprint is a how-to mined from a working application: it says when you want the thing, gives the code, and names the application and the files the code came from.** Nothing in a blueprint is invented - every code block comes from a file in the repository it was mined from, so you can open the real thing and read the rest of it.
+
+Each sample repository carries its own blueprints. This page is the way in: pick the task you are trying to do, follow the link, and land on the recipe.
+
+## What a blueprint looks like
+
+Every recipe is the same four things: when you want it, the shape it takes in an MVVM application, the code, and the files it came from. Two conventions run through all of them.
+
+- A code block introduced by a `// From` comment is verbatim from the file it names, with `// ...` where something was trimmed.
+- A block introduced by `// Adapted from` was recast - trimmed, or rewritten into the shape the blueprints teach - and the file it names is the original.
+
+Packages are referred to by library or add-in name rather than by package identifier. The application's own project file is the source of truth for the exact package it references.
+
+The blueprints are written in the shape the applications use, and it is worth knowing before you read one. A view model derived from `SimpleViewModel` owns the screen's state and behavior and exposes it as bound properties and `SimpleCommand` commands. Code-behind stays thin and forwards what only a view can do. Anything the view model needs from the platform - a file dialog, a canvas to invalidate, the clipboard - arrives through a small bridge interface the page implements or a delegate the page sets. Services live behind interfaces and are resolved through `SimpleServiceResolver`. Work that takes time happens off the UI thread and marshals back.
+
+## Where the blueprints live
+
+| Repository | Blueprints | Mined from |
+| --- | --- | --- |
+| CodeBrix.Samples | [BLUEPRINTS-Index.md](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Index.md) and one file per topic | The permissively licensed applications |
+| CodeBrix.Samples.Gpl2 | [BLUEPRINTS.md](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md) | Doom.Brix and Wolfenstein.Brix |
+| CodeBrix.Samples.Gpl3 | [BLUEPRINTS.md](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md) | Fresco.Brix |
+
+The applications behind them are described in [Samples](README.md).
+
+## I want to
+
+| I want to | Blueprint file | Start with | Sample application |
+| --- | --- | --- | --- |
+| Start a new multi-head application | [AppStructureAndStartup](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-AppStructureAndStartup.md) | Start each head from a Program Main; Bootstrap the application in the App constructor | MediaPlayerDemo |
+| Register my own services | [AppStructureAndStartup](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-AppStructureAndStartup.md) | Supply a generic host builder to SimpleServiceResolver; Register library services with one AddXxx extension method | WikipediaPublisher |
+| Set one font for the whole application | [AppStructureAndStartup](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-AppStructureAndStartup.md) | Set a bundled font as the default text font and register script fallbacks | PdfSideBySide |
+| Make it work on the frame-buffer head | [AppStructureAndStartup](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-AppStructureAndStartup.md) | Enable a picker and the software keyboard on the Linux framebuffer head | PolyHavenBrowser |
+| Write my first view model | [MVVM](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md) | Write bound properties and commands the family way | WebcamPainter |
+| Run a long job with progress and cancel | [MVVM](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md) | Run a long job from a command with progress cancellation and a busy flag | CodeBrixVideoTool |
+| Touch bound state from a worker thread | [MVVM](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md) | Set bound properties from a background thread with InvokeOnMainThread | JustBetweenUs |
+| Ask the user a question from a view model | [MVVM](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md) | Confirm and inform from the view model with SimpleViewModel dialogs | PainDiagram |
+| Show a file dialog from a view model | [PlatformServices](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md) | Pick a file to open through a native dialog; Save a file through a native dialog | CodeBrixVideoTool |
+| Copy to the clipboard | [PlatformServices](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md) | Copy text to the clipboard from a command through a bridge interface | JustBetweenUs |
+| Repaint a canvas from the view model | [PlatformServices](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md) | Let the page invalidate a canvas through a bridge interface | WebcamPainter |
+| Write my first page in XAML | [ViewsAndControls](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md) | Declare a Skia page and bind with the platform Binding markup extension | PdfSideBySide |
+| Restyle the theme | [ViewsAndControls](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md) | Re-key theme brushes so controls dialogs and picker chrome follow your palette | PolyHavenBrowser |
+| Make a layout reflow | [ViewsAndControls](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md) | Wrap and reflow a layout with the FlexPanel add-in | KenneyAssetBrowser |
+| Add keyboard shortcuts | [ViewsAndControls](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md) | Dispatch keyboard shortcuts from one page KeyDown handler | Pinta.Brix |
+| Put 3D in a page | [GraphicsAndRendering](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md) | Host an OpenGL scene in XAML with a GLCanvasElement subclass | PolyHavenBrowser |
+| Draw on a Skia canvas | [GraphicsAndRendering](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md) | Paint a zoomable image on an SKXamlCanvas from the view model | KenneyAssetBrowser |
+| Show SVG art | [GraphicsAndRendering](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md) | Rasterize SVG art with the CodeBrix SkiaSvg library | KenneyAssetBrowser |
+| Play video or audio in a page | [MediaAndVision](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md) | Host the VideoPlayer add-in in a page; Play an audio clip straight from bytes | CodeBrixVideoTool |
+| Use a webcam | [MediaAndVision](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md) | Enumerate cameras and start a live capture session | WebcamPainter |
+| Call a REST API | [DocumentsAndData](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md) | Call a REST API behind a service interface the view model resolves | NotionDocumentCreator |
+| Generate a PDF | [DocumentsAndData](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md) | Compose a book with sections styles running heads and folios | WikipediaPublisher |
+| Read a zip without extracting it | [DocumentsAndData](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md) | Read a zip archive without extracting it with the CodeBrix Compression library | KenneyAssetBrowser |
+| Remember settings between runs | [SettingsAndPersistence](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-SettingsAndPersistence.md) | Wrap the AppSettings add-in in one application named facade | Pinta.Brix |
+| Draw and measure text with no text control | [TextEditing](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-TextEditing.md) | Lay out and draw text through the CodeBrix Platform TextLayout add-in | Pinta.Brix |
+| Run a game loop in a page | [GameEngine](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GameEngine.md) | Run and pause a game engine session inside a page | PalmVisualizer |
+| Get an application under test | [Testing](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md) | Set up an xUnit v3 test project for a CodeBrix library | PalmVisualizer |
+| Lay the projects out on disk | [ProjectLayoutAndPackaging](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ProjectLayoutAndPackaging.md) | Carry every package in one Core library and give each head exactly one runtime package | CodeBrixVideoTool |
+| Ship an asset and its license | [ProjectLayoutAndPackaging](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ProjectLayoutAndPackaging.md) | Record bundled third-party content in a notices file | PolyHavenBrowser |
+| Download data the application cannot redistribute | [Gpl2 BLUEPRINTS](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md) | Enforce a one file download policy from the view model; Verify a downloaded file against known checksums | Doom.Brix |
+| Present my own pixel buffer | [Gpl2 BLUEPRINTS](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md) | Present a software framebuffer through the game surface canvas | Wolfenstein.Brix |
+| Add a code editor with syntax highlighting | [Gpl3 BLUEPRINTS](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md) | Attach a language-aware highlighter to the text editor add-in | Fresco.Brix |
+| Open files into the window that is already running | [Gpl3 BLUEPRINTS](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md) | Hand the files of a second launch to the running window and exit | Fresco.Brix |
+
+The full list follows, file by file.
+
+## Application structure and startup
+
+Everything that has to happen before the first page appears: head entry points, the ordering contract inside the `App` constructor, service registration, logging, fonts, the main window and the per-head opt-ins.
+
+File: [BLUEPRINTS-AppStructureAndStartup.md](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-AppStructureAndStartup.md). Guide chapter: [Your first application](../platform/03-your-first-application.md) and [Project architecture](../platform/04-project-architecture.md).
+
+- [Start each head from a Program Main and pick the platform backend](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-AppStructureAndStartup.md#start-each-head-from-a-program-main-and-pick-the-platform-backend) - The minimum a head entry point contains, and what a head is allowed to differ on.
+- [Bootstrap the application in the App constructor](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-AppStructureAndStartup.md#bootstrap-the-application-in-the-app-constructor) - The ordering contract for the `App` constructor: fonts, container, design mode off, then `InitializeComponent()`.
+- [Create the main window and navigate to the first page](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-AppStructureAndStartup.md#create-the-main-window-and-navigate-to-the-first-page) - The smallest correct window-and-frame bootstrap in `OnLaunched`.
+- [Supply a generic host builder to SimpleServiceResolver](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-AppStructureAndStartup.md#supply-a-generic-host-builder-to-simpleserviceresolver) - One shared `IHostBuilderProvider` instead of one per head.
+- [Register library services with one AddXxx extension method](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-AppStructureAndStartup.md#register-library-services-with-one-addxxx-extension-method) - Register a library's services in one line, without the application ever naming the implementation type.
+- [Turn on console logging only in Debug builds](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-AppStructureAndStartup.md#turn-on-console-logging-only-in-debug-builds) - Console diagnostics while developing and a silent Release build, on every head.
+- [Set a bundled font as the default text font and register script fallbacks](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-AppStructureAndStartup.md#set-a-bundled-font-as-the-default-text-font-and-register-script-fallbacks) - One typeface everywhere, including on heads with no system font stack to fall back to.
+- [Enable a picker and the software keyboard on the Linux framebuffer head](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-AppStructureAndStartup.md#enable-a-picker-and-the-software-keyboard-on-the-linux-framebuffer-head) - File and folder pickers and typed input on a head with no desktop chrome to borrow them from.
+- [Force the software render surface on the WinWpfSkia head](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-AppStructureAndStartup.md#force-the-software-render-surface-on-the-winwpfskia-head) - The fix when the WPF-hosted head opens a window that stays blank while every other head renders.
+- [Keep Main synchronous and STA so an embedded WebView can start](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-AppStructureAndStartup.md#keep-main-synchronous-and-sta-so-an-embedded-webview-can-start) - Why `async Task Main` stops an embedded WebView from starting on Windows.
+- [Turn on extra media codecs once at startup](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-AppStructureAndStartup.md#turn-on-extra-media-codecs-once-at-startup) - Register decoders that a media add-in does not, and by design cannot, reference itself.
+- [Run one view model on Skia heads and on native WinUI 3 WPF and MAUI heads](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-AppStructureAndStartup.md#run-one-view-model-on-skia-heads-and-on-native-winui-3-wpf-and-maui-heads) - Ship a native Windows or mobile build without a second implementation of your logic.
+- [Detect which platform head is running without referencing it](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-AppStructureAndStartup.md#detect-which-platform-head-is-running-without-referencing-it) - Let a library know which head hosts it without taking a dependency on any of them.
+
+## View models, commands and threading
+
+The view model layer: bound properties and commands, the design-mode guard, long jobs with progress and cancellation, results marshaled back to the UI thread, dialogs raised from a view model, and orderly disposal.
+
+File: [BLUEPRINTS-MVVM.md](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md). Guide chapter: [MVVM the right way](../platform/05-mvvm-the-right-way.md).
+
+- [Write bound properties and commands the family way](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#write-bound-properties-and-commands-the-family-way) - The exact shape the samples use: bound properties, lazily created commands, buttons that enable themselves.
+- [Refresh CanExecute when the gating state is not a bound property](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#refresh-canexecute-when-the-gating-state-is-not-a-bound-property) - Refresh `CanExecute` when the gating state lives on a model object rather than the view model.
+- [Refresh command enablement in one pass from a headless command model](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#refresh-command-enablement-in-one-pass-from-a-headless-command-model) - One pass that refreshes dozens of commands declared in a headless command model.
+- [Give each grid cell its own command and lazily loaded thumbnail](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#give-each-grid-cell-its-own-command-and-lazily-loaded-thumbnail) - A data-templated cell that binds to its own item and lazily fetches its thumbnail.
+- [Guard a view model constructor for the XAML designer](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#guard-a-view-model-constructor-for-the-xaml-designer) - Keep a constructor that opens cameras, starts threads or hits the network out of the XAML designer.
+- [Kick off async startup loading from the view model constructor](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#kick-off-async-startup-loading-from-the-view-model-constructor) - Show the page immediately while its data arrives, and say so readably when the load fails.
+- [Load documents named on the command line during startup](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#load-documents-named-on-the-command-line-during-startup) - Open the documents named on the command line, without clicking through pickers first.
+- [Set bound properties from a background thread with InvokeOnMainThread](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#set-bound-properties-from-a-background-thread-with-invokeonmainthread) - Push a result from a worker thread into a bound property.
+- [Hand results from a capture thread through a worker to the UI thread](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#hand-results-from-a-capture-thread-through-a-worker-to-the-ui-thread) - Move results from a sensor callback through a processing worker to the UI thread.
+- [Run a long job from a command with progress cancellation and a busy flag](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#run-a-long-job-from-a-command-with-progress-cancellation-and-a-busy-flag) - The canonical long-operation shape: run, cancel, progress, status, everything else disabled.
+- [Report progress across stages when only some of them know a percentage](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#report-progress-across-stages-when-only-some-of-them-know-a-percentage) - One honest progress bar when only some stages can report a percentage.
+- [Snapshot view model state before a long running command](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#snapshot-view-model-state-before-a-long-running-command) - Copy the state a long command needs before the user can change it under you.
+- [Dispose a view model its commands and its bridge delegates](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#dispose-a-view-model-its-commands-and-its-bridge-delegates) - Dispose a view model, its commands, the delegates the page handed it, and its native handles.
+- [Run one render per pane with latest request wins cancellation](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#run-one-render-per-pane-with-latest-request-wins-cancellation) - Latest-request-wins rendering when the user clicks faster than results arrive.
+- [Ignore a stale async result when the selection moved on](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#ignore-a-stale-async-result-when-the-selection-moved-on) - Discard an async result whose selection has already changed.
+- [Debounce a search box before rebuilding a filtered list](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#debounce-a-search-box-before-rebuilding-a-filtered-list) - Debounce a search box so typing does not feel heavy.
+- [Fill a grid lazily as it scrolls](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#fill-a-grid-lazily-as-it-scrolls) - Materialize grid items and their thumbnails only as they scroll into view.
+- [Show and hide panes with computed Visibility properties](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#show-and-hide-panes-with-computed-visibility-properties) - Computed `Visibility` properties instead of value converters in the XAML.
+- [Load a tree lazily as the user expands it](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#load-a-tree-lazily-as-the-user-expands-it) - Fetch a hierarchy one level per request, only where the user looks.
+- [Confirm and inform from the view model with SimpleViewModel dialogs](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#confirm-and-inform-from-the-view-model-with-simpleviewmodel-dialogs) - Ask a yes/no question or show a message with no dialog type in the view model.
+- [Prompt before discarding unsaved work](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#prompt-before-discarding-unsaved-work) - Prompt before discarding a dirty document, from every path that can close one.
+- [Gate an action behind a chosen folder and explain the gate with a dialog](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#gate-an-action-behind-a-chosen-folder-and-explain-the-gate-with-a-dialog) - Explain why an action is unavailable instead of showing a dead button.
+- [Report a failure as status text instead of throwing](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#report-a-failure-as-status-text-instead-of-throwing) - Report an invalid entry as status text rather than crashing or opening a dialog.
+- [Report a domain rule violation as a typed exception the view model can catch](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#report-a-domain-rule-violation-as-a-typed-exception-the-view-model-can-catch) - Turn a model-level rule violation into a typed exception the view model tells apart from a real failure.
+- [Compose a page from a parent view model and child view models](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#compose-a-page-from-a-parent-view-model-and-child-view-models) - Give each region of a window its own view model under one data context.
+- [Notify a value typed bindable property by hand](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#notify-a-value-typed-bindable-property-by-hand) - Raise change notification by hand for a `double`, an `enum` or another value type.
+- [Bind a picker to enum values with or without friendly labels](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#bind-a-picker-to-enum-values-with-or-without-friendly-labels) - Bind a pick-one control to the members of an enum, with or without friendly labels.
+- [Stop a two way bound selection from commanding the control back](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#stop-a-two-way-bound-selection-from-commanding-the-control-back) - Stop a two-way bound selection from commanding the control that just set it.
+- [Alert and revert when the user picks an unsupported option](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#alert-and-revert-when-the-user-picks-an-unsupported-option) - Alert and revert when the user picks something the running platform cannot do.
+- [Offer only the choices that make sense for the current selection](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#offer-only-the-choices-that-make-sense-for-the-current-selection) - Rebuild dependent drop-downs whenever the selection changes.
+- [Settle an operation in a plan before running any of it](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#settle-an-operation-in-a-plan-before-running-any-of-it) - Answer "can this be done, and what exactly will happen" in one testable place.
+- [Report the host operating system from the view model](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#report-the-host-operating-system-from-the-view-model) - Report the host operating system and runtime from the view model.
+- [Cache rendered results with a bounded most recently used cache](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#cache-rendered-results-with-a-bounded-most-recently-used-cache) - A bounded most-recently-used cache so stepping back and forth re-renders nothing.
+- [Signal a non property model change to the view with a version counter](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#signal-a-non-property-model-change-to-the-view-with-a-version-counter) - Signal an object-graph change with a version counter instead of a dozen property subscriptions.
+- [Do blocking work in a service behind Task Run](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#do-blocking-work-in-a-service-behind-task-run) - Keep the window responsive by putting blocking work behind `Task.Run` inside the service.
+- [Load an asset off the UI thread and resolve its side files from the same container](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#load-an-asset-off-the-ui-thread-and-resolve-its-side-files-from-the-same-container) - Parse an asset off the UI thread and resolve its side files from the same archive.
+- [Pre warm a rendering backend off the UI thread](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#pre-warm-a-rendering-backend-off-the-ui-thread) - Prove a GPU backend works before a paint callback depends on it, so failure is a message not an exception.
+- [Coalesce repaints and drop backlogged pointer frames](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#coalesce-repaints-and-drop-backlogged-pointer-frames) - Coalesce repaints and drop pointer frames you cannot draw.
+- [Run a sensor pipeline on a worker thread with latest frame wins](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#run-a-sensor-pipeline-on-a-worker-thread-with-latest-frame-wins) - A worker pipeline that never blocks a producer running faster than you can consume.
+- [Survive a native runtime tearing down while a frame is in flight](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#survive-a-native-runtime-tearing-down-while-a-frame-is-in-flight) - Survive a native library being unloaded at process exit while a frame is in flight.
+- [Publish a small immutable result type from a background pipeline](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#publish-a-small-immutable-result-type-from-a-background-pipeline) - Publish an immutable result type from a pipeline that raises events at frame rate.
+- [Capture a still and start a second pipeline from a command](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#capture-a-still-and-start-a-second-pipeline-from-a-command) - Grab data, build a heavier model off the UI thread, subscribe, and flip the page into another mode.
+- [Run an effect on worker threads with a live preview](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#run-an-effect-on-worker-threads-with-a-live-preview) - An expensive transform that previews as it goes, stays cancellable, and lands in the undo history.
+- [Drive an undo history from a list and travel to a clicked point](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#drive-an-undo-history-from-a-list-and-travel-to-a-clicked-point) - Undo, redo, a visible history, and jumping several steps at once.
+- [Bind a tab per open document and keep both directions in sync](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#bind-a-tab-per-open-document-and-keep-both-directions-in-sync) - A tab per open document, where the model rather than the tab control owns which is active.
+- [Show selection state in button captions from computed properties](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#show-selection-state-in-button-captions-from-computed-properties) - Show which mode is active in button captions, with no converter and no code-behind.
+
+## Bridging platform services into the view model
+
+The bridge interfaces and settable delegates that let a view model reach what only a page or a head can do: dialogs, native pickers, the clipboard, canvas repaints, timers, an embedded browser and an audio transport.
+
+File: [BLUEPRINTS-PlatformServices.md](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md). Guide chapter: [Platform services](../platform/07-platform-services.md).
+
+- [Give the view model a XamlRoot so its dialogs can show](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md#give-the-view-model-a-xamlroot-so-its-dialogs-can-show) - Give the view model the `XamlRoot` its dialog helpers need.
+- [Save a file through a native dialog from the view model](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md#save-a-file-through-a-native-dialog-from-the-view-model) - Get a destination path from a save dialog, and still work on a head that has none.
+- [Pick a file to open through a native dialog from the view model](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md#pick-a-file-to-open-through-a-native-dialog-from-the-view-model) - Ask which file to work with, from a view model that cannot show a dialog itself.
+- [Clean up the path a file picker returns](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md#clean-up-the-path-a-file-picker-returns) - Normalize the percent-encoded or placeholder path a picker hands back on some heads.
+- [Suppress a native save dialog overwrite prompt so the view model owns confirmation](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md#suppress-a-native-save-dialog-overwrite-prompt-so-the-view-model-owns-confirmation) - Stop the user being asked twice whether to replace a file.
+- [Let the page invalidate a canvas through a bridge interface](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md#let-the-page-invalidate-a-canvas-through-a-bridge-interface) - Request a repaint from background work without the view model owning a control reference.
+- [Copy text to the clipboard from a command through a bridge interface](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md#copy-text-to-the-clipboard-from-a-command-through-a-bridge-interface) - A head-only capability, reached from a command, on heads that do not all support it.
+- [Put a platform service behind an interface with a no-op default](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md#put-a-platform-service-behind-an-interface-with-a-no-op-default) - A platform service behind an interface with a no-op default, so tests and partial heads still run.
+- [Install UI dialogs into a headless model through handler delegates](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md#install-ui-dialogs-into-a-headless-model-through-handler-delegates) - Let a UI-free library ask the user something through handler delegates.
+- [Marshal a repeating timer into a headless model](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md#marshal-a-repeating-timer-into-a-headless-model) - Give a library a periodic tick on the UI thread without referencing the dispatcher.
+- [Set the mouse cursor from a model owned interface](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md#set-the-mouse-cursor-from-a-model-owned-interface) - Let the model decide which cursor is right, and the view only obey.
+- [Veto a window close until unsaved work is handled](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md#veto-a-window-close-until-unsaved-work-is-handled) - Veto the window's own close button until unsaved documents are handled.
+- [Tell the user when graphics initialization failed](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md#tell-the-user-when-graphics-initialization-failed) - Say so when a GL pane cannot initialize, instead of showing an empty pane that looks like a bug.
+- [Show a WebView on every head and drive it from a command](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md#show-a-webview-on-every-head-and-drive-it-from-a-command) - An embedded browser the user navigates freely, plus a command that sends it somewhere.
+- [Replay a finished audio clip with one button press](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md#replay-a-finished-audio-clip-with-one-button-press) - Make Play work again on a clip that has already run to its end.
+
+## Views, XAML and custom controls
+
+Markup and page code-behind: XAML namespaces and data contexts, theme brush keys, value converters, layouts that reflow, the controls you write yourself, and forwarding pointer, wheel and keyboard input.
+
+File: [BLUEPRINTS-ViewsAndControls.md](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md). Guide chapter: [Views and styling](../platform/06-views-and-styling.md).
+
+- [Declare a Skia page and bind with the platform Binding markup extension](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#declare-a-skia-page-and-bind-with-the-platform-binding-markup-extension) - Which namespaces a Skia page declares, how the view model gets there, and why plain `{Binding}` silently does nothing.
+- [Re-key theme brushes so controls dialogs and picker chrome follow your palette](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#re-key-theme-brushes-so-controls-dialogs-and-picker-chrome-follow-your-palette) - Re-key theme brushes so controls, dialogs and picker chrome follow your palette.
+- [Dim a list row for an item the application cannot act on](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#dim-a-list-row-for-an-item-the-application-cannot-act-on) - Show that one thing cannot be done with a row, without hiding the row.
+- [Format a value for display with an IValueConverter](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#format-a-value-for-display-with-an-ivalueconverter) - Format a `TimeSpan`, or any value, into a particular textual form.
+- [Highlight the selected button with a value converter](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#highlight-the-selected-button-with-a-value-converter) - Give the selected button in a radio-style row the accent style.
+- [Bind a scrubber and volume slider straight to the media element](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#bind-a-scrubber-and-volume-slider-straight-to-the-media-element) - Bind a value that ticks many times a second straight to the element.
+- [Switch a page between two modes with one bool and a converter](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#switch-a-page-between-two-modes-with-one-bool-and-a-converter) - Two mutually exclusive page states from one bool, with no second page and no navigation stack.
+- [Show a panel only when the last operation left something to say](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#show-a-panel-only-when-the-last-operation-left-something-to-say) - A panel that takes no room until there is something in it, and empties when the next run starts.
+- [Load an SVG or bitmap from an embedded resource with a custom URI scheme](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#load-an-svg-or-bitmap-from-an-embedded-resource-with-a-custom-uri-scheme) - Vector icons that ship inside the assembly and are referenced from XAML by name.
+- [Build a button that combines an embedded image with text](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#build-a-button-that-combines-an-embedded-image-with-text) - A toolbar-style button with an icon above, below, left or right of its caption.
+- [Wrap and reflow a layout with the FlexPanel add-in](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#wrap-and-reflow-a-layout-with-the-flexpanel-add-in) - A toolbar or two-pane layout that reflows with no breakpoint and no converter.
+- [Bind a TreeView to a view model tree with checkboxes](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#bind-a-treeview-to-a-view-model-tree-with-checkboxes) - A hierarchy the user checks freely, without the tree owning the selection semantics.
+- [Take a secret token in a PasswordBox and keep it out of storage](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#take-a-secret-token-in-a-passwordbox-and-keep-it-out-of-storage) - Take the user's own credential without echoing it on screen or writing it anywhere.
+- [Forward pointer input from a canvas into a model](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#forward-pointer-input-from-a-canvas-into-a-model) - Strokes, orbit and pan that follow pen, finger or mouse and survive lost capture mid-gesture.
+- [Translate platform pointer and key events into a headless input model](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#translate-platform-pointer-and-key-events-into-a-headless-input-model) - Give a model mouse and key events without a UI type anywhere in it.
+- [Select a canvas base class per head with conditional compilation](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#select-a-canvas-base-class-per-head-with-conditional-compilation) - One XAML element name over canvas controls that come from different assemblies per head.
+- [Show live video on an SKXamlCanvas subclass](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#show-live-video-on-an-skxamlcanvas-subclass) - Live video inside a XAML layout, aspect-fit and mirrored, with no per-frame allocation.
+- [Turn image bytes into a bound BitmapImage](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#turn-image-bytes-into-a-bound-bitmapimage) - Turn encoded image bytes from a service into a bound `Image` source.
+- [Let the page do the layout arithmetic only it can do](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#let-the-page-do-the-layout-arithmetic-only-it-can-do) - Combine a view-model zoom and pan with the viewport size only the page knows.
+- [Build menus and toolbars from a command model instead of XAML](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#build-menus-and-toolbars-from-a-command-model-instead-of-xaml) - Declare a command's label, icon, enabled state and shortcut once, and build the menus from that.
+- [Dispatch keyboard shortcuts from one page KeyDown handler](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#dispatch-keyboard-shortcuts-from-one-page-keydown-handler) - Working keyboard shortcuts on the Skia heads, from one handler.
+- [Run a command when the user presses Enter in a text box](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#run-a-command-when-the-user-presses-enter-in-a-text-box) - Make Enter in a search box do what the Search button does.
+- [Render a tool options toolbar from a descriptor model](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#render-a-tool-options-toolbar-from-a-descriptor-model) - Render a UI described by a library that must not reference the UI framework.
+- [Build a drawn widget as an SKXamlCanvas subclass with hit testing](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#build-a-drawn-widget-as-an-skxamlcanvas-subclass-with-hit-testing) - A pixel-exact small control - a swatch strip, a gauge, a mini timeline - drawn rather than composed.
+- [Supply a splitter bar where the platform has none](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#supply-a-splitter-bar-where-the-platform-has-none) - A resizable pane divider where the platform ships no splitter control.
+- [Show a modeless floating options panel so a live preview stays visible](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#show-a-modeless-floating-options-panel-so-a-live-preview-stays-visible) - Adjust parameters while the document keeps changing behind the panel.
+- [Generate an options panel from object properties by reflection](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#generate-an-options-panel-from-object-properties-by-reflection) - Generate a parameter panel from an object's properties instead of hand-building one per type.
+- [Show a cancellable progress dialog from synchronous code](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#show-a-cancellable-progress-dialog-from-synchronous-code) - Progress and cancel for a long operation driven by a synchronous loop.
+- [Lay out a document editor shell with tabs a toolbox and pads](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#lay-out-a-document-editor-shell-with-tabs-a-toolbox-and-pads) - The window shape of an editor: menus, toolbars, a tool palette, tabs, dockable pads and a status bar.
+- [Split a page code-behind into named partial files](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#split-a-page-code-behind-into-named-partial-files) - Keep a page with a lot of wiring navigable rather than one long file.
+- [Use FontIcon glyphs so icons survive on a device with no system fonts](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#use-fonticon-glyphs-so-icons-survive-on-a-device-with-no-system-fonts) - Icons that render identically on a desktop and on a device with no installed fonts.
+
+## Graphics and rendering
+
+Producing pixels rather than arranging controls: 3D scenes behind headless interfaces, per-head backend selection, off-screen rendering and compositing, canvas painting, and decoding, rasterizing and showing images.
+
+File: [BLUEPRINTS-GraphicsAndRendering.md](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md). Guide chapter: [Graphics, media and vision](../platform/09-graphics-media-and-vision.md).
+
+- [Host an OpenGL scene in XAML with a GLCanvasElement subclass](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#host-an-opengl-scene-in-xaml-with-a-glcanvaselement-subclass) - Hardware-accelerated 3D in an ordinary page, without writing GL, EGL, WGL or GLX code of your own.
+- [Keep the GL renderer framework-free behind an interface](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#keep-the-gl-renderer-framework-free-behind-an-interface) - Drawing code that is unit-testable and swappable, with the control reduced to lifecycle and input.
+- [Pick the shader version header for desktop GL or GLES at runtime](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#pick-the-shader-version-header-for-desktop-gl-or-gles-at-runtime) - One set of shaders across heads that give you desktop OpenGL and heads that give you OpenGL ES.
+- [Share one camera and one matrix convention across graphics APIs](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#share-one-camera-and-one-matrix-convention-across-graphics-apis) - Write the camera math once, and stop the scene going flat when the camera rotates off an axis.
+- [Frame the camera automatically on each newly bound model](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#frame-the-camera-automatically-on-each-newly-bound-model) - Compose every newly loaded model well, at a consistent angle.
+- [Draw translucent surfaces in a second pass with depth writes off](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#draw-translucent-surfaces-in-a-second-pass-with-depth-writes-off) - Stop glass in the scene hiding what is behind it.
+- [Render off screen product shots on the head own GL context](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#render-off-screen-product-shots-on-the-head-own-gl-context) - High-resolution stills of a 3D scene, at a size the on-screen canvas never has.
+- [Generate scene set dressing as ordinary geometry](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#generate-scene-set-dressing-as-ordinary-geometry) - A studio floor, backdrop and contact shadow without a second rendering path to maintain.
+- [Swap the 3D graphics backend at run time from a dropdown](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#swap-the-3d-graphics-backend-at-run-time-from-a-dropdown) - Let the user switch GPU backends while the application runs, with nothing above the GPU knowing which is active.
+- [Gate an optional graphics backend to specific heads with an allow list](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#gate-an-optional-graphics-backend-to-specific-heads-with-an-allow-list) - A predictable, testable policy instead of a driver probe that might half-succeed.
+- [Render an OpenGL scene off screen and composite it onto an SKXamlCanvas](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#render-an-opengl-scene-off-screen-and-composite-it-onto-an-skxamlcanvas) - Real GPU 3D in a page on every head, without fighting the head's own renderer for the context.
+- [Add a self contained Vulkan renderer that needs no shader toolchain](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#add-a-self-contained-vulkan-renderer-that-needs-no-shader-toolchain) - A second GPU backend that cannot collide with the head's renderer and needs no shader compiler at build time.
+- [Add a direct to Metal renderer with no NuGet package or Apple bindings](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#add-a-direct-to-metal-renderer-with-no-nuget-package-or-apple-bindings) - A macOS GPU backend that calls the Objective-C runtime directly.
+- [Composite engine pixels onto Skia with the right vertical orientation](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#composite-engine-pixels-onto-skia-with-the-right-vertical-orientation) - One compositing path that is correct for backends with different framebuffer origins.
+- [Paint a CPU ray traced panorama into an SKBitmap](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#paint-a-cpu-ray-traced-panorama-into-an-skbitmap) - An interactive image-based view that works on a head with no GPU at all.
+- [Decode HDR images and tone map them for display](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#decode-hdr-images-and-tone-map-them-for-display) - One place that turns a high-dynamic-range file into either a display bitmap or a float image.
+- [Build a textured cube mesh from a bitmap for previewing a flat material](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#build-a-textured-cube-mesh-from-a-bitmap-for-previewing-a-flat-material) - Preview a flat texture as a material rather than as a swatch.
+- [Paint a zoomable image on an SKXamlCanvas from the view model](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#paint-a-zoomable-image-on-an-skxamlcanvas-from-the-view-model) - A drawing surface whose content and zoom come from the view model, repainted on demand.
+- [Spotlight one region of an image on the canvas](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#spotlight-one-region-of-an-image-on-the-canvas) - Highlight the selected sub-rectangle of an atlas or a scanned page in place.
+- [Play a baked animation clip in a preview canvas](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#play-a-baked-animation-clip-in-a-preview-canvas) - Play a model's animations without teaching the renderer about skinning or node hierarchies.
+- [Rasterize SVG art with the CodeBrix SkiaSvg library](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#rasterize-svg-art-with-the-codebrix-skiasvg-library) - Rasterize vector art at display size and again at thumbnail size.
+- [Decode raster images with the CodeBrix Imaging library into a Skia bitmap](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#decode-raster-images-with-the-codebrix-imaging-library-into-a-skia-bitmap) - Turn image bytes of an unknown supported format into a bitmap or raw RGBA for a GPU upload.
+- [Normalize a downloaded image before embedding it in a document](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#normalize-a-downloaded-image-before-embedding-it-in-a-document) - Get images into the format and resolution a document embedder accepts.
+- [Create a drawing session with named color layers](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#create-a-drawing-session-with-named-color-layers) - Freehand annotation in translucent colors that do not compound where passes overlap.
+- [Export a drawing at a chosen pixel size](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#export-a-drawing-at-a-chosen-pixel-size) - Export finished artwork at a fixed resolution, independent of the on-screen canvas.
+- [Drive strokes in normalized image coordinates from a sensor](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#drive-strokes-in-normalized-image-coordinates-from-a-sensor) - Keep view-size, display-scale and letterbox math away from stroke input that is not a pointer.
+- [Keep a mirrored preview and a mirrored drawing consistent](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#keep-a-mirrored-preview-and-a-mirrored-drawing-consistent) - Keep everything downstream of a selfie-style preview agreeing about which way is left.
+- [Draw a brush sized cursor over a rendered drawing session](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#draw-a-brush-sized-cursor-over-a-rendered-drawing-session) - Show where the brush is and how big it is when the user is not painting with a mouse.
+- [Draw an animated SkSL shader as a game engine direct drawing](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#draw-an-animated-sksl-shader-as-a-game-engine-direct-drawing) - A full-surface procedural visual on the GPU when there is one and the CPU when there is not.
+- [Smooth worker rate data into frame rate animation](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#smooth-worker-rate-data-into-frame-rate-animation) - Turn irregular background values into animation that runs at the render rate without snapping.
+- [Keep a pipeline and a renderer decoupled by a normalized seam](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#keep-a-pipeline-and-a-renderer-decoupled-by-a-normalized-seam) - Two libraries cooperating every frame, neither depending on the other's concepts.
+- [Offer a CPU fallback for a GPU rendering path behind one switch](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#offer-a-cpu-fallback-for-a-gpu-rendering-path-behind-one-switch) - One switch between GPU and CPU over the same scene, rather than two code paths.
+- [Choose the render resolution from the zoom level](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#choose-the-render-resolution-from-the-zoom-level) - Sharpen content as the user zooms, without rendering a poster-sized image.
+- [Draw a zoomable document canvas on an SKXamlCanvas subclass](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#draw-a-zoomable-document-canvas-on-an-skxamlcanvas-subclass) - The canvas any document editor needs: composite content and repaint fast.
+- [Repaint only the dirty rectangle of a cached composite](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#repaint-only-the-dirty-rectangle-of-a-cached-composite) - Repaint the region an edit touched, not the whole expensive composite.
+- [Animate an overlay with a timer that stops when unloaded](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#animate-an-overlay-with-a-timer-that-stops-when-unloaded) - A marching-ants selection, a caret or a spinner that stops when its view is gone.
+- [Host a canvas in a scroll viewer and drive zoom and scroll from an interface](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#host-a-canvas-in-a-scroll-viewer-and-drive-zoom-and-scroll-from-an-interface) - Let the model, not the view, decide where the viewport goes after a zoom.
+- [Scale a Skia drawn control from surface pixels to logical units](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#scale-a-skia-drawn-control-from-surface-pixels-to-logical-units) - Make drawing code written in the element's own coordinates look right on a scaled display.
+- [Turn raw pixel surfaces into XAML image sources](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#turn-raw-pixel-surfaces-into-xaml-image-sources) - Get raw premultiplied pixels from a decoder, renderer or thumbnail into an `Image` element.
+- [Honor EXIF orientation when decoding with SkiaSharp codecs](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#honor-exif-orientation-when-decoding-with-skiasharp-codecs) - Decode photographs upright, the way every other image viewer shows them.
+- [Combine selection polygons with the CodeBrix PolygonTools library](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#combine-selection-polygons-with-the-codebrix-polygontools-library) - Union, difference, intersection and exclusion on user-drawn regions.
+- [Give a headless library a drawing facade over SkiaSharp](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#give-a-headless-library-a-drawing-facade-over-skiasharp) - Keep a large body of drawing code independent of any one graphics API.
+- [Play a Lottie animation on a Skia head and on native WinUI](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md#play-a-lottie-animation-on-a-skia-head-and-on-native-winui) - A small looping vector animation that looks the same on a Skia head and in a native WinUI 3 application.
+
+## Media, camera and vision
+
+Playing video and audio inside a page, probing and converting media files, and driving camera capture and on-device vision without leaking device libraries into the view model.
+
+File: [BLUEPRINTS-MediaAndVision.md](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md). Guide chapter: [Graphics, media and vision](../platform/09-graphics-media-and-vision.md).
+
+- [Host the VideoPlayer add-in in a page and drive it from the view model](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#host-the-videoplayer-add-in-in-a-page-and-drive-it-from-the-view-model) - Put the transport, the chapter list and the caption list on the view model rather than in code-behind.
+- [Play a video from a URL with the MediaPlayer add-in](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#play-a-video-from-a-url-with-the-mediaplayer-add-in) - Playback with the source chosen by application logic, and standard play, pause and seek without writing commands.
+- [Play an audio clip straight from bytes with the AudioPlayer add-in](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#play-an-audio-clip-straight-from-bytes-with-the-audioplayer-add-in) - Play audio held in memory, with no temporary file, on whichever heads can.
+- [Probe a media file behind an interface the view model resolves](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#probe-a-media-file-behind-an-interface-the-view-model-resolves) - Read size, duration, codecs and chapter and caption counts before offering anything to do with a file.
+- [Detect a container from its first bytes](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#detect-a-container-from-its-first-bytes) - Tell two formats that share an extension apart the way the reader will.
+- [Author a cbv file in either container mode from a settled plan](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#author-a-cbv-file-in-either-container-mode-from-a-settled-plan) - Which authoring knobs correspond to which output, in either container mode.
+- [Export an mp4 with FFmpeg through the CodeBrix VideoProcessing library](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#export-an-mp4-with-ffmpeg-through-the-codebrix-videoprocessing-library) - Inputs, stream selection, codecs, filters, progress and cancellation, behind a service a view model drives.
+- [Demultiplex a bespoke container and remux it so an external tool can read it](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#demultiplex-a-bespoke-container-and-remux-it-so-an-external-tool-can-read-it) - Hand ordinary elementary streams to a tool that cannot open your container.
+- [Lift chapters and captions out of a source into sidecar files](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#lift-chapters-and-captions-out-of-a-source-into-sidecar-files) - Turn embedded chapters and captions into the separate input files an encoder wants.
+- [Build a resolution ladder keyed on the short side with even dimensions](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#build-a-resolution-ladder-keyed-on-the-short-side-with-even-dimensions) - Downscale choices that read correctly for portrait video as well as landscape.
+- [Move one encoder knob and pin everything else](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#move-one-encoder-knob-and-pin-everything-else) - Make a quality choice mean one comparable thing across two different encoders.
+- [Download run scoped media into a self cleaning temp cache](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#download-run-scoped-media-into-a-self-cleaning-temp-cache) - Fetch many short-lived remote files for one operation and leave nothing on disk.
+- [Extract a video poster frame and degrade when the external tool is missing](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#extract-a-video-poster-frame-and-degrade-when-the-external-tool-is-missing) - Take a still or a duration with tools that may not be installed on the user's machine.
+- [Enumerate cameras and start a live capture session](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#enumerate-cameras-and-start-a-live-capture-session) - A camera drop-down that fills itself, starts the first camera and switches cleanly.
+- [Wrap a device library type so the view model never sees it](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#wrap-a-device-library-type-so-the-view-model-never-sees-it) - Bind to a plain object with a display name, and stay free to change the capture library later.
+- [Run a TFLite model through the OpenCV DNN module](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#run-a-tflite-model-through-the-opencv-dnn-module) - Run a model file from a CodeBrix.Platform application with no extra inference runtime.
+- [Warp a rotated region of interest into a model input](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#warp-a-rotated-region-of-interest-into-a-model-input) - Turn a detector's rotated box into the upright square crop the next stage wants.
+- [Recognize a gesture from landmark geometry instead of a model](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#recognize-a-gesture-from-landmark-geometry-instead-of-a-model) - A fast, explainable, testable rule in place of a classification model.
+- [Track multiple detections across frames with stable ids](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#track-multiple-detections-across-frames-with-stable-ids) - Let downstream animation know this frame's item is last frame's item.
+- [Smooth a noisy sensor position before it drives the UI](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MediaAndVision.md#smooth-a-noisy-sensor-position-before-it-drives-the-ui) - Take the jitter out of raw per-frame positions before anything on screen follows them.
+
+## Documents, data and web APIs
+
+Work with content rather than pixels, kept in UI-free libraries behind service interfaces: archives and embedded resources, encryption, REST and HTTP calls, parsing messy markup, and producing, reading and saving documents.
+
+File: [BLUEPRINTS-DocumentsAndData.md](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md). Guide chapter: [The library catalog](../libraries/README.md).
+
+- [Put the real work in a UI free library behind a service interface](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#put-the-real-work-in-a-ui-free-library-behind-a-service-interface) - Make the application's actual functionality testable, reusable and independent of any head.
+- [Encrypt text with the CodeBrix Cryptography library](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#encrypt-text-with-the-codebrix-cryptography-library) - Symmetric encryption inside a service, with the randomness carried alongside the ciphertext.
+- [Read an embedded default value at run time](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#read-an-embedded-default-value-at-run-time) - A default that ships inside the assembly rather than as a file on disk, read once and cached.
+- [Guard Base64 input against invisible clipboard characters](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#guard-base64-input-against-invisible-clipboard-characters) - Why pasted encoded output sometimes fails to decode, and how to guard it.
+- [Read a zip archive without extracting it with the CodeBrix Compression library](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#read-a-zip-archive-without-extracting-it-with-the-codebrix-compression-library) - Read members of a container on demand instead of unpacking everything.
+- [Resolve a file that another archive entry references by relative path](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#resolve-a-file-that-another-archive-entry-references-by-relative-path) - Turn a relative reference inside an archive into a real member of it.
+- [Classify and group the contents of a container for browsing](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#classify-and-group-the-contents-of-a-container-for-browsing) - Present many files as fewer, more meaningful items - one per logical asset.
+- [Build a typed REST client with source generated JSON and its own exceptions](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#build-a-typed-rest-client-with-source-generated-json-and-its-own-exceptions) - An API library with trimmable JSON, a timeout policy, catchable error types and correct client lifetime.
+- [Call a REST API behind a service interface the view model resolves](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#call-a-rest-api-behind-a-service-interface-the-view-model-resolves) - Keep the whole conversation with an API behind one interface the view model holds.
+- [Pace outbound API calls with a rate gate](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#pace-outbound-api-calls-with-a-rate-gate) - Stay inside a published request-rate limit while walking a tree.
+- [Be a polite HTTP client to a public API](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#be-a-polite-http-client-to-a-public-api) - Download many files from someone else's servers without being blocked.
+- [Normalize a user entered ID or URL before calling an API](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#normalize-a-user-entered-id-or-url-before-calling-an-api) - Accept a bare identifier, a formatted one, or a full URL in the same box.
+- [Resolve an ID that may be one of several object kinds](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#resolve-an-id-that-may-be-one-of-several-object-kinds) - One input box that accepts several kinds of object, against an API that answers "not found" for the wrong kind.
+- [Read a nested tree from an API with a cycle guard](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#read-a-nested-tree-from-an-api-with-a-cycle-guard) - Walk an API tree one level per request, skipping node types that must not be recursed and guarding cycles.
+- [Batch a metadata API and treat the result as best effort](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#batch-a-metadata-api-and-treat-the-result-as-best-effort) - Fetch per-item metadata for many items so one failure does not fail the job.
+- [Fetch a whole remote catalog once and cache images behind a concurrency gate](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#fetch-a-whole-remote-catalog-once-and-cache-images-behind-a-concurrency-gate) - Be polite to the server without starving the scroll.
+- [Report true byte progress across a multi file download with side car files](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#report-true-byte-progress-across-a-multi-file-download-with-side-car-files) - One progress bar for a download that is really a main file plus its companions.
+- [Cache downloaded assets with a key you can invalidate](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#cache-downloaded-assets-with-a-key-you-can-invalidate) - Download a large file once, under a key that invalidates correctly when the target changes.
+- [Parse messy HTML into structured blocks with the CodeBrix MarkupParse library](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#parse-messy-html-into-structured-blocks-with-the-codebrix-markupparse-library) - Turn real-world HTML into typed content rather than a string.
+- [Strip web only chrome while walking the DOM](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#strip-web-only-chrome-while-walking-the-dom) - Keep citation markers, edit links, navigation boxes and reference sections out of printed output.
+- [Upgrade thumbnail URLs to print resolution](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#upgrade-thumbnail-urls-to-print-resolution) - Get print-resolution images from a page that serves screen-sized ones, without upscaling.
+- [Run a multi stage pipeline behind one service method](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#run-a-multi-stage-pipeline-behind-one-service-method) - One method the view model calls, over stages that stay separate and testable.
+- [Register embedded OFL fonts with the PDF font system](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#register-embedded-ofl-fonts-with-the-pdf-font-system) - Make generated documents look identical everywhere, whatever fonts the host has.
+- [Drop characters your embedded fonts cannot render](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#drop-characters-your-embedded-fonts-cannot-render) - Keep empty boxes out of a printed page when the source text goes beyond your glyphs.
+- [Derive a whole document theme from one page size choice](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#derive-a-whole-document-theme-from-one-page-size-choice) - Lay a document out proportionately at several page sizes rather than tuning it at one.
+- [Compose a book with sections styles running heads and folios](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#compose-a-book-with-sections-styles-running-heads-and-folios) - Real book structure: a cover section, mirrored margins, running heads and page numbers.
+- [Build a table of contents with real page numbers and dot leaders](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#build-a-table-of-contents-with-real-page-numbers-and-dot-leaders) - A contents page whose numbers are correct after layout.
+- [Place numbered framed figures with credit lines](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#place-numbered-framed-figures-with-credit-lines) - Consistent figure sizing, a frame, a credit and a numbered caption.
+- [Pair a figure with the credit paragraph that follows it](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#pair-a-figure-with-the-credit-paragraph-that-follows-it) - Typeset the credit an author wrote after a picture with the figure instead of as body text.
+- [Render booktabs style tables from parsed rows](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#render-booktabs-style-tables-from-parsed-rows) - Typeset tables with horizontal rules only.
+- [Open a document with a raised initial](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#open-a-document-with-a-raised-initial) - Start the first paragraph of a book with a large colored capital.
+- [Write rich text runs into a paragraph or a hyperlink](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#write-rich-text-runs-into-a-paragraph-or-a-hyperlink) - Write annotated runs - bold, italic, code, links - into types that share no base for adding them.
+- [Render into either a section or a table cell](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#render-into-either-a-section-or-a-table-cell) - One content renderer that works at top level and inside a table cell.
+- [Keep unsupported content visible instead of failing the document](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#keep-unsupported-content-visible-instead-of-failing-the-document) - Handle input kinds that appear after you ship without failing the document.
+- [Compose a fixed layout poster with the CodeBrix PdfDocuments library](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#compose-a-fixed-layout-poster-with-the-codebrix-pdfdocuments-library) - A designed, fixed-layout page - a one-sheet, a certificate, a label - rather than a flowing document.
+- [Open a PDF and read its page count with the CodeBrix PdfRasterizer library](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#open-a-pdf-and-read-its-page-count-with-the-codebrix-pdfrasterizer-library) - Read a user-chosen PDF's page count, with a clear error when it is missing or not a PDF.
+- [Rasterize a PDF page to PNG off the UI thread](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#rasterize-a-pdf-page-to-png-off-the-ui-thread) - Get a page image for a bound image element out of a synchronous rasterizer.
+- [Keep two documents in step while letting the user offset one](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#keep-two-documents-in-step-while-letting-the-user-offset-one) - Line up two editions once, then page through both together.
+- [Treat two spellings of one path as the same file](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#treat-two-spellings-of-one-path-as-the-same-file) - Decide whether the user picked the same file twice, across spellings and case-insensitive file systems.
+- [Register import and export formats at startup through one entry point](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#register-import-and-export-formats-at-startup-through-one-entry-point) - Make your codec set data owned by a library, not scattered registration calls.
+- [Add codec coverage beyond SkiaSharp with the CodeBrix Imaging library](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#add-codec-coverage-beyond-skiasharp-with-the-codebrix-imaging-library) - Read and write the formats the base graphics library cannot.
+- [Save a document through a native picker with format filters](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#save-a-document-through-a-native-picker-with-format-filters) - A save-as that offers exactly the formats you can write and warns before a lossy conversion.
+- [Raise a UI hook from a codec through a static event](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#raise-a-ui-hook-from-a-codec-through-a-static-event) - One optional interaction - a quality slider, an overwrite confirmation - raised without a UI dependency.
+
+## Settings and persistence
+
+Keeping state between runs through the AppSettings add-in, from the application-named facade over the store to when that store must open relative to the rest of startup.
+
+File: [BLUEPRINTS-SettingsAndPersistence.md](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-SettingsAndPersistence.md). Guide chapter: [AppSettings](../platform/add-ins/AppSettings.md).
+
+- [Wrap the AppSettings add-in in one application named facade](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-SettingsAndPersistence.md#wrap-the-appsettings-add-in-in-one-application-named-facade) - One application-named type to call, one place to change the backend, and a store that survives corruption.
+- [Open the settings store before any other startup work](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-SettingsAndPersistence.md#open-the-settings-store-before-any-other-startup-work) - Ordering is not optional when a static type reads a setting from its own static constructor.
+- [Choose a folder with the picker and remember it across runs](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-SettingsAndPersistence.md#choose-a-folder-with-the-picker-and-remember-it-across-runs) - Make the folder choice the last thing the user ever has to do about it.
+- [Restore a remembered window size before any window exists](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-SettingsAndPersistence.md#restore-a-remembered-window-size-before-any-window-exists) - Reopen at the size the user left, when the head creates the native window before your page loads.
+- [Persist small pieces of application state through the same store](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-SettingsAndPersistence.md#persist-small-pieces-of-application-state-through-the-same-store) - A palette, a recent list or a last-used value, without inventing a file format.
+- [Flush deferred settings at natural points instead of at quit](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-SettingsAndPersistence.md#flush-deferred-settings-at-natural-points-instead-of-at-quit) - Save state in an application that has no quit path.
+
+## Text editing
+
+Laying out and drawing text through the TextLayout add-in from a headless library, so shaping, measurement, caret and selection geometry and an outline path are available with no XAML text control involved.
+
+File: [BLUEPRINTS-TextEditing.md](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-TextEditing.md). Guide chapter: [TextLayout](../platform/add-ins/TextLayout.md).
+
+- [Lay out and draw text through the CodeBrix Platform TextLayout add-in](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-TextEditing.md#lay-out-and-draw-text-through-the-codebrix-platform-textlayout-add-in) - Shaping, measurement, caret and selection geometry and an outline path, with no XAML text control involved.
+
+## Hosting a game engine
+
+Hosting the CodeBrix.Platform GameEngine loop inside an ordinary page, and owning the engine lifecycle in a session class that can start, pause, resume and stop.
+
+File: [BLUEPRINTS-GameEngine.md](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GameEngine.md). Guide chapter: [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md).
+
+- [Hand the view model a game canvas at its first real layout size](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GameEngine.md#hand-the-view-model-a-game-canvas-at-its-first-real-layout-size) - Start the engine against a surface the first time it actually has a non-zero size.
+- [Run and pause a game engine session inside a page](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GameEngine.md#run-and-pause-a-game-engine-session-inside-a-page) - Run the loop while the page is on screen and cost nothing while it is not, without tearing the scene down.
+
+## Testing
+
+Getting an application under test: test project setup, fixtures and test doubles, headless graphics and golden-image comparison, opt-in live tests, and a scripted run that drives the whole application on a real head.
+
+File: [BLUEPRINTS-Testing.md](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md). Guide chapter: [Testing your application](../platform/10-testing-your-application.md).
+
+- [Keep view model rules in a plain class so they can be tested](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#keep-view-model-rules-in-a-plain-class-so-they-can-be-tested) - Cover your rules, given that a `SimpleViewModel` cannot be constructed without a running host.
+- [Set up an xUnit v3 test project for a CodeBrix library](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#set-up-an-xunit-v3-test-project-for-a-codebrix-library) - The first test project for an application, matching the family conventions and actually discovered.
+- [Build a test project against real CodeBrix Platform assemblies](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#build-a-test-project-against-real-codebrix-platform-assemblies) - Build a test project that calls into real CodeBrix.Platform types.
+- [Add the native assets a head would have supplied](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#add-the-native-assets-a-head-would-have-supplied) - Give the tests the native runtime a head would have laid down.
+- [Expose library internals to its test project](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#expose-library-internals-to-its-test-project) - Unit test internal implementation types without widening the public surface.
+- [Test a service the way the container builds it](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#test-a-service-the-way-the-container-builds-it) - Resolve the service under test the way the application does, with the same dependencies.
+- [Route logging from the code under test into test output](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#route-logging-from-the-code-under-test-into-test-output) - Get the lines the code under test logs into the test report.
+- [Share one expensive fixture across every test class that needs it](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#share-one-expensive-fixture-across-every-test-class-that-needs-it) - Setup that takes real work, run once rather than once per test class.
+- [Build the binary inputs your tests need instead of committing them](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#build-the-binary-inputs-your-tests-need-instead-of-committing-them) - Test a reader, a decoder or a renderer without binary fixtures in the repository.
+- [Generate real media clips from a synthetic source](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#generate-real-media-clips-from-a-synthetic-source) - Produce real media to test against, at test time.
+- [Read a committed fixture from beside the test binary](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#read-a-committed-fixture-from-beside-the-test-binary) - Find the one input that really has to be a file a real tool produced.
+- [Test a document renderer against the object model it produces](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#test-a-document-renderer-against-the-object-model-it-produces) - Fast, offline, specific tests for a library that builds a document rather than returning a value.
+- [Assert on a generated document without a golden file](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#assert-on-a-generated-document-without-a-golden-file) - Cover the parse, compose and render path offline with nothing to compare against.
+- [Make live tests opt in and keep them out of the default run](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#make-live-tests-opt-in-and-keep-them-out-of-the-default-run) - Keep the tests that need the network or an account from failing the suite for everyone else.
+- [Test an HTTP client offline with a stub handler](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#test-an-http-client-offline-with-a-stub-handler) - Cover an API client with no network, including the exact URLs it builds.
+- [Mock a rendering or API seam with CodeBrix TestMocks](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#mock-a-rendering-or-api-seam-with-codebrix-testmocks) - Cover the code around an expensive or platform-bound service without touching it.
+- [Test GL code headlessly with a surfaceless EGL context](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#test-gl-code-headlessly-with-a-surfaceless-egl-context) - Real renderer tests on a machine or build agent with no window system.
+- [Prove every graphics backend with the same mirrored suite](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#prove-every-graphics-backend-with-the-same-mirrored-suite) - Prove the same behaviors for every backend you ship.
+- [Pin a fixed bug with a regression test that says why it is shaped that way](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#pin-a-fixed-bug-with-a-regression-test-that-says-why-it-is-shaped-that-way) - Write the test so a later tidy-up cannot quietly make it useless.
+- [Compare rendered images pixel by pixel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#compare-rendered-images-pixel-by-pixel) - Golden-image tests that are exact but tolerate one-bit rounding.
+- [Point a process-global store at a throwaway folder in tests](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#point-a-process-global-store-at-a-throwaway-folder-in-tests) - Keep tests away from the user's real data when production code initializes a singleton store.
+- [Drive a scripted end-to-end run of the whole application](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#drive-a-scripted-end-to-end-run-of-the-whole-application) - Prove the parts a unit test cannot reach: a real head, a real element, a real visual tree.
+
+## Project layout, packaging and native assets
+
+How a multi-head application is laid out on disk and how its packages are apportioned: the shared project, root namespaces, the `src` and `tests` layout, native payloads, separate solutions and a notices file.
+
+File: [BLUEPRINTS-ProjectLayoutAndPackaging.md](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ProjectLayoutAndPackaging.md). Guide chapter: [Project architecture](../platform/04-project-architecture.md) and [Packaging and shipping](../platform/11-packaging-and-shipping.md).
+
+- [Carry every package in one Core library and give each head exactly one runtime package](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ProjectLayoutAndPackaging.md#carry-every-package-in-one-core-library-and-give-each-head-exactly-one-runtime-package) - Add a head, or a package, without editing six project files.
+- [Share App xaml and the views across heads with a shared project](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ProjectLayoutAndPackaging.md#share-app-xaml-and-the-views-across-heads-with-a-shared-project) - One `App.xaml` and one set of pages, compiled into every head assembly.
+- [Set the Core library root namespace to the application namespace](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ProjectLayoutAndPackaging.md#set-the-core-library-root-namespace-to-the-application-namespace) - Put `<App>.Core` types in the `<App>` namespace so shared XAML and head code see them unqualified.
+- [Give a library that references CodeBrix Platform its own root namespace](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ProjectLayoutAndPackaging.md#give-a-library-that-references-codebrix-platform-its-own-root-namespace) - The fix when a library under `src/libs` makes the build report a duplicate type in the head.
+- [Fan native packages out across the heads](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ProjectLayoutAndPackaging.md#fan-native-packages-out-across-the-heads) - Give each head the native binaries for the platforms it can run on.
+- [Embed an asset with an explicit logical name and load it by reflection](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ProjectLayoutAndPackaging.md#embed-an-asset-with-an-explicit-logical-name-and-load-it-by-reflection) - Ship an asset inside an assembly, from one source file compiled into several assemblies.
+- [Let a Windows-targeting head build inside a cross-platform solution](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ProjectLayoutAndPackaging.md#let-a-windows-targeting-head-build-inside-a-cross-platform-solution) - Keep the whole solution restoring and building on Linux and macOS.
+- [Restrict the solution platforms to what a WinUI head declares](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ProjectLayoutAndPackaging.md#restrict-the-solution-platforms-to-what-a-winui-head-declares) - What to do when a native WinUI head joins a solution whose other projects build as Any CPU.
+- [Ship a separate solution where some heads cannot build everywhere](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ProjectLayoutAndPackaging.md#ship-a-separate-solution-where-some-heads-cannot-build-everywhere) - A solution that opens cleanly and builds everything it contains, on each operating system.
+- [Organize an application as src libs plus tests libs around a shared UI project](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ProjectLayoutAndPackaging.md#organize-an-application-as-src-libs-plus-tests-libs-around-a-shared-ui-project) - Put the non-UI work in libraries that can be unit tested without a window.
+- [Code to the higher-level graphics package and let the binding arrive transitively](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ProjectLayoutAndPackaging.md#code-to-the-higher-level-graphics-package-and-let-the-binding-arrive-transitively) - Why not to add a direct reference to the low-level graphics binding.
+- [Know what a transitive package brings and name what you depend on](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ProjectLayoutAndPackaging.md#know-what-a-transitive-package-brings-and-name-what-you-depend-on) - Decide whether you need a package reference for a type you can already see.
+- [Record bundled third-party content in a notices file](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ProjectLayoutAndPackaging.md#record-bundled-third-party-content-in-a-notices-file) - One file at the application root for anything you bundle, download at run time, or ship inside an assembly.
+
+## Not yet covered by a sample
+
+The CodeBrix.Samples blueprints keep an open list of the topics no application there demonstrates, so a reader looking for one of them knows the gap is known rather than hidden in another file.
+
+File: [BLUEPRINTS-NotYetCovered.md](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-NotYetCovered.md). It holds no recipes.
+
+- Navigating between several pages with a back stack, rather than one page per application.
+- Opening a second top-level window from a running application.
+- Localized user-interface strings, and formatting for a culture other than the running machine's.
+- Printing a document or a page from a Skia head.
+- Drag and drop between the application and the desktop.
+- A database-backed data layer, beyond the settings store the AppSettings add-in provides.
+- Publishing and installers for the Skia heads; only the native WinUI head's packaging configuration appears there.
+- Accessibility: naming elements for a screen reader, or a keyboard-only path through a page.
+
+> [!TIP]
+> Two of those gaps are addressed elsewhere in the family. Fresco.Brix ships compiled translation catalogs and looks its strings up by message id, and both Gpl2 games persist a whole subsystem's state behind one storage interface that talks only to the settings facade. Both are in the sections below.
+
+## The classic-game blueprints
+
+Mined from Doom.Brix and Wolfenstein.Brix. The MVVM guidance applies to the shell around each game - startup, Assets Mode, the download pipeline, settings and the page itself - not to the engine internals, which are a plain object graph on the game-loop thread.
+
+File: [BLUEPRINTS.md](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md) in CodeBrix.Samples.Gpl2. Guide chapter: [Reference applications](../platform/13-reference-applications.md).
+
+**Application structure and startup**
+
+- [Start one application from six head projects](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#start-one-application-from-six-head-projects) - One shared UI and one shared Core library running on all six desktop heads.
+- [Bootstrap the application in App xaml cs](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#bootstrap-the-application-in-app-xaml-cs) - The startup sequence in order: default font, service resolver, design-mode flag, settings store, then `InitializeComponent()`.
+- [Share App xaml and views through a shared shproj UI project](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#share-app-xaml-and-views-through-a-shared-shproj-ui-project) - One copy of `App.xaml` and your pages compiled into every head, rather than a library the heads reference.
+- [Keep WPF paints from starving keyboard input](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#keep-wpf-paints-from-starving-keyboard-input) - The WinWpfSkia fix when a high fixed present rate crowds out keyboard input.
+
+**View models, commands and threading**
+
+- [Boot an expensive object only when both prerequisites have arrived](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#boot-an-expensive-object-only-when-both-prerequisites-have-arrived) - Create an expensive object once both a view event and view-model state have arrived, in either order.
+- [Report multi stage background progress to a bound overlay](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#report-multi-stage-background-progress-to-a-bound-overlay) - A stage caption and a percentage across download, verify and extract, without blocking the UI thread.
+- [Show an alert dialog from a view model](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#show-an-alert-dialog-from-a-view-model) - Tell the user something, with the page supplying nothing but the XAML root.
+
+**Bridging platform services into the view model**
+
+- [Drive an embedded browser from the view model](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#drive-an-embedded-browser-from-the-view-model) - Navigate a browser the page owns, and know which page the user ended up on.
+- [Enforce a one file download policy from the view model](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#enforce-a-one-file-download-policy-from-the-view-model) - Let browsing be free while permitting exactly one download and refusing the rest with an explanation.
+
+**Views, XAML and custom controls**
+
+- [Switch a page between two full screen modes with visibility bindings](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#switch-a-page-between-two-full-screen-modes-with-visibility-bindings) - Two experiences and a modal overlay in one page, with no navigation and no second page type.
+- [Keep keyboard focus on a game canvas](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#keep-keyboard-focus-on-a-game-canvas) - Why a rendering surface's keyboard goes silently dead, and how to keep focus on it.
+- [Execute a view model command when Enter is pressed in a text box](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#execute-a-view-model-command-when-enter-is-pressed-in-a-text-box) - Make Enter in an address or search box do what the adjacent button does.
+
+**Documents, data and web APIs**
+
+- [Verify a downloaded file against known checksums](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#verify-a-downloaded-file-against-known-checksums) - Prove a file from a mirror you do not control is the one you expected, cheaply enough to repeat on every launch.
+- [Rebuild a nested archive in memory and extract only what you need](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#rebuild-a-nested-archive-in-memory-and-extract-only-what-you-need) - An archive whose interesting content is itself an archive, with no intermediate file on disk.
+- [Unpack a legacy DCL compressed archive safely](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#unpack-a-legacy-dcl-compressed-archive-safely) - Read an old installer format and put only the members you want on disk.
+- [Download a file with progress and mirror friendly request headers](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#download-a-file-with-progress-and-mirror-friendly-request-headers) - Fetch a file yourself, with progress, from a mirror that may check where the request came from.
+- [Parse original binary data formats into a testable library](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#parse-original-binary-data-formats-into-a-testable-library) - Keep binary format parsing verifiable independently of the application.
+
+**Settings and persistence**
+
+- [Wrap the AppSettings add-in in an application named facade](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#wrap-the-appsettings-add-in-in-an-application-named-facade) - One short, application-named type every part of the application reads and writes settings through.
+- [Let the user pick a folder and remember the choice](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#let-the-user-pick-a-folder-and-remember-the-choice) - A one-time setup choice that survives restarts and is re-validated on every launch.
+- [Persist a subsystem behind one storage interface](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#persist-a-subsystem-behind-one-storage-interface) - Let a self-contained subsystem persist state without knowing where it goes, and stay testable headless.
+
+**Hosting a game engine**
+
+- [Host a fixed rate game loop inside a XAML page](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#host-a-fixed-rate-game-loop-inside-a-xaml-page) - A simulation advancing at a fixed rate and rendering its own pixels, inside an ordinary page.
+- [Present a software framebuffer through the game surface canvas](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#present-a-software-framebuffer-through-the-game-surface-canvas) - Scale and letterbox your own pixel buffer into any window size, with no per-frame CPU conversion.
+- [Pause a game engine when the window is minimized](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#pause-a-game-engine-when-the-window-is-minimized) - Stop paying for a loop and an audio device in a background window, and resume exactly where the user left off.
+- [Pump keyboard events and held key state into a game loop](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#pump-keyboard-events-and-held-key-state-into-a-game-loop) - Discrete key edges and continuous held-key state, sampled consistently once per tic.
+- [Grab the mouse for relative movement in a game loop](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#grab-the-mouse-for-relative-movement-in-a-game-loop) - Relative pointer movement, released whenever a menu opens, optional so a head without it still runs.
+- [Add optional gamepad support that degrades to keyboard only](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#add-optional-gamepad-support-that-degrades-to-keyboard-only) - Controller support that is always on, never configured, and completely inert without a controller.
+- [Sample a gamepad once per tic without losing a sleeping controller](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#sample-a-gamepad-once-per-tic-without-losing-a-sleeping-controller) - Per-tic polling that survives a controller sleeping and waking, with edge detection and a menu repeat clock.
+- [Play short PCM clips on a pool of engine sound channels](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#play-short-pcm-clips-on-a-pool-of-engine-sound-channels) - Many short effects, registered once and replayed cheaply, with a bounded number of voices.
+- [Stream synthesized audio through one engine voice](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#stream-synthesized-audio-through-one-engine-voice) - Continuously generated audio fed to the device by a pull callback.
+
+**Testing**
+
+- [Set up an xUnit v3 test project for a CodeBrix Platform application](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#set-up-an-xunit-v3-test-project-for-a-codebrix-platform-application) - One test project per library under `src/libs`, named and placed the family way.
+- [Make data dependent tests explain themselves when the data is missing](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#make-data-dependent-tests-explain-themselves-when-the-data-is-missing) - Never look green by accident, and never fail mysteriously, when uncommittable data is absent.
+- [Serialize a test assembly that touches process static state](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#serialize-a-test-assembly-that-touches-process-static-state) - Stop process-wide statics from making parallel tests flaky.
+- [Test a hardware input path behind the engine adapter interfaces](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#test-a-hardware-input-path-behind-the-engine-adapter-interfaces) - Cover input handling for a device you cannot attach on a build machine.
+
+**Project layout, packaging and native assets**
+
+- [Carry every shared package in one Core library and one runtime package per head](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#carry-every-shared-package-in-one-core-library-and-one-runtime-package-per-head) - Add a package once and have all six heads get it, with no per-head fan-out to keep in sync.
+- [Set the RootNamespace and conditional compilation defines CodeBrix Platform needs](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#set-the-rootnamespace-and-conditional-compilation-defines-codebrix-platform-needs) - What any project compiling against CodeBrix.Platform, or transitively referencing it, has to set.
+- [Ship bundled assets and license notices into every head output](https://github.com/ellisnet/CodeBrix.Samples.Gpl2/blob/main/BLUEPRINTS.md#ship-bundled-assets-and-license-notices-into-every-head-output) - Get a run-time data file and its notices into every head's output without repeating the item six times.
+
+## The notation-editor blueprints
+
+Mined from Fresco.Brix, which hosts a long-running engine in process and uses the editor, settings, PDF, audio and SVG libraries together at full load.
+
+File: [BLUEPRINTS.md](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md) in CodeBrix.Samples.Gpl3. Guide chapter: [Reference applications](../platform/13-reference-applications.md).
+
+**Application structure and startup**
+
+- [Run one shared XAML UI on six platform heads from one head program](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#run-one-shared-xaml-ui-on-six-platform-heads-from-one-head-program) - Every head a file you write once and never touch again.
+- [Bootstrap an application with SimpleServiceResolver and a default font](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#bootstrap-an-application-with-simpleserviceresolver-and-a-default-font) - Register the services the view models resolve, turn design mode off, and name the font the interface draws in.
+- [Configure logging before the host is built](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#configure-logging-before-the-host-is-built) - Console diagnostics in Debug without the framework's own lines drowning yours, and nothing in Release.
+- [Hand the files of a second launch to the running window and exit](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#hand-the-files-of-a-second-launch-to-the-running-window-and-exit) - Open a file from the file manager as a tab in the window that is already running.
+- [Ship compiled gettext catalogs and look strings up by upstream msgid](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#ship-compiled-gettext-catalogs-and-look-strings-up-by-upstream-msgid) - Ship translations produced elsewhere so a missing one falls back to English rather than to something wrong.
+
+**View models, commands and threading**
+
+- [Show a long background load in the window title instead of a splash screen](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#show-a-long-background-load-in-the-window-title-instead-of-a-splash-screen) - Let the user start working while something slow finishes loading.
+- [Marshal work onto the UI thread with one delegate handed to services](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#marshal-work-onto-the-ui-thread-with-one-delegate-handed-to-services) - One delegate that lets Core services raise events from worker threads knowing nothing about the UI thread.
+- [Host one long-running engine per process and load it in the background](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#host-one-long-running-engine-per-process-and-load-it-in-the-background) - Load expensive process-global state once, off the UI thread, before anything can use it.
+- [Marshal live engine output onto the thread that started the job](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#marshal-live-engine-output-onto-the-thread-that-started-the-job) - Bring a library's live progress and diagnostics back to the thread that owns the state they touch.
+- [Run one job at a time against a process-global engine](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#run-one-job-at-a-time-against-a-process-global-engine) - A service that cannot be re-entered, and a user who can press the button twice.
+- [Debounce automatic background work behind a timer with eligibility gates](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#debounce-automatic-background-work-behind-a-timer-with-eligibility-gates) - Do something expensive as the user types without doing it on every keystroke.
+- [Cancel work at the boundaries a library can honor](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#cancel-work-at-the-boundaries-a-library-can-honor) - Behave honestly when a library takes a `CancellationToken` but cannot interrupt itself mid-call.
+
+**Bridging platform services into the view model**
+
+- [Own window state in a view model and reach the view through one interface](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#own-window-state-in-a-view-model-and-reach-the-view-through-one-interface) - One bridge interface for the file dialog, the focused editor, the fullscreen switch and the questions.
+
+**Views, XAML and custom controls**
+
+- [Set a page DataContext in XAML and give the view model a XamlRoot](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#set-a-page-datacontext-in-xaml-and-give-the-view-model-a-xamlroot) - Let XAML construct the view model, and give its dialog helpers somewhere to attach.
+- [Build a dock shell with drawn splitters and remember its arrangement](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#build-a-dock-shell-with-drawn-splitters-and-remember-its-arrangement) - Resizable tool panels around a center area that come back where the user left them.
+- [Register window-level shortcuts that survive a focused text editor](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#register-window-level-shortcuts-that-survive-a-focused-text-editor) - Accelerators that work before the menu is ever opened and that a focused editor cannot swallow.
+- [Build menus and toolbars in code from command objects](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#build-menus-and-toolbars-in-code-from-command-objects) - Menus and toolbars built from data, one command object each, with correct enabled and checked state.
+- [Show and size a modal dialog on the Skia heads](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#show-and-size-a-modal-dialog-on-the-skia-heads) - A `ContentDialog` that is neither clipped on a small window nor collapsed to nothing.
+- [Render embedded SVG icons through one renderer and pick the set by theme](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#render-embedded-svg-icons-through-one-renderer-and-pick-the-set-by-theme) - Vector icons shipped inside the assembly, recolored to the theme's foreground.
+
+**Graphics and rendering**
+
+- [Draw a paged document view that scrolls by translating a viewport-sized surface](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#draw-a-paged-document-view-that-scrolls-by-translating-a-viewport-sized-surface) - A zoomable, scrollable document whose full content is larger than any surface you can allocate.
+- [Parse SVG once into a scene graph and use its anchors as hit-test geometry](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#parse-svg-once-into-a-scene-graph-and-use-its-anchors-as-hit-test-geometry) - Fast redraw at any zoom and clickable regions, from a single parse.
+- [Move the caret from a click in a rendered document and back again](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#move-the-caret-from-a-click-in-a-rendered-document-and-back-again) - Two-way navigation between a rendered artifact and the source that produced it, that survives edits.
+
+**Media, camera and vision**
+
+- [Play a MIDI file and render one to WAV with the audio library](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#play-a-midi-file-and-render-one-to-wav-with-the-audio-library) - In-process synthesis with a SoundFont or SFZ bank, plus an offline render of the same material to a file.
+
+**Documents, data and web APIs**
+
+- [Give each document a private scratch directory cleaned up at process exit](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#give-each-document-a-private-scratch-directory-cleaned-up-at-process-exit) - Run something over an unsaved document without leaving output beside the user's file.
+- [Turn tool diagnostics into clickable source locations that survive edits](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#turn-tool-diagnostics-into-clickable-source-locations-that-survive-edits) - Turn `file:line:column:` messages into links that still point at the right place after the user types.
+- [Show PDF pages inside the application with PdfRasterizer](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#show-pdf-pages-inside-the-application-with-pdfrasterizer) - Show bundled documentation, or the user's own PDFs, with no WebView anywhere in the application.
+- [Write a vector PDF with PdfDocCreate and the Html2Pdf add-on](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#write-a-vector-pdf-with-pdfdoccreate-and-the-html2pdf-add-on) - SVG content into a PDF that stays vector, with the exact fonts you drew with subset into the file.
+- [Convert a file through a library in process and apply the result as one undo step](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#convert-a-file-through-a-library-in-process-and-apply-the-result-as-one-undo-step) - Import and upgrade commands that no longer shell out to a command-line tool.
+
+**Settings and persistence**
+
+- [Put the AppSettings add-in behind one facade](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#put-the-appsettings-add-in-behind-one-facade) - Keep every caller from knowing which store it is talking to.
+- [Persist preference pages and named sessions through that one store](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#persist-preference-pages-and-named-sessions-through-that-one-store) - A multi-page preferences dialog, and named workspaces the user can switch between.
+
+**Text editing**
+
+- [Bridge a platform-free document model onto the editor text document](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#bridge-a-platform-free-document-model-onto-the-editor-text-document) - Let a library's own document abstraction operate on the live editor document rather than on a copy.
+- [Attach a language-aware highlighter to the text editor add-in](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#attach-a-language-aware-highlighter-to-the-text-editor-add-in) - Color by grammar, with folding, matching, completion and the outline all agreeing with the highlighter.
+- [Fold match pairs and auto-indent from the same tokenization](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#fold-match-pairs-and-auto-indent-from-the-same-tokenization) - Folding that does not open on a brace inside a string, and matching that agrees with the highlighter.
+- [Show two editor views over one document](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#show-two-editor-views-over-one-document) - Split views that agree with each other, including highlighting, folding and every language tool.
+- [Offer context-aware autocompletion in the editor](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#offer-context-aware-autocompletion-in-the-editor) - Completion that knows where the caret is in the grammar and includes identifiers the document defines.
+
+**Testing**
+
+- [Set up test projects on the Microsoft Testing Platform and check a port against recorded answers](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#set-up-test-projects-on-the-microsoft-testing-platform-and-check-a-port-against-recorded-answers) - A test setup for a CodeBrix.Platform application, plus fixtures recorded from an independent oracle.
+
+**Project layout, packaging and native assets**
+
+- [Put every package in a Core library and one runtime package in each head](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#put-every-package-in-a-core-library-and-one-runtime-package-in-each-head) - Stop keeping six package lists in step.
+- [Give a library that references CodeBrix Platform its own RootNamespace](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#give-a-library-that-references-codebrix-platform-its-own-rootnamespace) - Keep generated XAML types from colliding when a library references CodeBrix.Platform.
+- [Keep a ported library completely free of the UI framework](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#keep-a-ported-library-completely-free-of-the-ui-framework) - Test a chunk of pure logic in a host-free process, quickly, with no native assets.
+- [Ship data assets beside the program so their licenses travel with them](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#ship-data-assets-beside-the-program-so-their-licenses-travel-with-them) - Bundle third-party data, satisfy its attribution requirement, and keep the folder emptiable.
+
+---
+
+**Where to go next**
+
+- [Samples](README.md) - the applications every recipe here was mined from
+- [Build a CodeBrix.Platform application](../platform/README.md) - the same ground taught in order
+- [MVVM the right way](../platform/05-mvvm-the-right-way.md) - the shape the blueprints assume
+- [Add-ins](../platform/08-add-ins.md) - the elements and services the recipes reach for

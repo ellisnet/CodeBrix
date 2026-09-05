@@ -674,6 +674,10 @@ private async Task DoCreate()
 
 Notice that both forms appear in working applications and each is correct for its own service: a `Progress<T>` created on the UI thread already posts its callbacks back there, while one whose callback runs wherever the service is needs the explicit `InvokeOnMainThread`. Check which case you are in before adding a second layer of marshalling. Make `IProgress<T>` optional on the service, too - offline tests rely on passing `null`.
 
+### Stream a paged read into the page
+
+When the long job is a paged read of a remote source, the same shape delivers results as they land rather than all at the end. The service returns `IAsyncEnumerable<TPage>` and takes the `IProgress<T>` and the `CancellationToken`; the view model enumerates it with `await foreach` under `ConfigureAwait(false)` and hands each page to `InvokeOnMainThread` to be folded into the bound collections. Hold the `CancellationTokenSource` in a field so a Cancel command can reach it, and cancel the previous run before starting the next one, so the latest request wins. A wait the service has to take - a rate limit resetting, a retry delay - belongs on the same progress channel as a phase of its own, which is what stops a paused read reading as a hang. Both halves are written out in [Stream an IAsyncEnumerable of pages into a bound collection](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#stream-an-iasyncenumerable-of-pages-into-a-bound-collection) and [Make a rate limit wait visible through the progress channel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-MVVM.md#make-a-rate-limit-wait-visible-through-the-progress-channel).
+
 ### Honest progress across stages
 
 When only some stages can report a percentage, carry the stage in the report and derive the bar from it:
@@ -2056,6 +2060,8 @@ internal async System.Threading.Tasks.Task EnsureChildrenLoadedAsync()
 
 Notice that `_loadRequested` is a separate flag from the child count, so a page that turns out to have no children is not re-fetched on every expand - and that a "load everything" command walks the same `EnsureChildrenLoadedAsync()` path recursively, so there is one loading code path rather than two. A failed child load writes to the status line and leaves the row usable; it never throws into the expand gesture.
 
+Results that belong under headings take two item view models rather than one. The group carries its heading, its count and an `ObservableCollection` of rows; the row carries everything its own line draws, worked out once in its constructor. The page is an outer `ListView` bound to the groups, whose item template holds the heading and an inner `ItemsControl` bound to that group's rows. Neither the group nor the row holds a reference to the view model that built it - what a click does arrives as a delegate they were handed. That shape is [Build a grouped list from group and row view models](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#build-a-grouped-list-from-group-and-row-view-models).
+
 ## Documents, tabs and history
 
 An editor's history is a list with a pointer. Bind the list, dim the entries past the pointer, and travel one step at a time so each item's own undo or redo runs:
@@ -2273,6 +2279,7 @@ Notice the caching field: `GatherInfo` is awaited once. Pass `withConsoleOutput:
 | Set bound properties from a background thread | [JustBetweenUs MainViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/JustBetweenUs/Shared/ViewModels/MainViewModel.cs) |
 | Capture thread through a worker to the UI thread | [WebcamPainter MainViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/WebcamPainter/src/WebcamPainter.Core/ViewModels/MainViewModel.cs) |
 | A long job with progress, cancellation and a busy flag | [CodeBrixVideoTool ConversionViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/CodeBrixVideoTool/src/libs/CodeBrixVideoTool.Processing/ViewModels/ConversionViewModel.cs) |
+| A paged read streamed into bound collections | [GitHubIssueFinder MainViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/GitHubIssueFinder/src/GitHubIssueFinder.Core/ViewModels/MainViewModel.cs) |
 | Progress across stages when only some know a percentage | [CodeBrixVideoTool ConversionProgress](https://github.com/ellisnet/CodeBrix.Samples/blob/main/CodeBrixVideoTool/src/libs/CodeBrixVideoTool.Processing/Operations/ConversionProgress.cs) |
 | Snapshot state before a long-running command | [PolyHavenBrowser MainViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/PolyHavenBrowser/src/PolyHavenBrowser.Core/ViewModels/MainViewModel.cs) |
 | Dispose a view model, its commands and its bridge delegates | [WebcamPainter MainViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/WebcamPainter/src/WebcamPainter.Core/ViewModels/MainViewModel.cs) |
@@ -2280,6 +2287,7 @@ Notice the caching field: `GatherInfo` is awaited once. Pass `withConsoleOutput:
 | Ignore a stale async result | [NotionDocumentCreator MainViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/NotionDocumentCreator/src/NotionDocumentCreator.Core/ViewModels/MainViewModel.cs) |
 | Debounce a search box | [PolyHavenBrowser MainViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/PolyHavenBrowser/src/PolyHavenBrowser.Core/ViewModels/MainViewModel.cs) |
 | Fill a grid lazily as it scrolls | [KenneyAssetBrowser AssetCellCollection](https://github.com/ellisnet/CodeBrix.Samples/blob/main/KenneyAssetBrowser/src/KenneyAssetBrowser.Core/ViewModels/AssetCellCollection.cs) |
+| A grouped list from group and row view models | [GitHubIssueFinder RepositoryGroupViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/GitHubIssueFinder/src/GitHubIssueFinder.Core/ViewModels/RepositoryGroupViewModel.cs) |
 | Show and hide panes with computed `Visibility` | [NotionDocumentCreator MainViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/NotionDocumentCreator/src/NotionDocumentCreator.Core/ViewModels/MainViewModel.cs) |
 | Load a tree lazily as the user expands it | [NotionDocumentCreator NotionPageNodeViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/NotionDocumentCreator/src/NotionDocumentCreator.Core/ViewModels/NotionPageNodeViewModel.cs) |
 | Confirm and inform with the built-in dialogs | [WebcamPainter MainViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/WebcamPainter/src/WebcamPainter.Core/ViewModels/MainViewModel.cs) |

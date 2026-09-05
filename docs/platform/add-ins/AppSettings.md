@@ -430,7 +430,7 @@ The add-in works the same on all six heads; only the default folder differs by o
 
 - [CodeBrix.Sqlite](../../libraries/CodeBrix.Sqlite.md) - the SQLite engine behind `settings.sqlite`, and what to use directly when your data outgrows key-value settings
 - [Platform services](../07-platform-services.md) - the pickers and window services a settings page is usually built from
-- KenneyAssetBrowser and Pinta.Brix in [the sample applications](../../samples/README.md) - both wrap the add-in in one application-named facade, then persist a picked folder, a window size, a palette and per-tool options through it
+- GitHubIssueFinder, KenneyAssetBrowser and Pinta.Brix in [the sample applications](../../samples/README.md) - each wraps the add-in in one application-named facade, then persists through it what its own window has to reopen with: a picked folder, a window size, a palette, per-tool options, or the search terms and the chosen color scheme
 - [AdvancedTextEdit](AdvancedTextEdit.md) - a control whose font, tab size and word-wrap state are natural settings to persist
 
 ## Documentation and source

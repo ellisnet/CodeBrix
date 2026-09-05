@@ -252,6 +252,7 @@ None. The panel is pure managed layout with no native dependency and behaves ide
 - [Views and styling](../06-views-and-styling.md) - where `FlexPanel` sits among the framework's own panels
 - [FlexPanelDemo](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform/FlexPanelDemo) in CodeBrix.Platform - a live playground on six heads: the panel properties as drop-downs, attached properties on individual children, a nested panel, a collapsible child, and two worked examples
 - [PolyHavenBrowser](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PolyHavenBrowser) in [the sample applications](../../samples/README.md) - a header row that wraps, and a main axis flipped from a `SizeChanged` handler so a 3D viewer drops below the information pane in portrait
+- [GitHubIssueFinder](https://github.com/ellisnet/CodeBrix.Samples/tree/main/GitHubIssueFinder) in [the sample applications](../../samples/README.md) - a header bar and a search row that wrap on a narrow window, and label pills that flow after a row title
 - KenneyAssetBrowser, NotionDocumentCreator and WikipediaPublisher in [the sample applications](../../samples/README.md) - wrapping headers and bottom bars that reflow on the Skia heads
 
 ## Documentation and source

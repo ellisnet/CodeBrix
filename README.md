@@ -6,7 +6,7 @@ This repository is the documentation for all of it: a curriculum that takes you 
 
 ## What CodeBrix.Platform applications look like
 
-Four of the reference applications, captured on the Linux X11 head. The same applications run unchanged on the other five heads.
+A few of the reference applications, captured on the Linux X11 head. The same applications run unchanged on the other five heads.
 
 | | |
 | --- | --- |
@@ -14,6 +14,8 @@ Four of the reference applications, captured on the Linux X11 head. The same app
 | **Doom.Brix** - the classic shareware episode, rendered through the game engine add-in ([CodeBrix.Samples.Gpl2](docs/samples/README.md#codebrixsamplesgpl2)) | **Fresco.Brix** - a music-notation editor that engraves the score in process ([CodeBrix.Samples.Gpl3](docs/samples/README.md#codebrixsamplesgpl3)) |
 | ![Pinta.Brix: a layered raster paint editor with tools, palette, layers and history](docs/images/pintabrix-linux-x11.png) | ![PainDiagram: a body-map drawing application with three highlighter layers](docs/images/paindiagram-linux-x11.png) |
 | **Pinta.Brix** - a layered raster paint and image editor ([CodeBrix.Samples](docs/samples/README.md#codebrixsamples)) | **PainDiagram** - symptom mapping over a medical body map ([CodeBrix.Samples](docs/samples/README.md#codebrixsamples)) |
+| ![GitHubIssueFinder: unassigned issues grouped by repository, in the Light color scheme](docs/images/githubissuefinder-linux-x11.png) | |
+| **GitHubIssueFinder** - unclaimed issues across an owner's public repositories ([CodeBrix.Samples](docs/samples/README.md#codebrixsamples)) | |
 
 ## Runs on every laptop
 

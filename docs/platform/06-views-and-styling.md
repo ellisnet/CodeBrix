@@ -249,6 +249,10 @@ Notice that every state has a key of its own - normal, pointer-over, pressed and
 > [!TIP]
 > Base your own style on the theme style with `BasedOn="{StaticResource AccentButtonStyle}"` and set only shaping - corner radius, padding, weight. The colors come from the keys you re-keyed, so a later palette change is one edit in one dictionary.
 
+Two keys are worth naming, because they are the ones a sweep misses. A list that is clicked rather than selected wants every one of its selection faces transparent instead of re-colored, so the row's own chrome is all that draws. And a text control's placeholder needs `PlaceholderForeground` set on the element as well as re-keyed: the template otherwise reaches that color through a binding whose theme-resource fallback does not survive an element-theme change at run time, and the placeholder text then disappears for good. The family-by-family sweep, and the rest of what it turns up, is [Re-key every control brush family the platform ships](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ThemingAndStyling.md#re-key-every-control-brush-family-the-platform-ships).
+
+Some colors cannot be shared resources at all, because they follow the data rather than the scheme: a state glyph per row, a pill wearing a color a server sent. The item view model owns a `SolidColorBrush` created once in its constructor and exposed get-only, the template binds to it, and a scheme change walks the items and re-tints each brush where it sits - nothing raises a change notification, because the object never changes, only its color does. That is [Give each item its own brushes and re-tint them on a scheme change](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ThemingAndStyling.md#give-each-item-its-own-brushes-and-re-tint-them-on-a-scheme-change).
+
 ### Choosing the theme
 
 `Application.RequestedTheme` may be set only before initialization completes - in the `App` constructor, before `InitializeComponent()`. Afterwards the setter throws `NotSupportedException`. To switch at run time, set `FrameworkElement.RequestedTheme` on an element; setting it on the window's root element switches the whole application:
@@ -262,6 +266,8 @@ Notice that every state has a key of its own - normal, pointer-over, pressed and
 ```
 
 Notice that `ElementTheme` has a `Default` member as well as `Light` and `Dark`, so a subtree can be pinned to one theme and the rest left following the application.
+
+Two things follow from that rule, and an application with palettes of its own leans on both. Leaving `Application.RequestedTheme` unassigned is what keeps the platform following the desktop's own light or dark preference; assigning it is what stops it, which is why a "System default" entry in a picker is the one choice that never assigns it. And a picker can offer more palettes than the platform has themes, because a keyed `SolidColorBrush` can be handed a new `Color` in place: every consumer repaints at once - the page, the stock control chrome, and the rows a list has already realized - with no tree rebuilt, no scroll position lost and no search abandoned. The reasoning is in [Choose a repaint mechanism that can carry more than two schemes](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ThemingAndStyling.md#choose-a-repaint-mechanism-that-can-carry-more-than-two-schemes), and the working code in [Switch between several color schemes by mutating keyed brushes in place](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#switch-between-several-color-schemes-by-mutating-keyed-brushes-in-place) and [Follow the operating system light and dark preference with a System default entry](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#follow-the-operating-system-light-and-dark-preference-with-a-system-default-entry).
 
 ## Converters
 
@@ -1454,6 +1460,8 @@ To point the whole application at your own icon font, either assign `FeatureConf
 
 Mirror all three dictionaries or a theme switch loses your value.
 
+Keep the codepoints a view model picks at run time in one named constants class in the shared library, rather than as escapes scattered through the markup and the code. And when a design is about to depend on the symbols font behaving on a head you have not shipped on before, prove it first: the smallest page that can answer the question, run on that head, looked at with your own eyes, and the answer written down where it outlives the session. [Draw every icon from the shipped symbols font](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ThemingAndStyling.md#draw-every-icon-from-the-shipped-symbols-font) and [Prove a platform capability with a throwaway page before designing around it](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ThemingAndStyling.md#prove-a-platform-capability-with-a-throwaway-page-before-designing-around-it).
+
 ### Text shaping on Windows and macOS
 
 Line breaking, bidirectional resolution and the rest of the Unicode property tables come from ICU. Linux distributions ship their own, and a Linux head uses it. Windows and macOS do not, so a head for those operating systems references the package that carries it: [CodeBrix.Platform.Unicode.ApacheLicenseForever](https://www.nuget.org/packages/CodeBrix.Platform.Unicode.ApacheLicenseForever) for a Windows head, [CodeBrix.Platform.UnicodeMacOs.ApacheLicenseForever](https://www.nuget.org/packages/CodeBrix.Platform.UnicodeMacOs.ApacheLicenseForever) for a macOS head. Neither has a managed API: the reference is the whole integration, and the data archive is delivered into the build automatically. Referencing both from one project is supported and delivers the archive exactly once. See [CodeBrix.Platform.Unicode](../libraries/CodeBrix.Platform.Unicode.md) for the delivery routes and the test-project case.
@@ -1536,6 +1544,9 @@ Notice `DependentUpon`, which nests the partials under the page in a solution vi
 | Scope a region to a child view model | [PdfSideBySide MainPage](https://github.com/ellisnet/CodeBrix.Samples/blob/main/PdfSideBySide/src/PdfSideBySide.UI/Views/MainPage.xaml) |
 | Re-key dialog and picker brushes at application level | [NotionDocumentCreator App.xaml](https://github.com/ellisnet/CodeBrix.Samples/blob/main/NotionDocumentCreator/src/NotionDocumentCreator.UI/App.xaml) |
 | Re-key accent and list-selection brushes | [PolyHavenBrowser MainPage](https://github.com/ellisnet/CodeBrix.Samples/blob/main/PolyHavenBrowser/src/PolyHavenBrowser.UI/Views/MainPage.xaml) |
+| A palette as plain data, with no drawing type | [GitHubIssueFinder ColorSchemes](https://github.com/ellisnet/CodeBrix.Samples/blob/main/GitHubIssueFinder/src/GitHubIssueFinder.Core/Theming/ColorSchemes.cs) |
+| Re-key every control family from one role table | [GitHubIssueFinder SchemeBrushMap](https://github.com/ellisnet/CodeBrix.Samples/blob/main/GitHubIssueFinder/src/GitHubIssueFinder.Core/Theming/SchemeBrushMap.cs) |
+| Switch color schemes by re-pointing keyed brushes | [GitHubIssueFinder MainPage code-behind](https://github.com/ellisnet/CodeBrix.Samples/blob/main/GitHubIssueFinder/src/GitHubIssueFinder.UI/Views/MainPage.xaml.cs) |
 | Format a value with an `IValueConverter` | [CodeBrixVideoTool TimecodeConverter](https://github.com/ellisnet/CodeBrix.Samples/blob/main/CodeBrixVideoTool/src/CodeBrixVideoTool.Core/Converters/TimecodeConverter.cs) |
 | Map a bool to a style | [PolyHavenBrowser_viewer_only BoolToAccentStyleConverter](https://github.com/ellisnet/CodeBrix.Samples/blob/main/PolyHavenBrowser_viewer_only/src/PolyHavenBrowser.Core/Converters/BoolToAccentStyleConverter.cs) |
 | Switch a page between two modes with one bool | [PalmVisualizer MainPage](https://github.com/ellisnet/CodeBrix.Samples/blob/main/PalmVisualizer/src/PalmVisualizer.UI/Views/MainPage.xaml) |
@@ -1566,7 +1577,7 @@ Notice `DependentUpon`, which nests the partials under the page in a solution vi
 - [ ] Page wiring is subscribed in `DataContextChanged` before `InitializeComponent()`, which is the last line of the constructor
 - [ ] `XamlControlsResources` is merged in `App.xaml`, and every brush key you override is declared after it
 - [ ] Dialog, picker and on-screen-keyboard keys are at application level; page-only keys are in `Page.Resources`
-- [ ] Every re-keyed control family has its full set of state keys - normal, pointer-over, pressed and disabled
+- [ ] Every re-keyed control family has its full set of state keys - normal, pointer-over, pressed and disabled - and a text control also sets `PlaceholderForeground` on the element
 - [ ] `Application.RequestedTheme` is set only in the `App` constructor; run-time switching uses `FrameworkElement.RequestedTheme`
 - [ ] A converter that answers a yes-or-no question is registered twice, the second with `Invert="True"`
 - [ ] Converters return a safe default instead of throwing, and format with the invariant culture where separators are fixed

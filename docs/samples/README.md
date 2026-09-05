@@ -26,7 +26,7 @@ true of every other sample.
 
 ## What they look like
 
-Four of the applications, captured on the Linux X11 head; each runs unchanged on the other five heads.
+A few of the applications, captured on the Linux X11 head; each runs unchanged on the other five heads.
 
 | | |
 | --- | --- |
@@ -34,6 +34,8 @@ Four of the applications, captured on the Linux X11 head; each runs unchanged on
 | **Doom.Brix** ([CodeBrix.Samples.Gpl2](#codebrixsamplesgpl2)) | **Fresco.Brix** ([CodeBrix.Samples.Gpl3](#codebrixsamplesgpl3)) |
 | ![Pinta.Brix with brush strokes and a shape on a new image](../images/pintabrix-linux-x11.png) | ![PainDiagram showing the front and back body map](../images/paindiagram-linux-x11.png) |
 | **Pinta.Brix** ([CodeBrix.Samples](#codebrixsamples)) | **PainDiagram** ([CodeBrix.Samples](#codebrixsamples)) |
+| ![GitHubIssueFinder listing unassigned issues grouped by repository in its Light scheme](../images/githubissuefinder-linux-x11.png) | |
+| **GitHubIssueFinder** ([CodeBrix.Samples](#codebrixsamples)) | |
 
 ## What every application has in common
 
@@ -54,8 +56,8 @@ The six CodeBrix.Platform heads are present in project form in most applications
 LinuxWayland, LinuxFrameBuffer, MacOS, Win32Skia and WinWpfSkia. Three applications go further:
 JustBetweenUs, PainDiagram and WikipediaPublisher additionally carry native WinUI 3 and WPF heads
 that reuse the same view model without the CodeBrix.Platform UI stack, and JustBetweenUs adds a
-.NET MAUI head, the only mobile head in the repository. One goes the other way: CodeBrixVideoTool
-builds four of the six.
+.NET MAUI head, the only mobile head in the repository. Two go the other way: CodeBrixVideoTool
+and GitHubIssueFinder each build four of the six.
 
 Libraries are consumed as packages, never as source references, so each application folder can be
 opened and built on its own.
@@ -129,6 +131,7 @@ browsers, computer vision and a full raster editor.
 | Application | What it is | Headline libraries and add-ins | Source |
 | --- | --- | --- | --- |
 | CodeBrixVideoTool | Desktop video converter and player for AV1 media, with chapter and caption drop-downs, a resolution and quality ladder, and long conversions run with live progress and cancellation | [VideoPlayer](../platform/add-ins/VideoPlayer.md) add-in, [CodeBrix.VideoPlayback](../libraries/CodeBrix.VideoPlayback.md), [CodeBrix.VideoProcessing](../libraries/CodeBrix.VideoProcessing.md) | [CodeBrixVideoTool/](https://github.com/ellisnet/CodeBrix.Samples/tree/main/CodeBrixVideoTool) |
+| GitHubIssueFinder | Finds the open issues and pull requests nobody has picked up across a GitHub user's or organization's public repositories, grouped by repository, paced to the anonymous API allowance with every wait shown on screen, in any of five switchable color schemes | The [FlexPanel](../platform/add-ins/FlexPanel.md) and [AppSettings](../platform/add-ins/AppSettings.md) add-ins | [GitHubIssueFinder/](https://github.com/ellisnet/CodeBrix.Samples/tree/main/GitHubIssueFinder) |
 | JustBetweenUs | Text-encryption utility (AES, Triple DES, Twofish), and the repository's "one view model, many heads" reference - the only application that also runs on mobile | [CodeBrix.Cryptography](../libraries/CodeBrix.Cryptography.md), [CodeBrix.SkiaSvg](../libraries/CodeBrix.SkiaSvg.md), [CodeBrix.Platform](../libraries/CodeBrix.Platform.md) with its WinUI, WPF and Mobile support | [JustBetweenUs/](https://github.com/ellisnet/CodeBrix.Samples/tree/main/JustBetweenUs) |
 | KenneyAssetBrowser | Browser for downloaded Kenney game-asset packs: reads each zip without extracting it and previews images, SVG art, font specimens, Tiled maps, 3D models and audio | [CodeBrix.Compression](../libraries/CodeBrix.Compression.md), [CodeBrix.Imaging](../libraries/CodeBrix.Imaging.md), [CodeBrix.SkiaSvg](../libraries/CodeBrix.SkiaSvg.md); the [Graphics3DGL](../platform/add-ins/Graphics3DGL.md), [AudioPlayer](../platform/add-ins/AudioPlayer.md), [FlexPanel](../platform/add-ins/FlexPanel.md) and [AppSettings](../platform/add-ins/AppSettings.md) add-ins | [KenneyAssetBrowser/](https://github.com/ellisnet/CodeBrix.Samples/tree/main/KenneyAssetBrowser) |
 | MediaPlayerDemo | One-page media player - an address box, a stretch picker and the element's own transport controls - and the smallest six-head skeleton here | [MediaPlayer](../platform/add-ins/MediaPlayer.md) add-in | [MediaPlayerDemo/](https://github.com/ellisnet/CodeBrix.Samples/tree/main/MediaPlayerDemo) |

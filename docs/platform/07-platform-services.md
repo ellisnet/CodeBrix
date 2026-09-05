@@ -707,6 +707,10 @@ public void SetImage (ImageSurface surface)
 
 Notice the asymmetry: the reads are asynchronous and the writes are not. Keep it rather than forcing a shape the platform does not have. An image goes through an in-memory random-access stream holding the encoded bytes, seeked back to zero before the package is set.
 
+## Opening a URL in the browser
+
+`Windows.System.Launcher.LaunchUriAsync` hands a URI to whatever application the desktop has registered for its scheme, and it is one of the few platform capabilities a view model calls directly: there is no bridge interface and no page involvement. It does need wrapping, because it has two ways to fail - it returns `false` when the desktop has nothing registered, and it throws when the URI will not parse or the head has no launcher. Write one private method for the whole application, catch both, and report the failure the way the rest of the page reports failure. Items in a list reach that method through a `Func<string, Task>` they were handed when they were built, so no row and no group holds a reference to the view model that made it. The recipe is [Open a URL in the default browser from a view model](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-PlatformServices.md#open-a-url-in-the-default-browser-from-a-view-model).
+
 ## Repainting a canvas
 
 Background work changes what should be drawn, and the view model has to trigger a repaint without holding a control reference. One `Action` per canvas is the whole interface:
@@ -893,6 +897,37 @@ if (MainWindow.AppWindow.Presenter is OverlappedPresenter p)
 > [!WARNING]
 > Several of these are permanent no-ops on the Wayland head, because the protocol gives them to the compositor rather than the client: window positioning and position readback, forced resize, always-on-top, and minimized-state readback. Design the window so it does not need them, or accept that they work on X11, Windows and macOS only. [02 - Runs on every laptop](02-runs-on-every-laptop.md) has the full per-head list.
 
+### Set the launch size and a minimum size
+
+Two seams decide how big the window is, and each has exactly one right place.
+
+The launch size goes in the `App` constructor, before `InitializeComponent()`. Every desktop head reads `ApplicationView.PreferredLaunchViewSize` while it creates the native window, and falls back to the platform's own 1024 by 640 when the value is empty, so nothing written in `OnLaunched` happens early enough to decide it.
+
+```csharp
+// From CodeBrix.Samples/GitHubIssueFinder/src/GitHubIssueFinder.UI/App.xaml.cs
+Windows.UI.ViewManagement.ApplicationView.PreferredLaunchViewSize =
+    new Windows.Foundation.Size(LaunchWidth, LaunchHeight);
+```
+
+Set it unconditionally on every launch. The setter writes the two numbers into `ApplicationData.Current.LocalSettings`, so the value survives between runs, per head, and an unconditional set keeps that stored copy in step with the constants in your source.
+
+The minimum size goes in `OnLaunched`, immediately after the `Window` is constructed and before `Activate()`.
+
+```csharp
+// From CodeBrix.Samples/GitHubIssueFinder/src/GitHubIssueFinder.UI/App.xaml.cs
+if (MainWindow.AppWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter presenter)
+{
+    presenter.PreferredMinimumWidth = MinimumWidth;
+    presenter.PreferredMinimumHeight = MinimumHeight;
+}
+```
+
+Notice three things. The `is` test succeeds the instant `new Window()` returns, because the constructor builds the native window once the application has finished starting and installs the default `OverlappedPresenter`; setting the constraint before `Activate()` hands it to the window manager before the window is ever shown. `Window.AppWindow` is public here because the core package's build targets define `HAS_CODEBRIX_WINUI` in your project, so nothing has to be declared by hand. And no maximum is set: an unset maximum is the largest possible value, which is what keeps maximize working.
+
+The heads do not agree on the units. The X11 and Win32 heads read both numbers as native pixels, the Wayland and macOS heads read them as logical units, and the WPF head reads the launch size as device-independent units and the minimum as native pixels; the heads also differ on whether the numbers describe the client area or the whole framed window. At a display scale of 1 they all read the same, which is why one pair of constants is the right thing to write. Do not try to correct for the scale from application code: the scale is not knowable until the `XamlRoot` exists, which is after the native window has been created, so any correction is a visible resize of an existing window, and a correction that suits one head is wrong on another.
+
+Two applications show the whole shape, constants included: [GitHubIssueFinder App.xaml.cs](https://github.com/ellisnet/CodeBrix.Samples/blob/main/GitHubIssueFinder/src/GitHubIssueFinder.UI/App.xaml.cs) and [Fresco.Brix App.xaml.cs](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/Fresco.Brix/src/Fresco.Brix.UI/App.xaml.cs). To reopen at the size the user left instead of a fixed one, feed the same property from your settings store; see [Restore a window size before any window exists](#restore-a-window-size-before-any-window-exists).
+
 ### Veto a close until unsaved work is handled
 
 `Closed` is the platform's cancellable-close event: setting `Handled` vetoes the close, and the X11 head reports `SupportsClosingCancellation`.
@@ -929,6 +964,10 @@ MainWindow.Closed += async (_, e) =>
 ```
 
 Notice the re-entrancy guard. The confirmed `Close()` raises `Closed` again, and without the flag the prompt loops forever. The prompt is asynchronous while the event is not, which is what forces the veto-then-reissue shape. Remember too that not every head has window chrome: an application whose only exit is the window button has no exit path at all on the frame-buffer head.
+
+## The desktop's light or dark preference
+
+`Windows.UI.ViewManagement.UISettings` is the live report of the desktop's own appearance. `GetColorValue(UIColorType.Background)` comes back white when the desktop prefers light and black when it prefers dark, and `ColorValuesChanged` is raised when the user flips the preference, on startup as well when the desktop answers asynchronously. Keep the `UISettings` instance in a field of the page - the platform holds only a weak reference to it, so a local is collected and the event stops arriving - and forward each change to the view model. Whether the platform follows the preference at all is decided elsewhere: the framework follows it only while `Application.RequestedTheme` has never been assigned, so an application that offers a "System default" choice leaves it unassigned for that one choice and sets it in the `App` constructor for every other. [Follow or override the desktop appearance and check it from a shell](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ThemingAndStyling.md#follow-or-override-the-desktop-appearance-and-check-it-from-a-shell) covers both halves, including how to flip the preference from a shell so the behavior can be proved without logging out.
 
 ## An embedded browser
 
@@ -1387,6 +1426,8 @@ MainWindow.SizeChanged += (_, args) =>
 
 Notice the scale conversion, which is the part that most often goes wrong: the size-changed event reports logical units while the preferred launch size is consumed as native pixels on the X11 head. Multiply by the root's rasterization scale on the way in, or the window shrinks or grows at every restart on a scaled display.
 
+The comment in the first block records that application's own decision not to restore a maximized flag. The presenter itself is reachable from application code: `MainWindow.AppWindow.Presenter` is an `OverlappedPresenter` as soon as the `Window` is constructed, and it is where a minimum or maximum window size goes. See [Set the launch size and a minimum size](#set-the-launch-size-and-a-minimum-size).
+
 ### Name the store after your application
 
 One static facade in a small library of its own forwards every call to the add-in. View models call the facade by key, and nothing else in the application talks to the add-in directly.
@@ -1533,10 +1574,13 @@ The [AppSettings add-in page](add-ins/AppSettings.md) has the full API surface.
 | Suppress a dialog's own overwrite prompt | [PainDiagram MainWindow code-behind](https://github.com/ellisnet/CodeBrix.Samples/blob/main/PainDiagram/PainDiagram.Wpf/Views/MainWindow.xaml.cs) |
 | Choose a folder and remember it | [KenneyAssetBrowser MainViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/KenneyAssetBrowser/src/KenneyAssetBrowser.Core/ViewModels/MainViewModel.cs) |
 | Copy to the clipboard from a command | [JustBetweenUs MainViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/JustBetweenUs/Shared/ViewModels/MainViewModel.cs) |
+| Open a URL in the default browser | [GitHubIssueFinder MainViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/GitHubIssueFinder/src/GitHubIssueFinder.Core/ViewModels/MainViewModel.cs) |
+| Follow the desktop's light or dark preference | [GitHubIssueFinder MainPage code-behind](https://github.com/ellisnet/CodeBrix.Samples/blob/main/GitHubIssueFinder/src/GitHubIssueFinder.UI/Views/MainPage.xaml.cs) |
 | A platform service with a no-op default | [Pinta.Brix IClipboardService](https://github.com/ellisnet/CodeBrix.Samples/blob/main/Pinta.Brix/src/libs/Pinta.Brix.Engine/Services/IClipboardService.cs) |
 | Invalidate a canvas from a view model | [WebcamPainter MainPage code-behind](https://github.com/ellisnet/CodeBrix.Samples/blob/main/WebcamPainter/src/WebcamPainter.UI/Views/MainPage.xaml.cs) |
 | Marshal a repeating timer into a headless model | [Pinta.Brix ITimerService](https://github.com/ellisnet/CodeBrix.Samples/blob/main/Pinta.Brix/src/libs/Pinta.Brix.Engine/Services/ITimerService.cs) |
 | Set the cursor from a model-owned descriptor | [Pinta.Brix PintaCanvas](https://github.com/ellisnet/CodeBrix.Samples/blob/main/Pinta.Brix/src/libs/Pinta.Brix.Controls/PintaCanvas.cs) |
+| Set the window launch size and a minimum size | [GitHubIssueFinder App.xaml.cs](https://github.com/ellisnet/CodeBrix.Samples/blob/main/GitHubIssueFinder/src/GitHubIssueFinder.UI/App.xaml.cs) |
 | Veto a window close until work is saved | [Pinta.Brix App.xaml.cs](https://github.com/ellisnet/CodeBrix.Samples/blob/main/Pinta.Brix/src/Pinta.Brix.UI/App.xaml.cs) |
 | Drive an embedded browser from a command | [WikipediaPublisher MainViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/WikipediaPublisher/Shared/ViewModels/MainViewModel.cs) |
 | An audio transport bound to the element | [KenneyAssetBrowser MainPage](https://github.com/ellisnet/CodeBrix.Samples/blob/main/KenneyAssetBrowser/src/KenneyAssetBrowser.UI/Views/MainPage.xaml) |
@@ -1560,6 +1604,7 @@ The [AppSettings add-in page](add-ins/AppSettings.md) has the full API surface.
 - [ ] Every bridge delegate is nulled in `Dispose()`
 - [ ] The frame-buffer head opts in to the pickers, on-screen keyboard and clipboard it needs
 - [ ] No window behavior the Wayland head cannot provide is load-bearing
+- [ ] The launch size is set in the `App` constructor, and the minimum size on the presenter before `Activate()`
 - [ ] `AppSettingsService.Initialize` runs before `InitializeComponent()` and before any static constructor reads a setting
 - [ ] Setting keys are constants, prefixed with the application name, in one place per owning type
 - [ ] Bursty writes are debounced; a window size is stored in native pixels

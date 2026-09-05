@@ -601,6 +601,10 @@ Notice that the stub matches on the path and query, which is what turns "did it 
 
 The rest of the mocking vocabulary - sequences, conditional setups, protected members, argument capture, events, the proxy generator used directly - is on the [CodeBrix.TestMocks](../libraries/CodeBrix.TestMocks.md) library page.
 
+### A clock the test moves
+
+Code that waits is testable when the waiting goes through a seam. Take a `TimeProvider` in the constructor, default it to `TimeProvider.System`, and read the current time and start every delay through it. A test then supplies a fake whose `Advance` fires the timers that have come due and completes the tasks awaiting them, with no real time passing, so a wait for a rate limit to reset an hour from now is exercised in a millisecond and the assertion is on what the code did rather than on how long the run took. Build the fake on `TimeProvider.CreateTimer` rather than on a bespoke delay abstraction, so production code keeps calling the framework type. A throttle that reads its allowance out of the response headers of the last call is the case that makes the seam pay for itself, and it is written out in [Throttle from the rate limit headers an API sends back](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-DocumentsAndData.md#throttle-from-the-rate-limit-headers-an-api-sends-back).
+
 ## Fixtures
 
 ### Resolve the service the way the container does

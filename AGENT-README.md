@@ -70,6 +70,15 @@ https://raw.githubusercontent.com/ellisnet/CodeBrix.Platform/main/AGENT-README.t
 https://raw.githubusercontent.com/ellisnet/CodeBrix.Samples/main/BLUEPRINTS-Index.md
 ```
 
+A repository that produces more than one package carries one `AGENT-README.txt` per package, and the
+extra ones sit beside the project they document rather than at the repository root:
+
+```text
+https://raw.githubusercontent.com/ellisnet/CodeBrix.Audio/main/src/CodeBrix.Audio.ModestSynth/AGENT-README.txt
+```
+
+Each repository's `README-INDEX.txt` is the map of which file covers which package.
+
 A package's page on nuget.org is `https://www.nuget.org/packages/<PackageId>`.
 
 ## Package IDs and how to reference them
@@ -117,13 +126,14 @@ A CodeBrix.Platform solution is built from three kinds of project, and the packa
 
 ## Every library page
 
-One page per repository. Each page carries the library's capabilities, its first working example, its key concepts, its pitfalls, and links to its repository, its `AGENT-README.txt`, its tests and its samples.
+One page per library. Each page carries the library's capabilities, its first working example, its key concepts, its pitfalls, and links to its repository, its `AGENT-README.txt`, its tests and its samples. A repository that produces an add-on package alongside its main one has a page for each, and a library with a large surface has sub-pages under its own folder - [CodeBrix.Audio](docs/libraries/CodeBrix.Audio.md) is the one that does.
 
 | Page | What the library does |
 | --- | --- |
 | [CodeBrix.ArgumentParser](docs/libraries/CodeBrix.ArgumentParser.md) | Turns a `string[] args` into invocations of callbacks you register, generates the matching `--help` text, and models whole sub-command suites |
 | [CodeBrix.AssemblyTools](docs/libraries/CodeBrix.AssemblyTools.md) | Reads, writes and rewrites .NET assemblies: IL, metadata and debug symbols, in a single managed assembly |
-| [CodeBrix.Audio](docs/libraries/CodeBrix.Audio.md) | Reads WAV, MP3, Ogg Vorbis and FLAC, reads and writes Standard MIDI Files, plays media and sound effects, and renders SoundFont and SFZ instruments |
+| [CodeBrix.Audio](docs/libraries/CodeBrix.Audio.md) | Reads WAV, MP3, Ogg Vorbis, FLAC and AIFF, reads and writes Standard MIDI Files, plays media and sound effects, plays SoundFont, SFZ and Decent Sampler instruments, and plays a multi-track song of recordings and MIDI performances |
+| [CodeBrix.Audio.ModestSynth](docs/libraries/CodeBrix.Audio.ModestSynth.md) | Adds synthesis to CodeBrix.Audio: ten oscillator waveforms, seven creative effects, a patch model and a polyphonic synthesizer that plays a patch from MIDI |
 | [CodeBrix.Audio.Opus](docs/libraries/CodeBrix.Audio.Opus.md) | Adds Ogg Opus decoding and encoding to CodeBrix.Audio, in pure managed code with no native binaries |
 | [CodeBrix.Compression](docs/libraries/CodeBrix.Compression.md) | Creates, reads and extracts Zip, GZip, Tar and BZip2 archives, with AES encryption and Zip64, and decompresses legacy DCL and `.Z` data |
 | [CodeBrix.Cryptography](docs/libraries/CodeBrix.Cryptography.md) | General-purpose cryptography: ciphers, digests, MACs, signatures, key agreement, post-quantum algorithms, TLS and DTLS, OpenPGP, CMS and X.509 |

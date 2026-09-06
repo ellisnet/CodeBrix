@@ -202,7 +202,7 @@ SoundEffect.ClearCache();
 
 ### MIDI music through a SoundFont or SFZ instrument
 
-`MidiPlayer` synthesizes a MIDI file through a SoundFont (`.sf2`) or SFZ (`.sfz`) instrument, and its transport is `AudioPlayer`'s member for member - which means the same scrubber markup drives either player.
+`MidiPlayer` synthesizes a MIDI file through a SoundFont (`.sf2`) or SFZ (`.sfz`) instrument, and its transport is `AudioPlayer`'s member for member - which means the same scrubber markup drives either player. Those are the two instrument formats this element accepts; [SoundFont and SFZ instruments](../../libraries/audio/soundfont-and-sfz.md) covers what each of them can express, and [MIDI files](../../libraries/audio/midi-files.md) covers the file the element reads.
 
 ```xml
 <audio:MidiPlayer x:Name="Music"
@@ -282,7 +282,7 @@ using CodeBrix.Audio.Wave;                       // CodeBrix.Audio.MitLicenseFor
 SharedAudioOutput.Configure(sampleRate: 48000);  // Configure(sampleRate[, channels])
 ```
 
-`SharedAudioOutput` is the one shared output device every player, effect and `WaveOutEvent` in the process mixes into. `Configure` is optional: left alone, the output adopts the format of the first sound played.
+`SharedAudioOutput` is the one shared output device every player, effect and `WaveOutEvent` in the process mixes into. `Configure` is optional: left alone, the output adopts the format of the first sound played. [Playback and sound effects](../../libraries/audio/playback.md) is the full treatment, including the codec seam an add-on package registers through.
 
 ### Shipping an instrument as a package
 
@@ -323,7 +323,9 @@ None. Playback is fully managed through the audio engine package, whose bundled 
 
 ## Related
 
-- [CodeBrix.Audio](../../libraries/CodeBrix.Audio.md) - the managed audio engine underneath, usable directly from any .NET 10 application for readers, writers, synthesis and DSP
+- [CodeBrix.Audio](../../libraries/CodeBrix.Audio.md) - the managed audio engine underneath, usable directly from any .NET 10 application for readers, writers, synthesis and DSP. Its section goes well past what this element exposes: Decent Sampler instruments, multi-track songs and stems, MPE read out of a MIDI file, recording, and the DSP primitives
+- [Playback and sound effects](../../libraries/audio/playback.md) - the players this add-in wraps, and the shared output every voice mixes into
+- [SoundFont and SFZ instruments](../../libraries/audio/soundfont-and-sfz.md) - the two instrument formats `MidiPlayer` accepts, in full
 - [CodeBrix.Audio.Opus](../../libraries/CodeBrix.Audio.Opus.md) - the separate BSD-3-Clause package that adds `.opus`
 - [MediaPlayer](MediaPlayer.md) - video playback and the standard `MediaPlayerElement` contract, when audio alone is not enough
 - [AudioPlayerDemo](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform/AudioPlayerDemo) in CodeBrix.Platform - three panes on six heads: a song player with a format and source-form selector, sound effects, and a MIDI pane synthesizing through an SFZ instrument, with the transport bound to `Position`, `Duration`, `Speed` and `ActiveVoiceCount`
@@ -343,5 +345,5 @@ None. Playback is fully managed through the audio engine package, whose bundled 
 **Where to go next**
 
 - [MediaPlayer](MediaPlayer.md) - video and the standard playback contract, on five of the six heads
-- [CodeBrix.Audio](../../libraries/CodeBrix.Audio.md) - the engine on its own, for decoding, synthesis and analysis outside a UI
+- [CodeBrix.Audio](../../libraries/CodeBrix.Audio.md) - the front door of the audio section: decoding, sampled instruments, multi-track songs, synthesis and analysis outside a UI
 - [All add-ins](../08-add-ins.md) - the whole set at a glance

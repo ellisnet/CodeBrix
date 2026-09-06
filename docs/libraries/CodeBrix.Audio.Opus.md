@@ -20,7 +20,8 @@ application, whenever Opus has to be one of the formats your audio handles.
 
 ## What it does
 
-- Decodes and plays Ogg Opus (`.opus`) files - voice notes, podcasts and downloaded audio.
+- Decodes and plays Ogg Opus (`.opus`) files - voice notes, podcasts and downloaded audio - through
+  every [player CodeBrix.Audio offers](audio/playback.md).
 - Decodes the bare Opus packets a media container carries, through CodeBrix.Audio's packet seam.
   `OpusPacketCodecFactory` is what teaches that seam Opus, and one `Register()` call installs it.
 - Performs real packet-loss concealment on the packet path, so a source that drops packets is filled in
@@ -102,8 +103,8 @@ CodeBrixAudioOpus.Register();
 
 `Register()` registers both codec factories with `SharedAudioOutput` - the stream one, which opens
 `.opus` files, and the packet one, which decodes the bare Opus packets a media container carries - and
-registers `".opus"` with `AudioFileReaderRegistry`. It is idempotent and thread-safe; calling it twice
-does nothing. There is deliberately no module initializer doing this for you: a module initializer only
+registers `".opus"` with [`AudioFileReaderRegistry`](audio/reading-and-writing-files.md). It is
+idempotent and thread-safe; calling it twice does nothing. There is deliberately no module initializer doing this for you: a module initializer only
 runs once something in the assembly is touched, so under trimming or lazy assembly loading the package
 would work in a debug build and silently fail to register in a trimmed publish.
 
@@ -205,7 +206,7 @@ count. `Dispose()` calls it, and it is safe to call twice.
 `OpusCodecFactory : ICodecFactory` serves the stream seam: `OpusFormatId` is "opus", `OggFormatId` is
 "ogg", `FactoryId` is "CodeBrix.Audio.Opus.ManagedOpus", `SupportedFormatIds` is `["ogg", "opus"]` and
 `Priority` is -10, which sits below the engine's built-in native factory at 0, matching CodeBrix.Audio's
-own managed Vorbis and FLAC factories. `CreateEncoder` is what the engine's `Recorder` reaches, so
+own managed Vorbis and FLAC factories. `CreateEncoder` is what the [bundled engine](audio/audio-engine.md)'s `Recorder` reaches, so
 `new Recorder(captureDevice, stream, "opus")` records straight to Ogg Opus once the factory is
 registered; it accepts only the "opus" format id and only 1 or 2 channels, returning null otherwise.
 
@@ -225,8 +226,8 @@ and reuses one instance of each.
 
 Audio lifted out of a media container does not arrive as a file: a demultiplexer hands out bare Opus
 packets, fifty a second for the usual 20 ms frame, with no framing of their own. CodeBrix.Audio calls
-that its packet seam - `IPacketSoundDecoder`, `IPacketCodecFactory`, `IAudioPacketSource` and
-`PacketAudioPlayer` are all its types - and `Register()` teaches it Opus.
+that its [packet seam](audio/playback.md) - `IPacketSoundDecoder`, `IPacketCodecFactory`,
+`IAudioPacketSource` and `PacketAudioPlayer` are all its types - and `Register()` teaches it Opus.
 
 The codec-private data is the `OpusHead` bytes. A Matroska or WebM track stores the Opus identification
 header verbatim in its CodecPrivate element, so that element's bytes are what you hand over: no
@@ -321,7 +322,7 @@ media.Play();
 ```
 
 Reading a file as float samples goes through `OpusFileReader` directly, and shows why the header's
-sample rate must never be used to convert anything:
+sample rate must never drive a conversion:
 
 ```csharp
 using CodeBrix.Audio.Opus;
@@ -428,7 +429,7 @@ to. A `.opus` file preloads exactly like a `.ogg` rather than decoding on the au
 - **The 48 kHz rule.** An Opus stream always decodes at 48 kHz. The sample rate in an Opus header is the
   rate the encoder was given - 16000 for a typical messenger voice note, and permitted to be 0 - and
   RFC 7845 marks it informational. It is surfaced as `OpusFileReader.EncoderInputSampleRate` and must
-  never be used to convert anything: treat a 16 kHz voice note as 16 kHz and it plays three times too
+  never drive a conversion: treat a 16 kHz voice note as 16 kHz and it plays three times too
   slow.
 - **Call `SharedAudioOutput.Configure(48000)` at start-up.** When the shared output runs at the media's
   rate no conversion runs at all. Without it, an application that has already played a 44.1 kHz sound
@@ -510,6 +511,7 @@ CODEBRIX_AUDIO_RUN_PLAYBACK_TESTS=1 dotnet test CodeBrix.Audio.Opus.slnx
 | Complete API guide (ships inside the package too) | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Audio.Opus/blob/main/AGENT-README.txt) |
 | Tools and other non-package content | [EXTRAS-README.txt](https://github.com/ellisnet/CodeBrix.Audio.Opus/blob/main/EXTRAS-README.txt) |
 | Map of every document in the repository | [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Audio.Opus/blob/main/README-INDEX.txt) |
+| Provenance and licensing of included open source code | [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Audio.Opus/blob/main/THIRD-PARTY-NOTICES.txt) |
 | Tests (worked examples of every API) | [tests/CodeBrix.Audio.Opus.Tests](https://github.com/ellisnet/CodeBrix.Audio.Opus/tree/main/tests/CodeBrix.Audio.Opus.Tests) |
 | The companion guide for the library this builds on | [CodeBrix.Audio AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Audio/blob/main/AGENT-README.txt) |
 
@@ -529,6 +531,7 @@ in the repository.
 **Where to go next**
 
 - [CodeBrix.Audio](CodeBrix.Audio.md) - the library this extends, and the owner of every player it reaches
+- [Playback and sound effects](audio/playback.md) - the two codec seams this package registers with, in full
 - [CodeBrix.Platform.GameEngine](CodeBrix.Platform.GameEngine.md) - where the register-before-first-load rule applies
 - [AudioPlayer add-in](../platform/add-ins/AudioPlayer.md) - playing audio from a CodeBrix.Platform application
 - [ellisnet/CodeBrix.Audio.Opus on GitHub](https://github.com/ellisnet/CodeBrix.Audio.Opus) - source, tests and tools

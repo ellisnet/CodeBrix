@@ -54,7 +54,7 @@ root:
 | | |
 | --- | --- |
 | **GitHub** | [ellisnet/CodeBrix.Audio](https://github.com/ellisnet/CodeBrix.Audio) |
-| **Packages** | [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever) - ships the `CodeBrix.Audio` and `CodeBrix.Audio.Engine` assemblies<br>`CodeBrix.Audio.ModestSynth.MitLicenseForever` - the synthesis add-on, built and published from this repository at the same version |
+| **Packages** | [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever) - ships the `CodeBrix.Audio` and `CodeBrix.Audio.Engine` assemblies<br>[`CodeBrix.Audio.ModestSynth.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.ModestSynth.MitLicenseForever) - the synthesis add-on, built and published from this repository at the same version |
 | **Documents** | [README.md](https://github.com/ellisnet/CodeBrix.Audio/blob/main/README.md) · [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Audio/blob/main/README-INDEX.txt) · [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Audio/blob/main/THIRD-PARTY-NOTICES.txt) · the add-on's [README.md](https://github.com/ellisnet/CodeBrix.Audio/blob/main/src/CodeBrix.Audio.ModestSynth/README.md) |
 | **AGENT-README.txt** | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Audio/blob/main/AGENT-README.txt) for the main package · [src/CodeBrix.Audio.ModestSynth/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Audio/blob/main/src/CodeBrix.Audio.ModestSynth/AGENT-README.txt) for the add-on |
 | **Tests** | [tests](https://github.com/ellisnet/CodeBrix.Audio/tree/main/tests) |

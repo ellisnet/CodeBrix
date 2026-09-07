@@ -15,7 +15,7 @@ rather than a `<sample>`. It is pure managed code with no native payload of its 
 | | |
 | --- | --- |
 | **Repository** | [ellisnet/CodeBrix.Audio](https://github.com/ellisnet/CodeBrix.Audio) |
-| **Packages** | `CodeBrix.Audio.ModestSynth.MitLicenseForever` |
+| **Packages** | [`CodeBrix.Audio.ModestSynth.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.ModestSynth.MitLicenseForever) |
 | **License** | MIT; see [License](#license) |
 | **Requires** | .NET 10 or later, and [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever), which the package pulls in automatically |
 | **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application |
@@ -188,7 +188,11 @@ worth knowing.
   tuning, its glide ramp and the channel's pitch bend, handed over once per block.
 - Velocity goes to the oscillator as well as to the amplitude, which is what makes an `fm6op`
   operator's velocity sensitivity work.
-- The group's ADSR gates the oscillator, because only `pluck1` and `fm6op` stop by themselves.
+- The group's ADSR gates the oscillator, because only `pluck1` and `fm6op` stop by themselves. An
+  `fm6op` whose operators carry real releases owns its own tail: it is the longest operator release,
+  never the group envelope's, so the group envelope holds instead of releasing over the top of it. An
+  `fm6op` on the format's `-1` release sentinel is the other way around, and the group envelope ends
+  it.
 - Every oscillator is trimmed by one level constant, `ModestVoiceSource.ReferenceOscillatorGain`,
   which is where the reference player puts an oscillator zone relative to a sample zone. It is one
   trim over all of them, so the measured level *relationships* between the waveforms are the
@@ -235,7 +239,8 @@ The default behavior is the one a waveform that merely runs wants: `NoteOn` reco
 marks the key down, `NoteOff` marks it up, and `IsFinished` is never true - a sine has no end of its
 own, so whatever owns the envelope decides when the note stops. Two waveforms end by themselves:
 `pluck1`, once the string has decayed below an inaudible level whether the key is still down or not,
-and `fm6op`, once the key is up and every carrier that can be heard has finished its envelope.
+and `fm6op`, once the key is up and every carrier that can be heard has finished its envelope - the
+longest of them, which is measured to be what ends the voice.
 
 `ModestOscillatorFactory` builds one by enum or by name - `SupportedWaveforms`,
 `IsSupported(ModestWaveform)`, `IsSupported(string)`, `Create(ModestWaveform)` and
@@ -638,7 +643,7 @@ stereo simulator has no mix; its width does that job.
 | `wave_folder` | `drive` (1..100, 1), `threshold` (0..10, 0.25), `mix` (0..1, 1.0) |
 | `wave_shaper` | `drive` (1..1000, 1), `driveBoost` (0..1, 1), `outputLevel` (0..8, 0.1), `highQuality` (false), `mix` (0..1, 1.0) |
 | `stereo_simulator` | `algorithm` (`lauridsen`, `schroeder` or `adt`; `adt`), `width` (0..1, 0.5), `delayTime` (0.001..0.030 s, 0.005), `modRate` (0.1..10 Hz, 0.5, `adt` only), `modDepth` (0..1, 0.3, `adt` only) |
-| `bit_crusher` | `bitDepth` (1..24, 24), `sampleRateReduction` (1..32, 1), `mix` (0..1, 1.0) |
+| `bit_crusher` | `bitDepth` (1..24, 24), `sampleRateReduction` (1..32, 1), `mix` (0..1, 1.0); a mid-tread step of `2*sqrt(2)/2^(bitDepth-1)`, so a peak under half a step becomes digital silence |
 | `gate` | `amount` (0..1, 0.5), `mix` (0..1, 1.0), plus `Seed` and `WindowSeconds` as standalone extras |
 
 **The phaser** is a cascade of six first-order all-pass sections all tuned to the center frequency,
@@ -697,8 +702,12 @@ The three algorithms differ only in how far they decorrelate: `lauridsen` fully,
 and the default, and `schroeder` the subtlest. At a width of 1 the middle is removed entirely and the
 mono sum is silent.
 
-**The bit crusher** quantizes and holds. Bit depth is a mid-tread quantizer over -1..1 - the signal is
-rounded to the nearest of `2^bitDepth` evenly spaced levels - and sample-rate reduction is a
+**The bit crusher** quantizes and holds. Bit depth is a mid-tread quantizer with no dither whose step
+is `2*sqrt(2) / 2^(bitDepth-1)`. The full scale is `2*sqrt(2)`, not 1 - the same constant the
+compressor threshold and the wave folder use - so a signal whose peak is below half a step
+(`2^(1.5-bitDepth)`, which is 0.1768 at four bits) is crushed to digital silence. The apparent gain of
+a crusher follows from the step rather than being a parameter: +1.21 dB where the signal spans three
+levels, +0.44 dB where it spans five, and nothing once the step is small. Sample-rate reduction is a
 sample-and-hold, so a factor of four holds each sample for four. Both accept fractional values,
 because a knob bound to them sweeps through, and the hold length then alternates rather than jumping.
 The defaults are transparent: 24 bits is finer than a float can hold and a reduction of 1 holds
@@ -746,10 +755,12 @@ index a level of 1.0 buys and the whole sideband pattern that produces, the carr
 modulation matrix of all 32 algorithms, the ratio default, the absence of carrier-count normalization,
 the five-point velocity table with its neutral point at velocity 96, the four-stage rate scale with
 rate 0 crawling, the detune power law over the range it was measured across, and feedback acting only
-on the algorithm's own operator and clamping at 1. What is still reasoned rather than measured, each a
-single named constant: the feedback depth in cycles, the 0..99 level scale's curve, the
-modulator-to-modulator chains inherited from the published chart, the detune law outside the measured
-range, and rate scaling, which the format has no attribute for at all.
+on the algorithm's own operator and clamping at 1. The modulator-to-modulator chains are measured
+under load rather than inherited from the chart: each link runs through the intermediate operator's
+own output scaled by its level, so an operator whose downstream neighbor is silent is inaudible. Only
+algorithm 1, whose chain is four deep, has been walked. What is still reasoned rather than measured,
+each a single named constant: the feedback depth in cycles, the 0..99 level scale's curve, the detune
+law outside the measured range, and rate scaling, which the format has no attribute for at all.
 
 The effects are measured where a measurement exists and honest where one does not. The wave shaper's
 drive law reproduces the reference's measured boost closely; the stereo simulator reproduces both of

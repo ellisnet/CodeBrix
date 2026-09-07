@@ -13,7 +13,7 @@ engine could not honor is reported per instrument instead of thrown.
 | | |
 | --- | --- |
 | **Repository** | [ellisnet/CodeBrix.Audio](https://github.com/ellisnet/CodeBrix.Audio) |
-| **Packages** | [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever)<br>`CodeBrix.Audio.ModestSynth.MitLicenseForever` for oscillators and creative effects |
+| **Packages** | [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever)<br>[`CodeBrix.Audio.ModestSynth.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.ModestSynth.MitLicenseForever) for oscillators and creative effects |
 | **License** | MIT; see [License](#license) |
 | **Requires** | .NET 10 or later |
 | **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application |
@@ -298,6 +298,11 @@ whose release runs for exactly its own time and ends at zero. With no curve attr
 stage follows the shape the reference uses; unlike the reference, this engine also honors
 `attackCurve`, `decayCurve` and `releaseCurve` when a preset writes them.
 
+The two scopes are audibly different under a chord. `scope="voice"` gives every note its own envelope
+instance and leaves a sounding note alone; `scope="global"` keeps one instance that every note-on
+restarts from zero, so a note already sounding drops out and re-attacks. One note alone sounds
+identical either way.
+
 A modulator's own parameters are themselves bindable, so a knob can move a running LFO's rate or an
 envelope's attack. Every random draw is seeded, so a modulated preset renders the same bytes from the
 same events, and `settings.EnableModulators = false` plays the preset as the sampler alone.
@@ -327,10 +332,18 @@ reach every group.
 
 A `<noteSequences>` sequence is started by a binding with no `parameter` - an **action** rather than a
 value. `seqTriggerBehavior` decides what starts it: `midi_key` (start on the key down, stop on the key
-up, the default), `on`, or `off`. A player is tracked under `seqPlayerIdentifier`, or one per (channel,
-key) when the binding names none, so a handler covering a range of key switches runs a different
-sequence for every key. Speed is the sequence's own rate against the synthesizer's `TempoSource`, read
-every block, so a rate binding changes the speed of a sequence that is already running.
+up, the default), `on`, or `off`. A key-triggered player is tracked by its (channel, key),
+`seqPlayerIdentifier` or not, so a handler covering a range of key switches runs a different sequence
+for every key and two keys naming the same identifier run two independent players. Every other form -
+an `on` or an `off` fired from a controller or a user-interface control - is tracked under
+`seqPlayerIdentifier`, which is what lets a second `on` restart the one player a first `on` started.
+Speed is the sequence's own rate against the synthesizer's `TempoSource`, read every block, so a rate
+binding changes the speed of a sequence that is already running.
+
+Re-triggering restarts the player: the sounding note is cut, the grid is re-based on the new start,
+and the sequence runs from its first step again. A `<cc>` binding fires on every controller change and
+so restarts the sequence each time, while a button's state binding fires only when the state itself
+changes.
 
 Three things about a sequence's timing surprise people, all of them the reference player's own
 behavior:
@@ -380,14 +393,21 @@ note starting at the beginning of the file sounds without waiting for a disk rea
 streams strictly better than the same library inside a `.dslibrary`, because a backward seek inside a
 zip entry costs a walk from the start of it.
 
+Each streamed voice needs a ring buffer of its own, and
+`DecentSamplerSynthesizerSettings.StreamingVoiceCount` is automatic by default, which means one per
+voice of `MaximumPolyphony`. Left alone, a streamed preset sounds exactly like the same preset held in
+memory, however wide the chord; the price is `12 MB` of buffers at the default polyphony and ring
+size.
+
 `DecodeSamples = false` means **load on first use**, not "never": every path is resolved and every
 problem is still found, the whole model is built, and no audio file is opened until a note wants one.
 That is what a library browser or a validity check wants. The first note that needs a file is silent
 and the instrument says so in `Problems`; every note after it sounds.
 
-`SAMPLE_START`, `SAMPLE_END`, `LOOP_START` and `LOOP_END` take effect on the **next note**. A binding
-that moves one of them changes what the next note-on reads; a voice already sounding keeps the bounds
-it started with, so dragging the knob under a held chord is silent until the next note.
+`SAMPLE_START`, `LOOP_START` and `LOOP_END` take effect on the **next note**; `SAMPLE_END` also stops
+a sounding voice. A voice whose read position is already past a new `SAMPLE_END` stops at once and one
+still short of it plays on and stops there - measured on the reference. The other three keep the
+next-note rule, and a streamed voice keeps it for all four.
 
 > [!WARNING]
 > Streaming mode is the one setting an offline render must get right.
@@ -509,19 +529,21 @@ differences that remain, published rather than hidden:
 | Case | The difference |
 | --- | --- |
 | Undeclared bus | A group sent to a bus the preset never declares is silent in both, and this engine also reports it in `Problems`. So is a bus whose own output target names another bus: the format does not let a bus feed a bus, and the reference says nothing about it |
-| `<velocity>` bindings | They reach the group their `groupIndex` names, and reach a group's or the instrument's `AMP_VOLUME`. The reference applies such a binding to every group whatever its `groupIndex` says, and does nothing at all on `AMP_VOLUME`. Both are reference defects, and doing less was not worth reproducing |
+| `<velocity>` bindings | They reach the group their `groupIndex` names, and reach a group's or the instrument's `AMP_VOLUME`. The reference applies such a binding to every group whatever its `groupIndex` says, and does nothing at all on `AMP_VOLUME`. Both are reference defects, and doing less was not worth reproducing. They belong to `<velocity>` alone: a `<cc>` or `<note>` binding honors `groupIndex`, `position` and `level="tag"`, and reaches `AMP_VOLUME`, in the reference exactly as it does here |
 | `midiCC` scope | A voice-scope `<midiCC>` modulator reads its controller here; the reference reads zero for one, so a preset written the documented way does nothing there and works here |
 | `GLOBAL_TUNING` | A modulator binding at `level="instrument"` moves the tuning here; the reference ignores it and leaves the pitch alone |
+| `LOOP_START` and `LOOP_END` | A binding that moves either one is honored here at the next note-on. The reference accepts both and does nothing with them - not on a sounding voice, not at the next note-on, and through none of the three ways a binding can name its target |
 | Continuous zones | `trigger="continuous"` sounds here, and with no loop points of its own it loops the whole file. The reference produced no sound at all for such a zone |
 | Retrigger | The interval is exact here; the reference rounds it up to a whole 512-frame processing block, which stretches a one-second retrigger |
-| `no_loop` | A note sequence set to `no_loop` stops after one pass here, at every declared length. The reference fails to stop one whose declared length is 2, which is a defect and is deliberately not reproduced |
+| `no_loop` | A note sequence set to `no_loop` stops after one pass here, at every declared length. The reference fails to stop one whose declared length is exactly 2, and only that: declared lengths 1, 3, 4, 6 and 8 all stop after one pass there and 2 loops forever, whatever the note count. It is a defect and is deliberately not reproduced |
 | Random sequences | They draw from every note. Both of the reference's random loop modes measurably never draw one note of a four-note sequence, which is likewise a defect and deliberately not reproduced |
+| Sequence length | The declared length of a note sequence truncates it here at every length. The reference truncates from length 2 upward but not at length 1, where a sequence declaring `length="1"` with notes on beats 0 and 1 played both |
 | Envelope curves | `attackCurve`, `decayCurve` and `releaseCurve` on an `<envelope>` **modulator** bend its stages here. The reference accepts and ignores all three, even though the group amplitude envelope's own curves do work there. The default shape is the reference's either way |
 | First sample frame | A sample whose very first frame carries the signal sounds here; the reference ramps a voice in over its first frames and loses it |
 | Noise | The anti-imaging rolloff above 8 kHz is reproduced, and the power centroid lands slightly darker than the reference's - which is as close as the reference's own two figures allow |
 | Formant | The fixed tone's spectrum is reproduced closely; the phase of each partial could not be measured, so the waveform's shape is this engine's own |
 | `fm6op` detune | It follows the measured power law over the range it was measured across; outside that range it is an extrapolation |
-| Heavily layered presets | A preset built almost entirely of tag-gated layers measured about a decibel louder than the reference over eight bars. Every individual rule the preset uses was measured and matches on its own, so what is left is a level relationship between one family of layers and the rest. A master gain closes it if a render has to match the reference exactly |
+| Heavily layered presets | A preset built almost entirely of tag-gated layers - eighteen groups in six instrument families - measures 1.09 dB louder than the reference over eight bars. Recorded one family at a time, three families are above the reference and two below (strings +4.2 dB, the odds and ends +6.3, percussion +1.2, synths +0.2, guitars -1.3, winds -2.3), and the synth family is exact in every octave band, so the shared signal path is right and what is left is in what five families' zones do. The other two comparison presets are inside 0.1 dB. A master gain closes it if a render has to match the reference exactly |
 
 None of these is silent: each is either audible in a way the table describes or reported in
 `Problems`. Most of them are places where the reference does *less* than the format documents and this

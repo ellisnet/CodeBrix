@@ -17,7 +17,7 @@ detail, the examples and the pitfalls.
 | | |
 | --- | --- |
 | **Repository** | [ellisnet/CodeBrix.Audio](https://github.com/ellisnet/CodeBrix.Audio) |
-| **Packages** | [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever) - ships the `CodeBrix.Audio` and `CodeBrix.Audio.Engine` assemblies<br>`CodeBrix.Audio.ModestSynth.MitLicenseForever` - the synthesis add-on, on its own [page](CodeBrix.Audio.ModestSynth.md) |
+| **Packages** | [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever) - ships the `CodeBrix.Audio` and `CodeBrix.Audio.Engine` assemblies<br>[`CodeBrix.Audio.ModestSynth.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.ModestSynth.MitLicenseForever) - the synthesis add-on, on its own [page](CodeBrix.Audio.ModestSynth.md) |
 | **License** | MIT for both; see [License](#license) |
 | **Requires** | .NET 10 or later. No system audio package and no system-wide codec is required on Windows, macOS or Linux |
 | **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application, through the [AudioPlayer add-in](../platform/add-ins/AudioPlayer.md) |

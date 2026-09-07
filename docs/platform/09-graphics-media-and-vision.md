@@ -1346,7 +1346,7 @@ The property type on the view model is the playback-source interface, not the co
 
 ### The AudioPlayer add-in
 
-[CodeBrix.Platform.AudioPlayer.ApacheLicenseForever](https://www.nuget.org/packages/CodeBrix.Platform.AudioPlayer.ApacheLicenseForever) plays WAV, MP3, Ogg Vorbis and FLAC on all six heads with no native setup at all, and adds MIDI music through a SoundFont or SFZ instrument. The players are non-visual elements, so you compose the transport UI from ordinary controls.
+[CodeBrix.Platform.AudioPlayer.ApacheLicenseForever](https://www.nuget.org/packages/CodeBrix.Platform.AudioPlayer.ApacheLicenseForever) plays WAV, MP3, Ogg Vorbis and FLAC on all six heads with no native setup at all, and adds MIDI music synthesized live through a SoundFont, SFZ or Decent Sampler instrument. The players are non-visual elements, so you compose the transport UI from ordinary controls.
 
 Because the elements have no view-model-facing interface of their own, reach them through a bridge of settable delegates that the view model declares and implements:
 

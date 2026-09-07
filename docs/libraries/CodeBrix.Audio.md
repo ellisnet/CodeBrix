@@ -338,9 +338,11 @@ through the [AudioPlayer add-in](../platform/add-ins/AudioPlayer.md) and the
 and makes the call - the add-ins never do.
 
 The [AudioPlayer add-in](../platform/add-ins/AudioPlayer.md) wraps the file player, the sound-effect
-path and MIDI music through a SoundFont or SFZ instrument as non-visual XAML elements with a two-way
-bindable position, which is what a page wants. Reach for the library's own types when the audio does
-not belong to a page.
+path and MIDI music through any of the three sampled instrument formats as non-visual XAML elements
+with a two-way bindable position, which is what a page wants; it surfaces a Decent Sampler preset's
+control model and the MPE settings on the element as well. It does not wrap the multi-track player or
+the stems loader, and it does not render offline. Reach for the library's own types for those, and
+whenever the audio does not belong to a page.
 
 The publishing note matters on every head: the native payload has to travel with the application, so a
 single-file publish must keep native libraries available to the host.

@@ -15,7 +15,7 @@ through a SoundFont, an SFZ library and a Decent Sampler instrument.
 | **Packages** | [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever) |
 | **License** | MIT; see [License](#license) |
 | **Requires** | .NET 10 or later |
-| **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application |
+| **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application, through the [AudioPlayer add-in](../../platform/add-ins/AudioPlayer.md) |
 
 ## What it does
 

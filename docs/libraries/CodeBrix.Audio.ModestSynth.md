@@ -921,9 +921,11 @@ ModestSynth.Register();       // once, at application start-up, BEFORE loading a
 This package has no CodeBrix.Platform add-in of its own: a CodeBrix.Platform application references it
 like any other library, and the sound it makes reaches the speakers through
 [CodeBrix.Audio's players](audio/playback.md). The
-[AudioPlayer add-in](../platform/add-ins/AudioPlayer.md) plays what those players play. As with the
-Opus package, the consuming **application** takes this dependency and makes the `Register()` call -
-the add-ins never do.
+[AudioPlayer add-in](../platform/add-ins/AudioPlayer.md) plays what those players play, so a preset
+loaded by its `MidiPlayer` gets these oscillators and effects once the application has registered
+them, and reports what it could not have when it has not. The [GameEngine](CodeBrix.Platform.GameEngine.md)'s
+`MidiMusicTrack` is the same story. As with the Opus package, the consuming **application** takes this
+dependency and makes the `Register()` call - the add-ins never do.
 
 ## Pitfalls
 

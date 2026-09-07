@@ -41,8 +41,12 @@ dependency do not inherit one.
 - Audio playback and mixing through [CodeBrix.Audio](CodeBrix.Audio.md): master, music and
   sound-effect volume buses, a preload-to-PCM sound-effect voice pool, and WAV, MP3, Ogg Vorbis and
   FLAC out of the box.
+- MIDI music rendered live through a sampled instrument - SoundFont, SFZ or Decent Sampler - with
+  per-channel layering, a tempo control that does not change pitch, and MIDI Polyphonic Expression.
 - A music system: fades and equal-power crossfades, reference-counted ducking, stingers, playlists,
-  layered adaptive stems, and transitions quantized to the next beat or bar.
+  layered adaptive stems including the stems of a downloaded arrangement loaded straight from the zip
+  or the folder, and transitions quantized to the next beat or bar - exactly, through the source's own
+  tempo map, even where the music changes tempo.
 - Save and load of engine state as JSON, shared-reference object graphs included.
 - A global pause that parks the whole engine at near-zero CPU and shifts every time baseline on resume,
   so nothing bursts or teleports.
@@ -115,7 +119,7 @@ What the engine package deliberately does not do:
 - Collision overlap events are engine-internal: response is automatic (a solid push-out, or a trigger
   report), and game logic queries `ColliderRegistry.QueryAabb` itself.
 - No beat or tempo detection for decoded audio. The game supplies the `MusicTimeline`; a MIDI file
-  supplies its own.
+  supplies its own, and a stems download supplies one from the MIDI beside its recordings.
 - `.opus` is not built in, for license separation. Reference
   [CodeBrix.Audio.Opus](CodeBrix.Audio.Opus.md) and register it yourself.
 - It ships no SkiaSharp Linux native assets of its own. The head application provides them, and a
@@ -918,12 +922,23 @@ when idle, allocates nothing per tick, and freezes with the global engine pause.
 
 A track is a handle, not a transport: read its state and set its `Volume`, but play, stop, crossfade and
 seek through the manager, which owns the fades. `FileMusicTrack` wraps an `AudioResource` and streams;
-`MidiMusicTrack` renders a MIDI sequence live through a SoundFont (`.sf2`) or an SFZ instrument
-(`.sfz`), shared through `SoundFontCache` and `SfzInstrumentCache`. The transport is `Play(track,
-fadeIn)`, `CrossfadeTo(track, duration)`, `Stop(fadeOut)`, `Pause()`, `Resume()`, `Seek()`, plus
-`NowPlaying`, `IsPlaying` and `ActiveFadeCount`. A crossfade uses one fade for both sides, and
+`MidiMusicTrack` renders a MIDI sequence live through a SoundFont (`.sf2`), an SFZ instrument (`.sfz`)
+or a Decent Sampler instrument (`.dspreset`, `.dslibrary`, `.dsbundle`, or a folder holding a preset),
+shared through `SoundFontCache`, `SfzInstrumentCache` and `DecentSamplerInstrumentCache`. The
+transport is `Play(track, fadeIn)`, `CrossfadeTo(track, duration)`, `Stop(fadeOut)`, `Pause()`,
+`Resume()`, `Seek()`, plus `NowPlaying`, `IsPlaying` and `ActiveFadeCount`. A crossfade uses one fade for both sides, and
 `CrossfadeCurve` is `EqualPower` by default; choose `Linear` for correlated material such as a stem swap
 or a loop splice.
+
+The `(key, instrumentPath, midiFilePath)` constructor resolves a Decent Sampler path through the
+process-wide `MidiMusicPlayer.SharedDecentSamplerCache`, so two tracks naming one library decode it
+once and share its knobs, while a SoundFont or an SFZ named there is loaded fresh. Pass the instrument
+in instead for a part that must move its own knobs. `track.Problems` lists what the instrument and the
+MIDI file objected to, logged once at load and empty for a clean pair; the path form reports the file's
+problems only, because the player keeps the instrument it built and does not hand it back. A file that
+breaks a rule still loads, because the MIDI reader is lenient: what it had to work around is reported
+there rather than thrown, and what it can ignore outright is not reported at all. MPE settings live on
+`track.Player`.
 
 `PushDuck(depth, attack, release)` returns a handle you dispose to release; overlapping ducks are
 reference-counted and the deepest wins, `Duck(depth, attack, hold, release)` is the fire-and-forget
@@ -933,7 +948,7 @@ form, and `ClearDucks()` rescues a leaked handle. Ducking is a separate multipli
 add, remove, reset and move operations, and `MusicManager.Play(playlist, crossfade)` advances on each
 track's `Ended`.
 
-Adaptive layers come two ways. For MIDI, `track.SetLayerVolume(channel, 0f)` and
+Adaptive layers come three ways. For MIDI, `track.SetLayerVolume(channel, 0f)` and
 `track.FadeLayerTo(channel, 1f, TimeSpan.FromSeconds(2))` address channels 0 to 15, alongside
 `SetLayerPan` and a `Speed` tempo multiplier that does not change pitch; layer volume is sent as MIDI
 control change 7, so a track that automates its own volume overwrites the game's value the next time it
@@ -944,15 +959,61 @@ the longest and logs the mismatch once, stems are decoded to memory, and only th
 audible. Gain changes ramp across an audio block rather than stepping, because a step change in gain is
 a click; summing is not limited.
 
+The third way is a stems download.
+`MusicStemSet.FromSunoStems(key, stemsZipOrFolder, params stemNames)` reads one - a set of files named
+for the song and the stem, with the arrangement's MIDI beside them, as a zip or as a folder - and
+builds an ordinary `MusicStemSet` from the layers you name. Passing no names takes every stem that
+carries audio, and a name the export does not have throws `ArgumentException` listing the ones it does.
+"Suno" is Suno, Inc.'s name, and appears here only to say what the files are.
+
+```csharp
+var stems = MusicStemSet.FromSunoStems("battle", zipOrFolder, "Drums", "Bass", "Guitar");
+MusicManager.Instance.Play(stems);
+```
+
+The set's `Timeline` is already filled in from the MIDI that ships beside the recordings, so bar-locked
+layer changes and quantized transitions work with nothing else set up, and they follow the tempo
+exactly. `MusicStemSet.Problems` carries whatever the export could not account for, one line each,
+logged once and never thrown, and is empty for a set built any other way. Every stem is decoded to
+memory, about `23 MB` per stereo minute at 48 kHz, so name the three or four layers the game will
+actually cross-fade rather than taking a whole export. Call `AudioSystem.Initialize` first, so the
+decode converts to the device rate once. A zip is unpacked on demand into a cache folder keyed by the
+download and reused after that - `SunoLoadOptions.CacheFolder` chooses where, and a game that ships a
+download should point it at its own writable folder - while a folder is read where it lies. A full mix,
+when the download carries one, is not a stem: it is a long linear piece, so load it with
+`AudioResourceManager` and play it as a `FileMusicTrack`, which streams. Alignment measurement is
+forced off, because lining a recording up with its MIDI is a MIDI concern that costs a decode of every
+stem, and the recordings are already locked to each other.
+[Multi-track songs and stems](audio/multi-track-and-suno.md) covers what such a download contains and
+how to ask for one that lines up.
+
 `Play`, `CrossfadeTo` and `Stop` all take a `MusicTransitionQuantize` of `Immediate`, `Beat` or `Bar`,
 and the wait rides on the fade ticker, so it freezes with the global pause.
 `HasPendingTransition` reports one in flight and `CancelPendingTransition()` drops it. The grid comes
-from `MusicTrack.Timeline`: MIDI loaded from a path fills it in automatically, while for decoded audio
-the game supplies it with `track.Timeline = new MusicTimeline(beatsPerMinute: 128, beatsPerBar: 4);`.
+from `MusicTrack.Timeline`, and where it comes from decides how complete it is.
+
+| The track | What fills `Timeline` |
+| --- | --- |
+| MIDI loaded from a path | `MusicTimeline.FromMidiFile`: the tempo map, the time signature and the markers |
+| MIDI loaded from a `MidiSequence` | `MusicTimeline.FromMidiSequence`: the sequence's own tempo map, four beats to the bar assumed, and no markers, because a sequence keeps its tempo map and not the timing of its meta events |
+| A stems download | The MIDI in the export: four beats to the bar, no markers |
+| Decoded audio | Nothing. The game supplies it: `track.Timeline = new MusicTimeline(beatsPerMinute: 128, beatsPerBar: 4);` |
+
 There is no inference from a decoded stream, and a `Beat` or `Bar` request with no timeline happens
-immediately and says so in the log rather than being dropped. The grid is constant - one tempo
-throughout - and a file that changes tempo sets `HasTempoChanges` and is quantized against its first
-tempo. A MIDI file's markers and cue points become `MusicTimeline.Markers`, and
+immediately and says so in the log rather than being dropped.
+
+The grid follows the tempo. A timeline given a tempo in its constructor is a constant grid; one built
+from MIDI carries the source's whole tempo map - `MusicTimeline.TempoMap`, a
+`CodeBrix.Audio.Synth.MidiTempoMap` - and quantizes through it, so a beat or bar boundary lands exactly
+where the file puts it however often the tempo moves. That matters because a generated arrangement
+routinely carries one tempo event per beat, and quantizing such a file against its first tempo alone
+would be off the beat within a few bars. `HasTempoChanges` says whether the source's tempo varies at
+all; `SecondsPerBeat` and `SecondsPerBar` describe the tempo the piece starts at, so ask
+`TimeToNextBoundary` rather than doing that arithmetic yourself. Markers come through the same map, so
+a jump point and the bar line it sits on agree, and a game can build the same thing itself with
+`new MusicTimeline(tempoMap, beatsPerBar)`.
+
+A MIDI file's markers and cue points become `MusicTimeline.Markers`, and
 `MusicManager.JumpToMarker("chorus")` seeks the current track to one, case-insensitively, returning
 false rather than seeking somewhere arbitrary when there is no such marker.
 
@@ -1621,8 +1682,17 @@ public void ShutDown()
   do not round-trip.
 - `MusicDuckMultiplier` is owned by `MusicManager`: duck through `PushDuck` or `Duck`, never by writing
   `AudioMixer.MusicVolume`. `ClearDucks()` rescues a leaked duck handle.
-- A `.sfz` instrument references sample files beside it on disk, so extract it from an `AssetsFile`
-  before loading; a `.sf2` loads from a `Stream`.
+- An instrument from an asset pack must reach the disk, except a `.sf2`. A `.sfz` and a `.dspreset`
+  reference sample files beside them; a `.dslibrary` or `.dsbundle` is one file, but it is read in
+  place by path and nothing is unpacked. Only a `.sf2` loads from a `Stream`. Extract the rest from an
+  `AssetsFile` before loading.
+- Decent Sampler knob positions and modulated parameters are instrument state, not synthesizer state,
+  so two tracks over one instrument share them - right for two players of the same sound, wrong when
+  each part must move its own. The `(key, instrumentPath, midiFilePath)` constructor shares by design,
+  through the process-wide `MidiMusicPlayer.SharedDecentSamplerCache`; hand a part its own instrument
+  when it needs its own knobs.
+- `MusicStemSet.FromSunoStems` decodes every stem it is given to memory. Name the layers the game will
+  actually cross-fade rather than taking the whole export.
 
 ### Performance
 
@@ -1694,7 +1764,7 @@ Win32-Skia and macOS heads, and is built and run on its own.
 | ParticleTest | `ParticleSurface` and emitters, composites and text, movement easing, and a click that toggles the global pause through UI-level pointer input with letterbox mapping | [`samples/ParticleTest`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/ParticleTest) |
 | SoftRender | The software-rendered mode end to end: a plasma and starfield, the pixel-frame presenter, `InputPump`, raw-PCM audio, a streamed drone, and loop-health statistics | [`samples/SoftRender`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/SoftRender) |
 | GpuRender | The GPU-rendering showcase: an SkSL plasma drawn by a custom `DirectDrawingBase`, live GPU frame rate, click-anywhere pause with a pause overlay, and window-tracking resolution | [`samples/GpuRender`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/GpuRender) |
-| MusicDemo | The music system reference: buses, fades and crossfades, both ducking forms, stingers, playlists, stem sets, the MIDI per-channel route, bar-quantized transitions and marker jumps - generating every asset it plays on first run | [`samples/MusicDemo`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/MusicDemo) |
+| MusicDemo | The music system reference: buses, fades and crossfades, both ducking forms, stingers, playlists, stem sets, the MIDI per-channel route, MIDI rendered through both an SFZ and a Decent Sampler instrument, a bar-quantized crossfade across a tempo change, a stems export loaded with `MusicStemSet.FromSunoStems`, and marker jumps - generating every asset it plays on first run, down to the instruments, the MIDI files and the whole export | [`samples/MusicDemo`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/MusicDemo) |
 | padcheck | An interactive hardware check for gamepads that drives the real `SdlGamepadManager`, so what it prints is what a game would see | [`tools/padcheck`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tools/padcheck) |
 | sdl2_library_building | The hand-run script that builds the Windows-on-ARM64 SDL2 binary the gamepad package ships, verifying the source against a pinned hash and writing a provenance file beside the output | [`tools/sdl2_library_building`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tools/sdl2_library_building) |
 

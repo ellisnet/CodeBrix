@@ -45,6 +45,13 @@ Suno, Inc.'s name, and appears here only to say what the files are.
 Use neither to play a whole downloaded song: that is an ordinary MP3 or WAV and
 [`AudioFilePlayer`](playback.md) plays it. The next section shows exactly how.
 
+In a game, the [GameEngine](../CodeBrix.Platform.GameEngine.md) takes such a download as adaptive
+layers instead: `MusicStemSet.FromSunoStems` reads the same zip or folder, decodes the layers the game
+names, and fills the music timeline in from the MIDI beside the recordings, so bar-quantized
+transitions follow the arrangement's own tempo. The [AudioPlayer add-in](../../platform/add-ins/AudioPlayer.md)
+wraps neither this player nor the stems loader: one sequence per `MidiPlayer`, one file per
+`AudioPlayer`.
+
 ### Playing a whole downloaded song
 
 A whole song is the ordinary `<Title>.wav` or `<Title>.mp3` download, and it is a long recording like

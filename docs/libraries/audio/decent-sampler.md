@@ -16,7 +16,7 @@ engine could not honor is reported per instrument instead of thrown.
 | **Packages** | [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever)<br>[`CodeBrix.Audio.ModestSynth.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.ModestSynth.MitLicenseForever) for oscillators and creative effects |
 | **License** | MIT; see [License](#license) |
 | **Requires** | .NET 10 or later |
-| **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application |
+| **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application, through the [AudioPlayer add-in](../../platform/add-ins/AudioPlayer.md) |
 
 ## What it does
 
@@ -46,6 +46,10 @@ parameter model like it. `DecentSamplerSynthesizer` sits on the same `IMidiSynth
 [SoundFont and SFZ](soundfont-and-sfz.md), so `MidiSequencer`, `MidiMusicPlayer`,
 [`MultiTrackPlayer`](multi-track-and-suno.md) and `SoundFontRenderer` all take it, and
 `MidiMusicPlayer.Load(path, midi)` picks the synthesizer by extension.
+
+In a CodeBrix.Platform application the [AudioPlayer add-in](../../platform/add-ins/AudioPlayer.md)'s
+`MidiPlayer` takes any of these forms as its instrument and surfaces the control model, the tags and
+the memory summary on the element, so a page binds to a preset's own knobs without touching this API.
 
 What it is not: there is no instrument **user interface** here. A preset's `<ui>` section is parsed
 completely and becomes a live control model - every knob, button, menu, pad, label, image and color is

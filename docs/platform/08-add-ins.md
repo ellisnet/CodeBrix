@@ -80,7 +80,7 @@ The only non-CodeBrix package a head project may need is one an add-in's own gui
 
 | Add-in | Package | What it adds | Heads |
 | --- | --- | --- | --- |
-| [AudioPlayer](add-ins/AudioPlayer.md) | [`CodeBrix.Platform.AudioPlayer.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.AudioPlayer.ApacheLicenseForever) | `AudioPlayer`, `MidiPlayer` and `SoundEffect` - audio, SoundFont and SFZ playback with no native setup | All six |
+| [AudioPlayer](add-ins/AudioPlayer.md) | [`CodeBrix.Platform.AudioPlayer.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.AudioPlayer.ApacheLicenseForever) | `AudioPlayer`, `MidiPlayer` and `SoundEffect` - audio, and MIDI through a SoundFont, SFZ or Decent Sampler instrument, with no native setup | All six |
 | [VideoPlayer](add-ins/VideoPlayer.md) | [`CodeBrix.Platform.VideoPlayer.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.VideoPlayer.ApacheLicenseForever) | `VideoPlayer`, an AV1 video element with color grading, layers, captions and chapters | All six |
 | [MediaPlayer](add-ins/MediaPlayer.md) | [`CodeBrix.Platform.MediaPlayer.LgplLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.MediaPlayer.LgplLicenseForever) | The playback engine behind the core's `MediaPlayerElement` | Win32, WPF, X11, Wayland, frame buffer |
 | [WebView](add-ins/WebView.md) | [`CodeBrix.Platform.WebView.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.WebView.ApacheLicenseForever) | The per-head engine behind the core's `WebView2` control | All six |
@@ -111,6 +111,7 @@ Several add-ins are the XAML skin over a library that is fully usable on its own
 | [CodeBrix.SkiaSvg](../libraries/CodeBrix.SkiaSvg.md) | [Svg](add-ins/Svg.md) | Automatic dependency; the SVG parser and renderer |
 | [CodeBrix.Audio](../libraries/CodeBrix.Audio.md) | [AudioPlayer](add-ins/AudioPlayer.md) | Automatic dependency; the managed audio engine |
 | [CodeBrix.Audio.Opus](../libraries/CodeBrix.Audio.Opus.md) | [AudioPlayer](add-ins/AudioPlayer.md), [VideoPlayer](add-ins/VideoPlayer.md) | The application references and registers it for Opus sound |
+| [CodeBrix.Audio.ModestSynth](../libraries/CodeBrix.Audio.ModestSynth.md) | [AudioPlayer](add-ins/AudioPlayer.md) | The application references and registers it for the oscillators and creative effects a Decent Sampler preset may ask for |
 | [CodeBrix.VideoPlayback.Dav1d](../libraries/CodeBrix.VideoPlayback.Dav1d.md) | [VideoPlayer](add-ins/VideoPlayer.md) | The application references and registers it for AV1 decoding |
 | [CodeBrix.Platform.MediaPlayerCore](../libraries/CodeBrix.Platform.MediaPlayerCore.md) | [MediaPlayer](add-ins/MediaPlayer.md) | Automatic dependency; delivers playback |
 | [CodeBrix.Plotter](../libraries/CodeBrix.Plotter.md) | [PlotterView](add-ins/PlotterView.md) | Automatic dependency; owns the `PlotModel` |

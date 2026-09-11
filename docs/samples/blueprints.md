@@ -50,8 +50,10 @@ The applications behind them are described in [Samples](README.md).
 | Show results under clickable headings | [ViewsAndControls](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md) | Build a grouped list from group and row view models | GitHubIssueFinder |
 | Make a layout reflow | [ViewsAndControls](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md) | Wrap and reflow a layout with the FlexPanel add-in | KenneyAssetBrowser |
 | Add keyboard shortcuts | [ViewsAndControls](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md) | Dispatch keyboard shortcuts from one page KeyDown handler | Pinta.Brix |
+| Mask passwords with WinUI's black circle instead of the default bullet | [ViewsAndControls](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md) | Set the PasswordBox mask character back to WinUI's black circle | none yet |
 | Offer more schemes than light and dark | [ThemingAndStyling](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ThemingAndStyling.md) | Model a color scheme as plain data in a UI free library; Choose a repaint mechanism that can carry more than two schemes | GitHubIssueFinder |
 | Follow the desktop's light or dark appearance | [ThemingAndStyling](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ThemingAndStyling.md) | Follow or override the desktop appearance and check it from a shell | GitHubIssueFinder |
+| Keep a text box's own colors when it is hovered or focused | [ThemingAndStyling](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ThemingAndStyling.md) | Keep a text box's own colors while it is hovered or focused | none yet |
 | Put 3D in a page | [GraphicsAndRendering](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md) | Host an OpenGL scene in XAML with a GLCanvasElement subclass | PolyHavenBrowser |
 | Draw on a Skia canvas | [GraphicsAndRendering](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md) | Paint a zoomable image on an SKXamlCanvas from the view model | KenneyAssetBrowser |
 | Show SVG art | [GraphicsAndRendering](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-GraphicsAndRendering.md) | Rasterize SVG art with the CodeBrix SkiaSvg library | KenneyAssetBrowser |
@@ -176,7 +178,7 @@ File: [BLUEPRINTS-PlatformServices.md](https://github.com/ellisnet/CodeBrix.Samp
 
 ## Views, XAML and custom controls
 
-Markup and page code-behind: XAML namespaces and data contexts, theme brush keys, value converters, layouts that reflow, the controls you write yourself, and forwarding pointer, wheel and keyboard input.
+Markup and page code-behind: XAML namespaces and data contexts, theme brush keys, value converters, layouts that reflow, the controls you write yourself, forwarding pointer, wheel and keyboard input, and the PasswordBox mask character.
 
 File: [BLUEPRINTS-ViewsAndControls.md](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md). Guide chapter: [Views and styling](../platform/06-views-and-styling.md).
 
@@ -216,10 +218,11 @@ File: [BLUEPRINTS-ViewsAndControls.md](https://github.com/ellisnet/CodeBrix.Samp
 - [Lay out a document editor shell with tabs a toolbox and pads](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#lay-out-a-document-editor-shell-with-tabs-a-toolbox-and-pads) - The window shape of an editor: menus, toolbars, a tool palette, tabs, dockable pads and a status bar.
 - [Split a page code-behind into named partial files](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#split-a-page-code-behind-into-named-partial-files) - Keep a page with a lot of wiring navigable rather than one long file.
 - [Use FontIcon glyphs so icons survive on a device with no system fonts](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#use-fonticon-glyphs-so-icons-survive-on-a-device-with-no-system-fonts) - Icons that render identically on a desktop and on a device with no installed fonts.
+- [Set the PasswordBox mask character back to WinUI's black circle](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ViewsAndControls.md#set-the-passwordbox-mask-character-back-to-winuis-black-circle) - The platform masks with the bullet by design; how to ask for the black circle on one box or every box, and which shipped fonts can actually draw it.
 
 ## Theming and styling
 
-How an application decides what it looks like: a palette written as plain data, following or overriding the desktop appearance, repainting into another scheme at run time, re-keying the stock control families, brushes that belong to an item rather than to the application, a visual language of borders, pills and hairlines, the shipped symbols font, and proving a capability before designing around it.
+How an application decides what it looks like: a palette written as plain data, following or overriding the desktop appearance, repainting into another scheme at run time, re-keying the stock control families, brushes that belong to an item rather than to the application, a visual language of borders, pills and hairlines, the shipped symbols font, proving a capability before designing around it, and keeping a text box's own colors while it is hovered or focused.
 
 File: [BLUEPRINTS-ThemingAndStyling.md](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ThemingAndStyling.md). Guide chapter: [Views and styling](../platform/06-views-and-styling.md).
 
@@ -233,6 +236,7 @@ File: [BLUEPRINTS-ThemingAndStyling.md](https://github.com/ellisnet/CodeBrix.Sam
 - [Remember the chosen scheme and read it back before the first page](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ThemingAndStyling.md#remember-the-chosen-scheme-and-read-it-back-before-the-first-page) - Open wearing the scheme the user last chose, rather than flickering into it after the first frame.
 - [Prove a platform capability with a throwaway page before designing around it](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ThemingAndStyling.md#prove-a-platform-capability-with-a-throwaway-page-before-designing-around-it) - Answer the question a design depends on with the smallest page that can answer it, write the answer down, then delete the page.
 - [Drive a status line color and glyph from a small enum](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ThemingAndStyling.md#drive-a-status-line-color-and-glyph-from-a-small-enum) - One line that can look calm, busy, patient, finished or wrong, with the text, the glyph and the color set together.
+- [Keep a text box's own colors while it is hovered or focused](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-ThemingAndStyling.md#keep-a-text-boxs-own-colors-while-it-is-hovered-or-focused) - Why a styled TextBox or PasswordBox goes dark under the pointer and when focused, and the theme resources to override on the box, the page or the application so it keeps its own look.
 
 ## Graphics and rendering
 

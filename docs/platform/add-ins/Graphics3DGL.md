@@ -487,6 +487,7 @@ apt install libegl1 libgl1-mesa-dri
 - [PolyHavenBrowser](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PolyHavenBrowser) in [CodeBrix.Samples](../../samples/README.md) - a glTF preview in a GL canvas, automatic camera framing, a second translucent pass, and off-screen product shots
 - [PolyHavenBrowser_viewer_only](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PolyHavenBrowser_viewer_only) in [CodeBrix.Samples](../../samples/README.md) - three interchangeable GPU backends behind one interface, composited onto a Skia canvas
 - [KenneyAssetBrowser](https://github.com/ellisnet/CodeBrix.Samples/tree/main/KenneyAssetBrowser) in [CodeBrix.Samples](../../samples/README.md) - a 3D model preview alongside image, sprite-sheet and animation viewers
+- [SimpleCbxVideoPlayer](https://github.com/ellisnet/CodeBrix.Samples/tree/main/SimpleCbxVideoPlayer) in [CodeBrix.Samples](../../samples/README.md) - the reference application for the `SkiaGLCanvasElement` path: a GPU canvas and a processor canvas in one cell, the one that started wins, and the `GRContext` it hands out is what makes a shader color grade possible
 - [EmulateFrameBufferDemo](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform/EmulateFrameBufferDemo) in CodeBrix.Platform - `src/EmulateFrameBufferDemo.Core/Rendering/ModelViewerCanvas.cs` is a complete `GLCanvasElement` subclass: glTF loading, shader compile and link with error reporting, buffer and texture upload in `Init`, a turntable loop, and cleanup in `OnDestroy`
 
 ## Documentation and source

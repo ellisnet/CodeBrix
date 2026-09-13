@@ -1768,6 +1768,11 @@ Win32-Skia and macOS heads, and is built and run on its own.
 | padcheck | An interactive hardware check for gamepads that drives the real `SdlGamepadManager`, so what it prints is what a game would see | [`tools/padcheck`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tools/padcheck) |
 | sdl2_library_building | The hand-run script that builds the Windows-on-ARM64 SDL2 binary the gamepad package ships, verifying the source against a pinned hash and writing a provenance file beside the output | [`tools/sdl2_library_building`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tools/sdl2_library_building) |
 
+The reference application in [CodeBrix.Samples](https://github.com/ellisnet/CodeBrix.Samples) for the music system is
+[GameEngineMusicDemo](https://github.com/ellisnet/CodeBrix.Samples/tree/main/GameEngineMusicDemo), a standalone six-head
+application built against the published packages that puts the music control surface in an ordinary
+XAML page and generates every asset it plays on first run.
+
 Run any sample from the repository root, swapping the head project for `<Name>.Win32Skia` or
 `<Name>.MacOS`:
 

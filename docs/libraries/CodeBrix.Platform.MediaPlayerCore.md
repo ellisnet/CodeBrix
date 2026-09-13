@@ -943,6 +943,11 @@ dotnet run --project CodeBrixPlatform/WebcamViewer.WinWpfSkia
 dotnet run --project WebcamViewer.Wpf                                # Windows
 ```
 
+The reference application in [CodeBrix.Samples](https://github.com/ellisnet/CodeBrix.Samples) is
+[WebcamViewer](https://github.com/ellisnet/CodeBrix.Samples/tree/main/WebcamViewer), a six-head CodeBrix.Platform viewer built
+against the published packages, with a camera picker, an audio-monitor switch, a folder picker and a
+Photo button that writes the frame on screen as a PNG.
+
 Overlay burn-in and video recording are deliberately not in the sample. For the two-mode
 capture-then-paint flow with mirrored UX and hand tracking, see the WebcamPainter application in the
 [sample repositories](../samples/README.md).

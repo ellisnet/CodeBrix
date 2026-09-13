@@ -986,6 +986,10 @@ head is a Windows-targeted project and renders in software.
 | Terminal bridge library | Bridges a CodeBrix.Docker exec stream into the TerminalView control | [`samples/RedisSetupTool/src/libs/RedisSetupTool.TerminalView`](https://github.com/ellisnet/CodeBrix.Docker/tree/main/samples/RedisSetupTool/src/libs/RedisSetupTool.TerminalView) |
 | Library test suite | An integration suite against a real daemon: it builds images, provokes genuine OOM kills and CPU throttling, runs the containerized analysis tools, and stands up its own sshd container to exercise the `ssh://` transport | [`tests/CodeBrix.Docker.Tests`](https://github.com/ellisnet/CodeBrix.Docker/tree/main/tests/CodeBrix.Docker.Tests) |
 
+The reference application in [CodeBrix.Samples](https://github.com/ellisnet/CodeBrix.Samples) is
+[RedisSetupTool](https://github.com/ellisnet/CodeBrix.Samples/tree/main/RedisSetupTool), a standalone six-head control panel built
+against the published packages.
+
 The unit the sample's user manages is an *instance*, not a topology, so two instances of the same
 topology coexist. A host port allocator hands out free ports, and instance identity lives in Docker
 labels - `codebrix.redissetup.instance`, `.topology`, `.role`, `.node` and friends - so the tool can be

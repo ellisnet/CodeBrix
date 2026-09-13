@@ -766,6 +766,8 @@ TkCanvas:
 
 The whole application-side C# of the first sample is one boot method: create the interpreter, turn on `CacheParsedScripts` and `ProductionMode`, `TkBootstrap.Register`, `TclTkExtras.RegisterAll`, `TkTclBridge.RegisterHosted`, then source the bootstrap script and the program. Run it with `dotnet run --project src/DRAKON.Brix.LinuxX11` from the sample folder, substituting the head you want; the heads reference the `src/` projects directly, so the sample always exercises the working tree. The second sample was scaffolded from the same template and keeps those project names, so it runs the same way from its own folder.
 
+The reference application in [CodeBrix.Samples](https://github.com/ellisnet/CodeBrix.Samples) is [DRAKON.Brix](https://github.com/ellisnet/CodeBrix.Samples/tree/main/DRAKON.Brix), a standalone six-head application built against the published packages, with a test suite that boots the program headlessly and drives its real file-open path over a corpus of documents.
+
 The oracle tool needs a host Tk shell (`wish`) and an X11 display and is run only when a scenario changes; the tests never run it, because they replay the committed fixtures.
 
 ## Documentation and source

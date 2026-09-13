@@ -292,6 +292,7 @@ There is no head-specific setup and no head project changes: the control works o
 
 - [CodeBrix.Plotter](../../libraries/CodeBrix.Plotter.md) - the plotting engine this control hosts, and the reference for everything model-side: series, axes, annotations, legends, palettes, the controller and command model, and the exporters
 - [PlotterViewDemo](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform/PlotterViewDemo) - a chart gallery driven by a drop-down: live streaming signal, function series, bar chart, scatter, heat map through a color axis, and pie, plus a Reset view button and a hint line documenting the interaction model. No hardware required
+- [PicoScope.Brix](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PicoScope.Brix) in [CodeBrix.Samples](../../samples/README.md) - the reference application: a live oscilloscope trace streamed into this control from a driver callback on its own thread, with a simulated device when no instrument is attached
 - [TextLayout](TextLayout.md) - the text engine this add-in deliberately does not use, and the one every `TextBlock` does
 
 ## Documentation and source

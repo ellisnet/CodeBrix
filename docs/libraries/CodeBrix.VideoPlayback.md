@@ -952,6 +952,11 @@ The Linux frame-buffer head is run from a text console rather than from inside a
 | AssetAuthoring | The library's reference consumer: turns a plan entry into a `VideoAuthoringRequest` and regenerates the sample-video corpus | [`tools/CodeBrix.VideoPlayback.AssetAuthoring`](https://github.com/ellisnet/CodeBrix.VideoPlayback/tree/main/tools/CodeBrix.VideoPlayback.AssetAuthoring) |
 | Golden corpus | Small synthetic media files with an `ffprobe` oracle beside each one, and the `.cube` corpus the lookup-table engine is measured against | [`tests/assets`](https://github.com/ellisnet/CodeBrix.VideoPlayback/tree/main/tests/assets) |
 
+The reference application in [CodeBrix.Samples](https://github.com/ellisnet/CodeBrix.Samples) is
+[SimpleCbxVideoPlayer](https://github.com/ellisnet/CodeBrix.Samples/tree/main/SimpleCbxVideoPlayer), a six-head
+CodeBrix.Platform player built against the published packages, grading the picture with a chain of
+`.cube` tables it can bake back out as one file.
+
 The tools run from a clone, and the verbs are worth knowing:
 
 ```bash

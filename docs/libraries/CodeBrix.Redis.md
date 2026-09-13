@@ -705,6 +705,11 @@ CommandFlags.FireAndForget   CommandFlags.PreferReplica   CommandFlags.DemandMas
 The repository ships no sample applications. Its non-package content is the test side, and those
 suites are the most complete worked examples of the library anywhere in it.
 
+The reference application is [RedisSetupTool](https://github.com/ellisnet/CodeBrix.Samples/tree/main/RedisSetupTool)
+in [CodeBrix.Samples](https://github.com/ellisnet/CodeBrix.Samples), a six-head CodeBrix.Platform control panel that stands Redis up
+in a catalog of topologies on a local Docker daemon, connects a real client to each one and reports
+every check it ran, then tears the topology down again.
+
 | Name | What it demonstrates | Where |
 | --- | --- | --- |
 | Client tests | The client and the command surface | [`tests/CodeBrix.Redis.Tests`](https://github.com/ellisnet/CodeBrix.Redis/tree/main/tests/CodeBrix.Redis.Tests) |

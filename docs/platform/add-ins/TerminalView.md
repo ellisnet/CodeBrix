@@ -338,6 +338,7 @@ TerminalControl : Control
 - [CodeBrix.SSH](../../libraries/CodeBrix.SSH.md) - the family's SSH transport, and the `ShellStream` the bridge example drives
 - [TextLayout](TextLayout.md) - the text engine that measures the cell and lays out every run
 - [TerminalViewDemo](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform/TerminalViewDemo) - a local echo loop with a Replay showcase button that plays an ANSI / SGR feature tour, a color-scheme selector, a Reset terminal button and a live grid-size readout. No shell or PTY required
+- [RedisSetupTool](https://github.com/ellisnet/CodeBrix.Samples/tree/main/RedisSetupTool) in [CodeBrix.Samples](../../samples/README.md) - the reference application: a tab strip of live terminals, each one fed by an interactive shell running inside a container
 
 ## Documentation and source
 

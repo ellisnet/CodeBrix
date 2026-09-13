@@ -934,6 +934,12 @@ process and the vendor's `ps2000.dll` resolvable at run time from a separate ins
 vendor's own desktop application closed first, because only one process may hold the device open.
 Without hardware, `PicoScopeFinder` falls back to `SimulatedPicoScope`, so the sample still runs.
 
+The reference application in [CodeBrix.Samples](https://github.com/ellisnet/CodeBrix.Samples) is
+[PicoScope.Brix](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PicoScope.Brix), a six-head CodeBrix.Platform oscilloscope
+front end that hosts a live `PlotModel` through the
+[PlotterView add-in](../platform/add-ins/PlotterView.md), streams into it from the driver's own
+polling thread, and drives the `ps2000` driver on Linux as well as Windows.
+
 The example library is test-support code: it is not part of the library or the NuGet package, and it
 is organized as `Series/`, `Axes/`, `Annotations/`, `Showcases/`, `CustomSeries/`, `Misc/`, `Issues/`
 and `Discussions/`. The repository holds no build tools, scripts or generators.

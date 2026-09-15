@@ -599,6 +599,13 @@ Android and iOS, in containers and on web servers. An application that adds the 
 runtime-identifier list instead, and must keep the `runtimes/` folder the build produces beside its
 assemblies.
 
+The reference application in [CodeBrix.Samples](https://github.com/ellisnet/CodeBrix.Samples) is
+[InannaRosette](https://github.com/ellisnet/CodeBrix.Samples/tree/main/InannaRosette), which composes a
+hand-placed, multi-page report with `XGraphics` rather than through the document model: it grows its own page
+cursor for margins and breaks, draws as `XGraphicsPath` geometry the same vector art its pages draw on screen,
+and registers an `EmbeddedFontResolver` per face name from fonts embedded in its own library, so the finished
+file carries a subset of every glyph it used.
+
 ## Pitfalls
 
 - Do not confuse a package ID with a namespace. The `.MitLicenseForever` suffix belongs to the package

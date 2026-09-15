@@ -81,6 +81,7 @@ The add-ins - added once in `.Core`:
 - [`CodeBrix.Platform.TextLayout.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.TextLayout.ApacheLicenseForever)
 - [`CodeBrix.Platform.AdvancedTextEdit.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.AdvancedTextEdit.ApacheLicenseForever)
 - [`CodeBrix.Platform.FlexPanel.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.FlexPanel.ApacheLicenseForever)
+- [`CodeBrix.Platform.CommandBar.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.CommandBar.ApacheLicenseForever)
 - [`CodeBrix.Platform.TerminalView.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.TerminalView.ApacheLicenseForever)
 - [`CodeBrix.Platform.PlotterView.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.PlotterView.ApacheLicenseForever)
 - [`CodeBrix.Platform.AppSettings.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.AppSettings.ApacheLicenseForever)
@@ -215,6 +216,7 @@ add-in when the capability belongs on a page, and the library directly when it d
 | [Graphics3DGL](../platform/add-ins/Graphics3DGL.md) | `CodeBrix.Platform.Graphics3DGL.ApacheLicenseForever` | [CodeBrix.Platform.OpenGL](CodeBrix.Platform.OpenGL.md) |
 | [TextLayout](../platform/add-ins/TextLayout.md) | `CodeBrix.Platform.TextLayout.ApacheLicenseForever` | [CodeBrix.Platform.Unicode](CodeBrix.Platform.Unicode.md) supplies the ICU natives it needs |
 | [AdvancedTextEdit](../platform/add-ins/AdvancedTextEdit.md) | `CodeBrix.Platform.AdvancedTextEdit.ApacheLicenseForever` | None; it builds on the TextLayout add-in |
+| [CommandBar](../platform/add-ins/CommandBar.md) | `CodeBrix.Platform.CommandBar.ApacheLicenseForever` | None; it brings the Svg add-in, and through it [CodeBrix.SkiaSvg](CodeBrix.SkiaSvg.md), to draw vector icons |
 | [Graphics2DSK](../platform/add-ins/Graphics2DSK.md) | `CodeBrix.Platform.Graphics2DSK.ApacheLicenseForever` | None |
 | [SkiaSharpViews](../platform/add-ins/SkiaSharpViews.md) | `CodeBrix.Platform.SkiaSharp.Views.MitLicenseForever` | None |
 | [Lottie](../platform/add-ins/Lottie.md) | `CodeBrix.Platform.Lottie.ApacheLicenseForever` | None |

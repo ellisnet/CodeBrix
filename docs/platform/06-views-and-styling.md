@@ -796,6 +796,8 @@ columnSplitter.DragDelta += (_, delta) =>
 
 Notice the sign: the pane grows as the splitter moves the other way, and the delta is relative to the previous report, so the owner clamps against its own minimum. `ProtectedCursor` is a protected member of `UIElement`, which is why setting a cursor needs a subclass. The XAML reserves an empty column for the splitter and the control is added in code on load. Writing the new size to settings on every delta is cheap only because the settings store skips unchanged values - see [07 - Platform services](07-platform-services.md).
 
+Where the regions you want are panes rather than an arbitrary pair of elements, `TriPaneView` is already there: a three-pane control in the toolkit inside the core CodeBrix.Platform package, so a project that references the platform adds nothing to use it. It owns the dividers and their grips, takes a percentage and a minimum length per pane, and can minimize a pane and restore it. The control is sealed, so a window that wants a fourth region owns a pair of them rather than deriving from one - [Nest two TriPaneView controls to put four regions around an editor](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#nest-two-tripaneview-controls-to-put-four-regions-around-an-editor) and [Show and hide a TriPaneView pane by minimizing and restoring it](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#show-and-hide-a-tripaneview-pane-by-minimizing-and-restoring-it).
+
 ### A modeless options panel
 
 A modal dialog that dims the window defeats a live preview. A popup-based host with its own title bar returns a `Task<bool>`, so the calling code awaits it exactly like a dialog:
@@ -967,6 +969,8 @@ private static MenuBarItem BuildMenu(string title, params Command[] commands)
 ```
 
 Notice that a `null` entry in the command array is a separator, which keeps the call sites readable. With `SimpleCommand` the same builder would bind `CanExecute` instead of subscribing to an enabled-changed event, and the XAML would still declare no commands. A missing icon must not take the menu down: the icon factory can return null and the builder omits it.
+
+Toolbars come from the same command objects. The [CommandBar add-in](add-ins/CommandBar.md) supplies the bar itself, a tray that lays several bars out side by side, plain, toggle and drop-down button types, separators and spacers, an overflow chevron, the keyboard walk along a bar and the automation peers, so what the application writes is a list saying what is on each bar and in what order - [Add the CommandBar add-in and build a tray of two toolbars from command objects](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#add-the-commandbar-add-in-and-build-a-tray-of-two-toolbars-from-command-objects) and [Give a panel its own toolbar with the CommandBar add-in](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#give-a-panel-its-own-toolbar-with-the-commandbar-add-in). Keeping that list as data is also what lets a test assert what is on a bar in a process with no window - [Assert a toolbar's contents and a shell's pane arithmetic in host-free tests](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/BLUEPRINTS.md#assert-a-toolbars-contents-and-a-shells-pane-arithmetic-in-host-free-tests).
 
 ### Keyboard shortcuts
 
@@ -1556,6 +1560,9 @@ Notice `DependentUpon`, which nests the partials under the page in a solution vi
 | An image-and-text button | [JustBetweenUs EmbeddedImageButton](https://github.com/ellisnet/CodeBrix.Samples/blob/main/JustBetweenUs/CodeBrixPlatform/JustBetweenUs.Core/Controls/EmbeddedImageButton.cs) |
 | A drawn widget with hit testing | [Pinta.Brix PaletteWidget](https://github.com/ellisnet/CodeBrix.Samples/blob/main/Pinta.Brix/src/libs/Pinta.Brix.Controls/Palette/PaletteWidget.cs) |
 | A splitter bar | [Pinta.Brix ThumbSplitter](https://github.com/ellisnet/CodeBrix.Samples/blob/main/Pinta.Brix/src/libs/Pinta.Brix.Controls/ThumbSplitter.cs) |
+| A drag gesture on a drawn scene, settled by the view model | [InannaRosette MainPage code-behind](https://github.com/ellisnet/CodeBrix.Samples/blob/main/InannaRosette/src/InannaRosette.UI/Views/MainPage.xaml.cs) |
+| A control face drawn in code at a fixed design size | [InannaRosette CardView](https://github.com/ellisnet/CodeBrix.Samples/blob/main/InannaRosette/src/InannaRosette.UI/Controls/CardView.xaml.cs) |
+| A whole design system in one application resource dictionary | [InannaRosette App.xaml](https://github.com/ellisnet/CodeBrix.Samples/blob/main/InannaRosette/src/InannaRosette.UI/App.xaml) |
 | A modeless options panel | [Pinta.Brix FloatingDialogHost](https://github.com/ellisnet/CodeBrix.Samples/blob/main/Pinta.Brix/src/libs/Pinta.Brix.Controls/FloatingDialogHost.cs) |
 | A toolbar rendered from descriptors | [Pinta.Brix ToolBarRenderer](https://github.com/ellisnet/CodeBrix.Samples/blob/main/Pinta.Brix/src/libs/Pinta.Brix.Controls/ToolBarRenderer.cs) |
 | An options panel generated by reflection | [Pinta.Brix EffectOptionsDialog](https://github.com/ellisnet/CodeBrix.Samples/blob/main/Pinta.Brix/src/libs/Pinta.Brix.Controls/EffectOptionsDialog.cs) |
@@ -1597,5 +1604,5 @@ Notice `DependentUpon`, which nests the partials under the page in a solution vi
 
 - [07 - Platform services](07-platform-services.md) - the next chapter: what the page hands the view model so dialogs, pickers and the clipboard work
 - [05 - MVVM the right way](05-mvvm-the-right-way.md) - the properties and commands this markup binds against
-- [FlexPanel add-in](add-ins/FlexPanel.md) - the full reflowing-layout property set
+- [FlexPanel](add-ins/FlexPanel.md) and [CommandBar](add-ins/CommandBar.md) add-ins - the full reflowing-layout property set, and the tool bar family the command model above drives
 - [Reference applications](../samples/README.md) - the complete pages every sample here comes from

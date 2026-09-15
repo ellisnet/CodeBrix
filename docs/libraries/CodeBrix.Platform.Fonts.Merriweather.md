@@ -427,6 +427,13 @@ Armenian or Georgian, since each additional directly-referenced family is anothe
 The repository contains no sample applications, demo apps, tools, scripts or optional test-data
 downloads. It is a single font asset package plus the test project that guards it.
 
+The reference application in [CodeBrix.Samples](https://github.com/ellisnet/CodeBrix.Samples) is
+[InannaRosette](https://github.com/ellisnet/CodeBrix.Samples/tree/main/InannaRosette), which names this
+package's URI as its application-wide default text font and exposes the regular and bold faces as `FontFamily`
+resources that every text style uses, then embeds its own copies of the same faces in the PDF report it
+composes through [CodeBrix.PdfDocuments](CodeBrix.PdfDocuments.md), so the report reads the same on a machine
+with no fonts installed.
+
 | Name | What it demonstrates | Where |
 | --- | --- | --- |
 | Test project | xUnit v3 and SilverAssertions suite that pins the package's contents - font file set, manifest entries, `.targets` behavior and assembly metadata | [`tests/CodeBrix.Platform.Fonts.Merriweather.Tests`](https://github.com/ellisnet/CodeBrix.Platform.Fonts.Merriweather/tree/main/tests/CodeBrix.Platform.Fonts.Merriweather.Tests) |

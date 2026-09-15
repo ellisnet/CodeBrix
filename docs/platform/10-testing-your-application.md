@@ -1277,6 +1277,8 @@ public async Task Compose_and_render_fixture_offline_produces_multipage_pdf()
 
 Notice that the page-count assertion is a lower bound rather than an equality, because the content can change, and that the output is written to a folder under the test binary's base directory so a failure leaves something to look at.
 
+Two recipes push that further. Pinning every input the output derives from to a constant - the same items, the same positions, the same timestamp, built by a named fixture method rather than assembled test by test - is what lets a suite assert the exact sentence a generator wrote rather than that the text is not empty: [Pin every fixture to fixed ids and a fixed timestamp so tests can assert exact sentences](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#pin-every-fixture-to-fixed-ids-and-a-fixed-timestamp-so-tests-can-assert-exact-sentences). And when the thing under test is a parser whose only output is drawing calls, giving it a private sink interface and a second implementation that counts what it is asked to draw puts the grammar under test with no document constructed at all: [Test a parser through a counting sink that produces no document](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#test-a-parser-through-a-counting-sink-that-produces-no-document).
+
 ## Live tests that opt in
 
 A few tests genuinely need the network or a real account, and they must not fail the suite for anyone who does not have one. Either the credentials come from environment variables and the class skips itself when they are absent, or the live tests carry a category trait and share one fixture so a filter can exclude the whole set.

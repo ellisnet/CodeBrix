@@ -2318,6 +2318,7 @@ Notice the caching field: `GatherInfo` is awaited once. Pass `withConsoleOutput:
 | An undo history you can travel through | [Pinta.Brix MainPage code-behind](https://github.com/ellisnet/CodeBrix.Samples/blob/main/Pinta.Brix/src/Pinta.Brix.UI/Views/MainPage.xaml.cs) |
 | A tab per open document, in sync both ways | [Pinta.Brix MainPage code-behind](https://github.com/ellisnet/CodeBrix.Samples/blob/main/Pinta.Brix/src/Pinta.Brix.UI/Views/MainPage.xaml.cs) |
 | Selection state in button captions | [PainDiagram MainViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/PainDiagram/Shared/ViewModels/MainViewModel.cs) |
+| A whole table owned by the view model, with delegates telling the page what changed | [InannaRosette MainViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/InannaRosette/src/InannaRosette.Core/ViewModels/MainViewModel.cs) |
 
 ## Checklist
 

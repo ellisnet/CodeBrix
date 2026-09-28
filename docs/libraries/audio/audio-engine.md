@@ -2,7 +2,7 @@
 
 # The bundled audio engine
 
-**The `CodeBrix.Audio.MitLicenseForever` package ships a second assembly,
+**The `CodeBrix.Audio.MitLicenseForever` package brings in a second assembly,
 `CodeBrix.Audio.Engine`, alongside `CodeBrix.Audio`: a full cross-platform audio engine whose device
 playback and recording, effects, editing and mixing, MIDI, metadata, synthesis and visualization all
 live in its own namespaces.** Both assemblies are referenced automatically, and there is no separate
@@ -14,7 +14,7 @@ shows.
 | | |
 | --- | --- |
 | **Repository** | [ellisnet/CodeBrix.Audio](https://github.com/ellisnet/CodeBrix.Audio) |
-| **Packages** | [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever) - one package, two assemblies |
+| **Packages** | [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever) - one reference, two assemblies: both ship in [`CodeBrix.Audio.Core.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.Core.MitLicenseForever), which the desktop package references and supplies the native backend for |
 | **License** | MIT; see [License](#license) |
 | **Requires** | .NET 10 or later. No system audio package and no system-wide codec is required on Windows, macOS or Linux |
 | **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application |
@@ -206,9 +206,9 @@ the player that consumes them, `PacketAudioPlayer`, is a `CodeBrix.Audio` type. 
 ## License
 
 CodeBrix.Audio is licensed under the MIT License, and the license is also named in the package ID
-(`CodeBrix.Audio.MitLicenseForever`), which covers both bundled assemblies. The license notice for the
-bundled native backend travels with the native binaries into your application's output folder. For the
-provenance and licensing of open source code included in this library, see
+(`CodeBrix.Audio.MitLicenseForever`), and in that of the Core package that carries both assemblies.
+The license notice for the bundled native backend travels with the native binaries into your
+application's output folder. For the provenance and licensing of open source code included in this library, see
 [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Audio/blob/main/THIRD-PARTY-NOTICES.txt)
 in the repository.
 

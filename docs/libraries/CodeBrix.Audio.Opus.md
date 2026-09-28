@@ -14,7 +14,7 @@ application, whenever Opus has to be one of the formats your audio handles.
 | **Repository** | [ellisnet/CodeBrix.Audio.Opus](https://github.com/ellisnet/CodeBrix.Audio.Opus) |
 | **Packages** | [`CodeBrix.Audio.Opus.BsdLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.Opus.BsdLicenseForever) |
 | **License** | BSD-3-Clause; see [License](#license) |
-| **Requires** | .NET 10 or later, and [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever), which the package pulls in automatically |
+| **Requires** | .NET 10 or later, and [`CodeBrix.Audio.Core.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.Core.MitLicenseForever), which the package pulls in automatically. A desktop program that plays or records `.opus` also references the desktop package, [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever) |
 | **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application |
 | **Platforms** | Everywhere CodeBrix.Audio works. Nothing is called through P/Invoke and no binaries ship, so the package places no restriction on the runtime identifiers your application may publish for |
 
@@ -129,8 +129,10 @@ media.Play();
 finished.Wait();
 ```
 
-Nothing else is added to the project: one `PackageReference`, no native-asset package and no
-platform-specific payload.
+Decoding and encoding need nothing more, but the package depends on CodeBrix.Audio's Core package,
+which opens no audio device, so a program that plays, like this one, also references the desktop package,
+`CodeBrix.Audio.MitLicenseForever`. Nothing else is added to the project: no native-asset package and
+no platform-specific payload.
 
 ## Key concepts
 
@@ -521,8 +523,8 @@ XML documentation ships alongside the assembly.
 
 CodeBrix.Audio.Opus is licensed under the BSD 3-Clause License, and the license is also named in the
 package ID (`CodeBrix.Audio.Opus.BsdLicenseForever`). License acceptance is required. Note that the
-package it depends on, `CodeBrix.Audio.MitLicenseForever`, is licensed under the MIT License, while this
-one is BSD 3-Clause. For the provenance and licensing of open source code included in this library, see
+package it depends on, `CodeBrix.Audio.Core.MitLicenseForever`, is licensed under the MIT License, while
+this one is BSD 3-Clause. For the provenance and licensing of open source code included in this library, see
 [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Audio.Opus/blob/main/THIRD-PARTY-NOTICES.txt)
 in the repository.
 

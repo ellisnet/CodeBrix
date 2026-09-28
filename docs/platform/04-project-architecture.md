@@ -553,9 +553,9 @@ This is the documented exception to "exactly one platform package": a native dep
 Some heads only build where they run, so keep one solution per operating system - or one cross-platform solution plus a Windows superset - all sharing the same project files:
 
 ```text
-JustBetweenUs.Windows.sln   all six Skia heads + WinUI + WPF + Mobile + Encryption + tests
-JustBetweenUs.Linux.sln     Skia heads except WinWpfSkia + Encryption + tests
-JustBetweenUs.MacOS.sln     Skia heads except WinWpfSkia + Mobile + Encryption + tests
+JustBetweenUs.Windows.slnx  all six Skia heads + WinUI + WPF + Mobile + Encryption + tests
+JustBetweenUs.Linux.slnx    Skia heads except WinWpfSkia + Encryption + tests
+JustBetweenUs.MacOS.slnx    Skia heads except WinWpfSkia + Mobile + Encryption + tests
 ```
 
 Notice which head is excluded and which is not. Exclude a head only when it genuinely cannot restore: the Win32 Skia head targets the plain framework moniker and restores and builds anywhere even though it only runs on Windows, while the WPF-hosted head targets a Windows framework moniker and cannot - unless you let it:

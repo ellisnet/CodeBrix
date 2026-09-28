@@ -195,8 +195,8 @@ sweep test tones; `WaveChannel32` promotes a `WaveStream` to 32-bit float with v
 ### Adding a codec from another package
 
 CodeBrix.Audio is MIT and stays that way, so a codec under a different license belongs in its own
-package that depends on this one. Everything such a package needs is public API; nothing here has to
-change to accept one. There are two seams, because there are two ways audio gets opened.
+package that depends on CodeBrix.Audio's Core package. Everything such a package needs is public API;
+nothing here has to change to accept one. There are two seams, because there are two ways audio gets opened.
 
 Playback identifies formats by **content**. Supply an `ICodecFactory` and register it:
 

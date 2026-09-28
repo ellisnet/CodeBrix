@@ -17,7 +17,7 @@ rather than a `<sample>`. It is pure managed code with no native payload of its 
 | **Repository** | [ellisnet/CodeBrix.Audio](https://github.com/ellisnet/CodeBrix.Audio) |
 | **Packages** | [`CodeBrix.Audio.ModestSynth.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.ModestSynth.MitLicenseForever) |
 | **License** | MIT; see [License](#license) |
-| **Requires** | .NET 10 or later, and [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever), which the package pulls in automatically |
+| **Requires** | .NET 10 or later, and [`CodeBrix.Audio.Core.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.Core.MitLicenseForever), which the package pulls in automatically. A desktop program that plays what it synthesizes also references the desktop package, [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever) |
 | **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application |
 | **Platforms** | Everywhere CodeBrix.Audio works. Rendering is pure managed code: no P/Invoke, no `runtimes/` folder, nothing to rebuild when a platform is added |
 
@@ -65,8 +65,9 @@ through `DecentSamplerSynthesizer` is where they live.
 > [!IMPORTANT]
 > The two packages move together. `CodeBrix.Audio.ModestSynth.MitLicenseForever` is built and
 > published from the same repository as `CodeBrix.Audio.MitLicenseForever`, at the same version, so
-> the two always match. It depends on that package and on nothing else, and it is separate because
-> synthesis is not something every application that reads a WAV file needs to carry.
+> the two always match. It depends on `CodeBrix.Audio.Core.MitLicenseForever` and on nothing else, and
+> it is separate because synthesis is not something every application that reads a WAV file needs to
+> carry. A desktop program that plays through a device adds `CodeBrix.Audio.MitLicenseForever` itself.
 
 ## Getting started
 
@@ -1051,8 +1052,8 @@ XML documentation ships alongside the assembly.
 
 CodeBrix.Audio.ModestSynth is licensed under the MIT License, and the license is also named in the
 package ID (`CodeBrix.Audio.ModestSynth.MitLicenseForever`). License acceptance is required at install
-time. The package it depends on, `CodeBrix.Audio.MitLicenseForever`, is MIT as well, and the two are
-built and published from one repository at the same version. For the provenance and licensing of open
+time. The package it depends on, `CodeBrix.Audio.Core.MitLicenseForever`, is MIT as well, and the two
+are built and published from one repository at the same version. For the provenance and licensing of open
 source code included in this library, see
 [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Audio/blob/main/THIRD-PARTY-NOTICES.txt)
 in the repository.

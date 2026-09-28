@@ -5,17 +5,19 @@
 **CodeBrix.Platform.GameEngine is a fully managed, cross-platform 2D and 2.5D game engine for .NET:
 tile maps, tilesheets, sprites, layered scenes, cameras and views, animation, physics and collision,
 input, audio, a music system, save and load, and a global pause that parks the whole engine at
-near-zero CPU.** The repository publishes two packages with distinct jobs. The engine package is the
+near-zero CPU.** The repository publishes four packages with distinct jobs. The engine package is the
 game engine itself, and one reference brings both of its assemblies: the platform-agnostic engine core
-and the host layer that runs it on CodeBrix.Platform across all six heads. The gamepad package is an
-optional game controller add-on, kept separate precisely so that games which do not want a native SDL2
-dependency do not inherit one.
+and the host layer that runs it on CodeBrix.Platform across all six heads. The other three are optional
+add-ons, each kept separate so that a game that does not use it does not inherit its dependencies: the
+gamepad package adds game controllers through SDL2, the Kenney assets package reads Kenney asset packs
+straight from their downloaded zips, and the generated music package plays endless generated music
+through [CodeBrix.Audio.MusicGeneration](CodeBrix.Audio.MusicGeneration.md).
 
 | | |
 | --- | --- |
 | **Repository** | [ellisnet/CodeBrix.Platform.GameEngine](https://github.com/ellisnet/CodeBrix.Platform.GameEngine) |
-| **Packages** | [`CodeBrix.Platform.GameEngine.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.MitLicenseForever) - the engine<br>[`CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever) - optional gamepad support |
-| **License** | MIT for the engine package; `MIT AND Zlib` for the gamepad package; see [License](#license) |
+| **Packages** | [`CodeBrix.Platform.GameEngine.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.MitLicenseForever) - the engine<br>[`CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever) - optional gamepad support<br>[`CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever) - optional Kenney asset pack support<br>[`CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever) - optional generated music |
+| **License** | MIT for the engine, Kenney assets and generated music packages; `MIT AND Zlib` for the gamepad package; see [License](#license) |
 | **Requires** | .NET 10 or later, and a CodeBrix.Platform application with exactly one head package per executable project. Gamepads on Linux need the system SDL2 runtime |
 | **Use it from** | A CodeBrix.Platform application. The engine core has no UI-framework dependency, so it also runs headless in tests |
 | **Platforms** | All six CodeBrix.Platform heads: Windows Win32-Skia, Windows WPF-Skia, Linux X11, Linux Wayland, Linux frame buffer and macOS |
@@ -72,6 +74,49 @@ dependency do not inherit one.
   playable with keyboard and mouse.
 - The package carries SDL2 native binaries for Windows and macOS. On Linux it uses the system SDL2.
 
+### The Kenney assets package
+
+- Kenney asset packs read where they lie, from the downloaded zips or from extracted folders: nothing
+  is unpacked, renamed or repacked, and the package carries no art of its own.
+- One call attaches it - `Engine.Instance.UseKenneyAssets(paths)` - and from then on every asset in
+  those packs has a key, such as `kenney:pixel-platformer/Tiles/tile_0001`, that the engine's asset
+  provider registry turns into an engine object.
+- Images, sprite atlases, audio, fonts, SVG, Tiled maps and glTF models all arrive as ordinary engine
+  objects: tilesheets, audio resources, typefaces, scene layers imported from a tile map, and models
+  either as data or as sprite frames pre-rendered at load time.
+- `RegisterKenneyAssets` is the form for registration that can run more than once: it skips a pack
+  already registered and reports per path whether it was read, already registered, missing or
+  unreadable.
+- Every pack carries a ready-made credit line for a credits screen (`CreditLine`, and `CreditLines` for
+  all of them).
+- `CheckKeys` checks a game's hand-written keys against the catalog without loading anything and
+  reports the missing ones, `GetKeyCatalog` writes a readable listing of every key by pack with the
+  frame names inside each sprite atlas, and a key that fails to load through the engine's registry
+  names its closest real keys in a "Did you mean" message.
+- No native prerequisite: zip reading, decoding and the model renderer are managed code, so a
+  pre-rendered model sheet needs no GPU and works headless.
+
+### The generated music package
+
+- Endless in-game music generated while the game runs, through
+  [CodeBrix.Audio.MusicGeneration](CodeBrix.Audio.MusicGeneration.md): a model writes MIDI and an
+  instrument library plays it.
+- One call starts it - `Engine.Instance.UseGeneratedMusic(options)` - and the music fades in and never
+  ends. Every `GeneratedMusicOptions` property is optional; among them are the generator, the
+  instrument library, a preset or character words, a tempo, a seed, the seam crossfade and the fade-in.
+- It plays on the engine's music bus, so fades, crossfades, ducking, stingers, the music volume slider
+  and the global engine pause work on it exactly as on a music file. It opens no audio device of its
+  own.
+- `FollowUp` changes the music for a new level or a boss at a bar line without stopping it; calling
+  `UseGeneratedMusic` again switches the model, the instrument library or any session setting.
+- It registers no model and no instrument library: those are the game's choices, one `Register()` line
+  each. With no model registered a recorded piece plays in its place and the engine log says so; with
+  no instrument library there is no sound, the provider reports a fault naming the fix, and the game
+  runs on.
+- Test interfaces for the music stack: the provider is an `IGeneratedMusicSession`, starting one goes
+  through `IGeneratedMusicStarter`, and the engine's `MusicManager` is an `IMusicManager`, so a game's
+  music policy is unit-tested with scripted fakes and no model or audio device.
+
 ```mermaid
 flowchart LR
   Game[Your game library] --> Engine[Engine core assembly]
@@ -80,11 +125,14 @@ flowchart LR
   Host --> Canvas[GameSurfaceCanvas]
   Canvas --> Heads[Six CodeBrix.Platform heads]
   Pads[Gamepad package] --> Engine
+  Kenney[Kenney assets package] --> Engine
+  Music[Generated music package] --> Engine
 ```
 
 Both the engine core and the host assembly ship in the engine package; there is no separate host
-package. The gamepad package plugs into a seam the core defines, and takes the engine package as its
-only automatic dependency.
+package. Each add-on plugs into a seam the core defines: the gamepad package fills the gamepad seam and
+takes the engine package as its only automatic dependency, the Kenney assets package fills the
+asset-provider seam, and the generated music package fills the streaming-music-provider seam.
 
 ## When to use it
 
@@ -155,6 +203,14 @@ development one:
 
 ```bash
 sudo apt install libsdl2-2.0-0
+```
+
+Add the Kenney assets package when the game loads Kenney asset packs, and the generated music package
+when it plays generated music:
+
+```bash
+dotnet add package CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever
+dotnet add package CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever
 ```
 
 The shared library that holds the game looks like this. Every executable head project references it and
@@ -299,15 +355,16 @@ public sealed partial class MainPage : Page
 
 > [!TIP]
 > `FirstStarted` fires once, and `e.NewSize` is the first non-zero layout size. Start the game from
-> that event: before it, the surface has no real size, and `SetRenderResolution` and `UseGpuRendering`
-> must both be set before the first access to `Host`.
+> that event: before it, the surface has no real size. `UseGpuRendering` must be set before the first
+> access to `Host` (it throws otherwise); `SetRenderResolution` may be called at any time, and reaches a
+> host that already exists.
 
 `TinyGameHost` is the class that holds the game, and the [Examples](#examples) section builds a complete
 one.
 
 ## Key concepts
 
-### The two packages and the two assemblies
+### The four packages and the two assemblies
 
 The engine package ships two assemblies. `CodeBrix.Platform.GameEngine.dll` is the engine core: it has
 no UI-framework dependency, its rendering seam is a SkiaSharp `SKImage` plus the
@@ -317,9 +374,10 @@ input adapters, the UI dispatcher, and the game-host base classes, and it runs t
 CodeBrix.Platform across all six heads. One `PackageReference` brings both; there is no separate host
 package.
 
-The gamepad package is an ordinary reference on the engine package, not a lock-step pairing: it uses
-only public engine API, and the two are versioned and published independently. As a consumer you take
-the latest of each; there is no matching-versions rule to observe.
+Each of the three add-on packages takes an ordinary reference on the engine package, not a lock-step
+pairing: each is versioned and published independently of the engine. As a consumer you take the
+latest of each; there is no matching-versions rule to observe. The Kenney assets package also brings a
+managed glTF model reader, and the generated music package brings the music generation stack.
 
 ### The two hosting modes
 
@@ -352,9 +410,19 @@ Engine.Instance.Initialize(...);   // optional; Start() calls it if needed
 Engine.Instance.Start(syncContext); // spins the cycle thread
 Engine.Instance.Pause();            // global pause (see PAUSE section)
 Engine.Instance.Resume();
-Engine.Instance.Stop();             // halts the loop; engine reusable
+Engine.Instance.Stop();             // halts the loop and returns; engine reusable
+Engine.Instance.StopAndWait();      // stops AND joins the cycle thread; engine reusable
 Engine.Instance.Dispose();          // full teardown; engine NOT reusable
 ```
+
+`Stop()` halts the loop and returns at once; a cycle in flight may still be rendering. `StopAndWait()`
+stops the engine and blocks until that background cycle has finished, so a host can release native
+drawing resources without racing a frame. Call it from the hosting thread, outside any engine callback:
+it throws `InvalidOperationException` on the engine thread. It releases a cycle loop parked by the global
+pause, so a paused engine shuts down without being resumed first, and it does not dispose engine state.
+A timer-driven host stops its platform timer and calls it between ticks. `CodeBrixGameHost.Dispose`
+does this for you: it stops platform scheduling and joins the cycle before any cleanup hook runs and
+before the engine is disposed.
 
 `Start()` must receive the UI thread's `SynchronizationContext`; the parameterless overload captures
 `SynchronizationContext.Current`, so call it on the UI thread. For a single-threaded runtime,
@@ -381,6 +449,36 @@ Everything up to the throttle check runs every cycle, unthrottled. Rendering and
 at most `TargetFPS` times per second, and `TargetFPS <= 0` renders unbounded. That split is why input
 stays responsive at low frame rates - and why per-cycle event handlers must be cheap, because they run
 thousands of times per second.
+
+### The fixed step
+
+The engine cycle runs as often as its thread spins, so per-cycle events see variable deltas. For
+deterministic game logic - rules, movement, reading input into the simulation - set a fixed rate and
+handle fixed steps instead. The hook is opt-in, and it works the same in the background-thread loop and
+the timer-driven loop.
+
+`Configuration.FixedUpdateRate` is the steps per second; 0, the default, turns the hook off. Every
+cycle, an accumulator works out how many steps are due, and `Configuration.MaxFixedUpdateSteps`
+(default 5) caps how many one cycle may run: the rest of a stall is discarded, never replayed.
+`Engine.FixedUpdate` is raised once per step with a `FixedUpdateStep` - `StepNumber`, `DeltaSeconds`,
+`Tick`, `IndexInCycle`, `StepsInCycle` and `IsLastInCycle` - and `AfterFixedUpdates` once per cycle
+that ran steps, with the number that ran, which makes it the place to build the next frame. Both run on
+the engine thread, after the background tasks, so a step sees this cycle's input, and before the
+render.
+
+The step clock is frozen across `Engine.Pause()`: no steps run while paused, and the paused interval is
+not replayed after `Resume()`. A handler that pauses or stops the engine ends the cycle's remaining
+steps. Set the rate in `OnEngineInitialized`, because the configuration is replaced before that;
+changing the rate, or switching the hook on, restarts the step clock from the current cycle with no
+backlog. The hook does not change how often the engine cycles or renders. `GameHostBase`, the base of
+`CodeBrixGameHost`, surfaces both events as overrides:
+
+```csharp
+// Adapted from AGENT-README.txt
+protected override void OnEngineInitialized() => Engine.Configuration.FixedUpdateRate = 60;
+protected override void OnFixedUpdate(FixedUpdateStep step) => _game.Step(step.DeltaSeconds);
+protected override void OnAfterFixedUpdates(int stepCount) => _renderer.Publish(_game);
+```
 
 ### The threading model
 
@@ -459,13 +557,68 @@ The `Paused` event is raised once per pause episode, after game execution is qui
 snapshot and the audio suspend, which makes it the safe place for a save-game routine: nothing races
 you. Both host base classes surface it as the `OnEnginePaused()` and `OnEngineResumed()` overrides.
 
+### Window lifecycle
+
+`GameWindowLifecycle`, in `CodeBrix.Platform.GameEngine.Host.Hosting`, wires the application's window
+to the game in one call, in either hosting mode: pause while the window is hidden, resume when it is
+shown, and keyboard focus back to the game canvas whenever the window is activated. Make the call where
+the application creates its window:
+
+```csharp
+// Adapted from AGENT-README.txt
+// App.OnLaunched, after creating MainWindow and navigating to the game page:
+GameWindowLifecycle.Attach(MainWindow);
+MainWindow.Activate();
+```
+
+The full signature is `Attach(Window window, bool pauseWhenHidden = true, bool refocusOnActivate = true)`,
+and the returned object carries `Window`, `PauseWhenHidden`, `RefocusOnActivate`, `IsWindowHidden` and
+`Dispose()` to detach. Hiding the window calls `Engine.Pause()` unless the engine is already paused,
+and showing it calls `Engine.Resume()` only if the helper made that pause: a pause the game made itself
+stays. `pauseWhenHidden: false` keeps the hooks but never pauses. Workspace switches are not visibility
+changes and do not pause. On activation the canvas takes keyboard focus back through its dispatcher, so
+switching away and back does not leave the keyboard silently dead until the canvas is clicked.
+
+The game host need not exist yet when you attach. Every live `CodeBrixGameHost` and
+`SoftwareRenderedGameHostBase` whose canvas is in that window hears about it through four protected
+virtual hooks, all on the UI thread:
+
+| Hook | When it runs |
+| --- | --- |
+| `OnWindowHidden()` | Before the engine pauses, while the game is live: latch the game's own pause menu here so it is up when the player returns |
+| `OnWindowShown()` | After the engine resumed |
+| `OnWindowActivated()` | After the canvas got keyboard focus back |
+| `OnWindowDeactivated()` | When another window has input focus |
+
+### External links
+
+`ExternalLinks`, in `CodeBrix.Platform.GameEngine.Host.Links`, opens a web page or a `mailto:` address
+through the CodeBrix.Platform launcher from any thread:
+
+```csharp
+// Adapted from AGENT-README.txt
+public static Task<bool> OpenAsync(Uri uri);
+public static Task<bool> OpenAsync(string url);
+```
+
+On the UI thread it launches directly; anywhere else, the engine thread included, it posts the launch
+through `Engine.Instance.UiDispatcher`. The task completes with false instead of faulting when the URI
+is relative or the string is not an absolute URI, when there is no UI dispatcher, or when the launcher
+refuses or fails, so show a "No browser was available." line on false. A null `Uri` throws
+`ArgumentNullException`. Never block the UI thread waiting on the task.
+
 ### `GameSurfaceCanvas`
 
 `GameSurfaceCanvas` is the `SKXamlCanvas` subclass in the host assembly that both modes render into.
 `FirstStarted` fires once, when the surface first has a real size. `SetRenderResolution(width, height)`
 pins the engine render resolution and letterboxes frames aspect-fit into the control; non-positive
-values track the control size instead. `UseGpuRendering` opts into the GPU path. Both must be set before
-the first access to `Host`.
+values leave the resolution to `RenderScale`. `TrackWindowSize` (off by default) makes the render
+resolution follow the control's size instead, so a bigger window shows more of the world rather than the
+same image larger; each resize then reallocates the backbuffer, rescales the views and forces a full
+redraw. Pick one way to choose the resolution per surface - `RenderScale`, `SetRenderResolution` or
+`TrackWindowSize` - since tracking supersedes a pinned size on the next resize. `UseGpuRendering` opts
+into the GPU path and must be set before the first access to `Host`; the other two may be set at any
+time.
 
 `Host` is the `RenderSurfaceHost<BackbufferBase>` the engine renders into, and
 `Host.Bind(Scene newScene, bool limitCameraToWorldBoundPx = true)` connects a scene to it. The canvas
@@ -638,6 +791,13 @@ Cycle keys live in a global registry: constructing a `Cycle` with an existing ke
 the tile at cycle end, a throttle of 0 auto-stops the animation, and the animator raises `Started`,
 `Stopped` and `Cycled`. Never call `Animator.Dispose` directly - the owning tile does.
 
+A frame may carry its own display time, for art whose frames hold for different lengths:
+`seq.AddFrame(frame, 0.08)` adds one, `seq.SetDurationSeconds(3, 0.4)` sets one, and
+`SetDurationSeconds(3, null)` returns that frame to the cycle's throttle. A frame without one shows for
+the cycle's `ThrottleTime`, durations must be positive and finite, and they are saved with the cycle.
+`FrameSequence` is a struct, so edit the one inside the cycle (`cycle.Sequence.SetDurationSeconds(...)`)
+or set durations before constructing the `Cycle`.
+
 ### Movement and easing
 
 Every sprite, and every movable direct drawing, has a `.Movement` `MovementController`. Units are the
@@ -659,10 +819,14 @@ Following is `FollowPixelSoft`, `FollowPixelHard`, `FollowTileSoft`, `FollowTile
 the quad, cubic, quart and quint ease-in, ease-out and ease-in-out family, `SmoothStep` and
 `SmootherStep` - or from the `EasingKind` enum.
 
-Direct-drawing movement runs in real time: it advances once per engine update by the real elapsed delta,
-with no fixed-step accumulator and no per-update cap. A non-pause stall, such as a debugger break,
-therefore advances movement by the real elapsed time rather than slowing it down. `Engine.Pause()` is
-unaffected.
+Movement runs on real elapsed time, not on the [fixed step](#the-fixed-step). Sprite movement advances
+once per engine cycle and direct-drawing movement once per rendered frame, each by the real time elapsed
+since its previous update, with no catch-up cap of its own, so `MoveTo`, `MoveBy` and the follows keep
+the wall-clock durations they were given at any update rate; `FixedUpdateRate` and
+`MaxFixedUpdateSteps` govern only the fixed-step hook. (In the timer-driven loop, sprite movement reads
+the engine's fixed simulation clock instead.) A non-pause stall, such as a debugger break, therefore
+advances movement by the real elapsed time rather than slowing it down. `Engine.Pause()` is unaffected:
+paused time is shifted out on resume.
 
 ### Collisions and collision profiles
 
@@ -720,6 +884,15 @@ and opacity), `ImageInstanceLayer` (many instances of one image, in view mode or
 derive from `DirectDrawingBase`, or `DirectDrawingMovableBase` for one with `.Movement`, and override
 `OnDraw`.
 
+A game with no tile map gives its drawings a layer with no tile grid:
+`scene.AddPixelLayer(widthPx, heightPx, zOrder, parallax)` makes a pixel layer
+(`SceneLayer.IsPixelLayer`) that carries scene-layer direct drawings, sprites and colliders like any
+layer, with the same `ZOrder`, `Parallax`, `Visible`, camera and effects behavior, but draws no tiles.
+Internally it is one grid cell the size of the layer, so grid APIs keep working and direct drawings take
+world pixels as usual. A sprite aligns inside that one cell, so give it `HorizAlign` Left and
+`VertAlign` Top and place it with `layer.WorldPxToGrid(worldPx)`. A pixel layer survives save and load
+as a pixel layer.
+
 Lighting has two independent halves that work together or alone: lights that add glow, and darkness
 overlays that subtract it and are punched through by reveal sources. Both draw through the backbuffer
 canvas, so both work on the CPU and the GPU path. `DirectRadialLight` carries `CenterWorldPx`,
@@ -731,6 +904,75 @@ scrolls with its layer. Both share `DarknessColor`, `DarknessOpacity`, the radiu
 and `AddRevealSource`, `TrackLight`, `TrackLightLayer`, `UntrackLight` and `ClearRevealSources`. Lights
 default to `ZOrder` 10,000 and overlays to 20,000, so darkness composites over the lights, and flicker
 is pause-safe: a flickering torch does not jump phase across a pause and resume.
+
+### Draw lists
+
+A draw list draws many short-lived things - shots, HUD text, menus, a whole screen from game state -
+without a retained object for each. The game builds a list of draw commands every frame on the engine
+thread, publishes it, and one `DrawListDrawing` paints the last published copy. The types live in
+`CodeBrix.Platform.GameEngine.Drawing.Direct.DrawLists`.
+
+```csharp
+// Adapted from AGENT-README.txt
+var images = new DrawImageLibrary();            // shared by several lists
+var world = new DrawList(images);               // one list per drawing
+var hud = new DrawList(images);
+
+// once, after the scene exists (a pixel layer is the natural home):
+var layer = scene.AddPixelLayer(1280, 720);
+new DrawListDrawing(host, layer, new Rectangle(0, 0, 1280, 720), world) { ZOrder = 0 };
+new DrawListDrawing(host, host.ViewManager.Views[0],
+                    new Rectangle(0, 0, 1280, 720), hud) { ZOrder = 100 };
+
+// every frame, on the engine thread (AfterBackgroundTasksExecute or
+// GameHostBase.OnAfterFixedUpdates):
+world.Clear();
+world.Image("kenney-space:sheet", "playerShip1_blue.png", x, y, 64, 64,
+            rotation: 0, alpha: 1);             // asset key + frame name
+world.Circle(x, y, 3, SKColors.White);
+world.Publish();
+hud.Clear();
+hud.Text($"SCORE {score}", 640, 40, "ui-font", 28, SKColors.White,
+         SKTextAlign.Center);                   // FontManager key
+hud.HitRegion(640, 40, 400, 48, "pause-button");
+hud.Publish();
+
+// pointer input, in the same coordinates:
+var hit = hud.Published.HitTest(pointerX, pointerY);   // DrawHitRegion?
+if (hit?.Id == "pause-button") { ... }
+```
+
+The commands are `Image` (an `SKImage`, a tilesheet `Frame`, or an asset key plus a frame name),
+`Rectangle` (fill, outline and corner radius), `Circle`, `Text` (one line, through a `FontManager` key
+or an `SKTypeface`) and `HitRegion`. Every command takes an alpha, all but circles take a clockwise
+rotation in degrees, and commands draw back to front in the order added. Coordinates are world pixels
+for a scene-layer drawing and screen pixels for a view drawing. Pictures and typefaces are resolved when
+a command is added, on the building thread: a `DrawImageLibrary` looks asset keys up, and a key or frame
+it cannot find draws nothing, is listed in `Missing` and is logged once with the closest real names,
+rather than throwing mid-frame. `Preload(assetKey, frameNames)` at load time finds spelling mistakes
+before the first frame.
+
+`Publish()` copies the list into an immutable, numbered `DrawListSnapshot` and makes it
+`DrawList.Published`, latest wins. `Published` is safe to read from any thread; every other `DrawList`
+member belongs to the building thread. That makes a draw list safe by construction on both render
+tiers, which retained objects are not. Under CPU rendering the scene is rendered on the engine thread,
+so retained sprites, tiles and drawings are always seen whole. Under GPU rendering the UI thread renders
+the scene while the engine thread is already running the next cycle, with no scene lock between them.
+The collections the renderer walks are copied first, and `ImageInstanceLayer` and `ParticleSurface`
+paint a copy of their last update, so nothing throws - but one GPU frame can show some sprites after
+this cycle's movement and others before it, a custom `OnDraw` that iterates a collection the engine
+thread changes throws inside the frame and that frame is dropped, adding or removing scene layers
+during play is not safe, and native resources the UI thread may be drawing are disposed after
+`Engine.Stop()`, or a rendered frame or more after the game stops using them.
+
+Keep every picture, tilesheet and font a published list uses alive while it is published; nothing in
+the draw-list types disposes them. Two lists are published one after the other, so on the GPU tier a
+frame can pair one list's frame N with the other's frame N+1; when that matters, publish both in one
+object of your own and use the `DrawListDrawing` constructor that takes a `Func<DrawListSnapshot?>`.
+Unit tests that build draw lists need the native Skia library, because image and text commands carry
+real `SKImage` and `SKTypeface` objects: on Linux the test project references
+[`SkiaSharp.NativeAssets.Linux`](https://www.nuget.org/packages/SkiaSharp.NativeAssets.Linux), since
+only an application head brings the native library with it.
 
 ### Display effects
 
@@ -775,6 +1017,14 @@ and fill, centered above its target by `OffsetPx` and following the sprite's `Sp
 carries `Value`, `MaxValue`, `Fraction`, `BarSize`, the fill, warning and critical colors with their
 opt-in thresholds, and the fluent `SetValue`, `SetFillColor`, `SetThresholds`, `Show`, `Hide` and
 `RefreshPosition`. It disposes itself with its target sprite.
+
+A game with no sprite to follow anchors the bar to a world-pixel point on any layer, a pixel layer
+included. The `(host, sceneLayer, anchorPx, maxValue, ...)` constructor centers the bar horizontally on
+the anchor and sits it `DefaultGapPx` (6) above it, so the anchor is the top center of whatever the bar
+labels. `SetAnchor(point)` moves a fixed anchor and throws `InvalidOperationException` on a sprite bar;
+the constructor that takes a `Func<PointF>` reads that provider once per rendered frame on the engine
+thread, so keep it cheap, and repositions only when the point moved. `Target` is null for an anchored
+bar.
 
 ### Timers
 
@@ -835,10 +1085,99 @@ element. For mouse look, `RelativeMouseSession(GameSurfaceCanvas renderSurface)`
 hide, confine and accumulate, a per-tic `ConsumeDelta()` returning `(int DeltaX, int DeltaY)`, `End()`
 and `IsActive`.
 
+Keys the game uses stay with the game. While the canvas has keyboard focus, `CodeBrixKeyboardAdapter`
+marks `KeyDown` and `KeyUp` handled for every key the game uses, so those keys do not also fire an
+application keyboard accelerator, such as a menu item's Ctrl+S, or Tab focus navigation. A key is used
+when it is registered with the `KeyboardEventPoller` or claimed on the adapter; every other key reaches
+the application. A game that only polls `IsDown` declares its keys by claiming them, typically in
+`OnKeyboardAdapterInitialized`:
+
+```csharp
+// Adapted from AGENT-README.txt
+if (KeyboardEventPoller.Adapter is CodeBrixKeyboardAdapter kbd)
+    kbd.ClaimKeys([(int)VirtualKey.Left, (int)VirtualKey.Right,
+                   (int)VirtualKey.Space]);
+```
+
+The adapter also carries `ClaimKey`, `UnclaimKey`, `UnclaimAllKeys` and `IsKeyUsed`, callable from any
+thread, and `MarkUsedKeysHandled` (default true; false leaves every key unhandled).
+`StartMonitoringAllKeys` therefore keeps every key with a focused game, Tab and the function keys
+included. When the canvas loses keyboard focus the adapter releases every held key, so `IsDown` never
+reports a key stuck down after a menu, a dialog or a switch to another window.
+
 The host wires the adapters through extension methods on `Engine`:
 `InitializeCodeBrixKeyboardAdapter(UIElement element)`,
 `InitializeCodeBrixMouseAdapter(UIElement element, MouseEventConfiguration? mouseEventConfiguration = null)`
 and `InitializeCodeBrixTouchAdapter(UIElement element, bool emulateMouse = false)`.
+
+### Input actions
+
+`InputActionMap`, in `CodeBrix.Platform.GameEngine.Input.Actions`, turns keys, gamepad buttons, D-pad
+directions and stick directions into named actions, for menu games and action games alike. It reads
+`IGamepadAdapter`, so it needs no gamepad backend of its own, and it leaves the raw pollers untouched.
+An `InputBindingProfile` binds each action name to one or more `InputBinding` values -
+`InputBinding.Key(keyCode, displayName)`, `GamepadButton(button)`, `DPad(direction)` and
+`StickPush(stick, direction)` - `Copy` and `Rebind` derive another profile from it, and assigning the
+map's `Profile` swaps the controls.
+
+```csharp
+// Adapted from AGENT-README.txt
+var classic = new InputBindingProfile("Classic")
+    .Bind("Left",  InputBinding.Key((int)VirtualKey.Left),
+                   InputBinding.DPad(StickDirection.Left))
+    .Bind("Right", InputBinding.Key((int)VirtualKey.Right),
+                   InputBinding.DPad(StickDirection.Right))
+    .Bind("Fire",  InputBinding.Key((int)VirtualKey.Space, "Space"),
+                   InputBinding.GamepadButton(SdlGamepadButtons.A))
+    .Bind("MenuUp", InputBinding.Key((int)VirtualKey.Up),
+                   InputBinding.DPad(StickDirection.Up),
+                   InputBinding.StickPush(GamepadStick.Left, StickDirection.Up));
+var input = new InputActionMap(classic);          // reads the engine's devices
+input.SetRepeat("MenuUp", new InputRepeat(0.35, 0.1));
+input.Attach(Engine.Instance);                    // polled every engine cycle
+Engine.Instance.Configuration.FixedUpdateRate = 60;
+Engine.Instance.FixedUpdate += step =>
+{
+    input.Update(step.DeltaSeconds);              // FIRST, once per step
+    var move = input.GetAxis("Left", "Right", GamepadStick.Left);
+    if (input.WasPressed("Fire")) Shoot();
+    if (input.IsTriggered("MenuUp")) MoveCursorUp(); // press + repeats
+};
+```
+
+`Attach(engine)` makes the engine call `Poll` on every cycle, after its own input polling and before
+the fixed steps, so presses and releases are latched until the next `Update(stepSeconds)`, which the
+game calls first, once per step. A tap shorter than one fixed step is never lost: the step after it sees
+`WasPressed` and `IsHeld`. Without an engine loop - the software-rendered mode, or tests - call `Update`
+alone, which polls first, or `Poll(elapsedSeconds)` as often as you can plus `Update`.
+
+The reads all describe one step: `IsHeld`, `WasPressed`, `WasReleased`, `IsTriggered` (a press, or a
+hold-to-repeat step when the action has `SetRepeat` timing), `AnyPressed`, `PressedBindings`,
+`GetAxis(negative, positive, stick, vertical)` and `GetStick(stick)`. An action the profile does not
+bind reads as idle, and an action is one press however many bindings drive it. With
+`SetRepeat(action, new InputRepeat(delay, interval))` the press acts at once, the first repeat comes
+after the delay and then one per interval at a constant rate; a long stall gives one repeat, never a
+burst.
+
+Whatever is held at the map's first poll gives no press, no hold and no repeat until it is released.
+`SuppressHeld()` does the same when a screen starts, `ClearLatched()` drops pending edges, and after a
+profile swap, inputs the new profile newly binds that are already held wait for their release too.
+
+A `StickPush` binding turns on past `StickPressThreshold` (0.5), off only inside
+`StickReleaseThreshold` (0.3), and after turning off that axis cannot turn on again, either way, for
+`StickSettleSeconds` (0.08), because a released stick springs back past center and the overshoot would
+otherwise read as a push the other way. `GetAxis` applies `StickDeadZone` (0.15) per axis to the analog
+value; do not also bind the same stick's directions to the two actions you pass it. Buttons count on any
+connected gamepad, each stick reads the pad pushed furthest, and an unplugged pad releases what it held.
+
+`LastDevice` (`InputDeviceKind.KeyboardMouse` or `Gamepad`) follows the most recent press, for
+on-screen prompts, and is settable; `NoteDeviceUsed(kind)` records a mouse click or touch, and
+`SimulatePress(action)` latches a press no binding made. The map claims the keys of its active profile
+on a keyboard adapter that supports claims, which `CodeBrixKeyboardAdapter` does, so they are marked
+handled while the surface has focus; keys the game already claimed or monitors are left alone, and the
+map withdraws only its own claims. It is thread-safe but normally used on the engine thread only. The
+constructor that takes a profile plus keyboard and gamepad functions reads your own adapters instead of
+the engine's, for a game that owns its loop and for tests with fake adapters.
 
 ### Touch and gestures
 
@@ -947,6 +1286,40 @@ form, and `ClearDucks()` rescues a leaked handle. Ducking is a separate multipli
 `MusicPlaylist` adds `MusicRepeatMode` of `None`, `One` or `All`, seeded shuffle, and the usual
 add, remove, reset and move operations, and `MusicManager.Play(playlist, crossfade)` advances on each
 track's `Ended`.
+
+Because `PlayStinger` rides the music bus, the player's music slider and any duck turn it down with the
+music. For a cue that must be heard whatever the music slider says - a boss warning, a game-over sting -
+pick the bus with `PlayStingerOnBus`, whose duck ends with the stinger, or hold the duck yourself with
+`PlayStingerWithHeldDuck`, which plays on `AudioBus.Sfx` by default and returns an `IDisposable` duck
+handle, reference-counted with every other duck, that keeps the music down until you dispose it. The
+duck is held even when the key is not loaded, with a warning logged, because the moment still wants the
+music quiet.
+
+```csharp
+// Adapted from AGENT-README.txt
+MusicManager.Instance.PlayStingerOnBus("sfx.warning", AudioBus.Sfx,
+    volume: 1f, duckMusic: true, duckDepth: 0.3f);   // duck ends with it
+
+_gameOverDuck = MusicManager.Instance.PlayStingerWithHeldDuck(
+    "sfx.game-over", duckDepth: 0.2f,
+    attack: TimeSpan.FromSeconds(2), release: TimeSpan.FromSeconds(1.5));
+// ...
+_gameOverDuck.Dispose();                     // on leaving the screen
+```
+
+`IMusicManager` is the duck, stinger and music-slider surface of `MusicManager`, with the transport
+deliberately left off it. Write the game's music policy - ducking under a pause menu, a stinger per
+level - against it, hand it `MusicManager.Instance` in the game and a recording fake in tests, with no
+audio device and no adapter class of your own.
+
+Endless music that is produced as it plays - generated music, a procedural score - comes through a
+streaming music provider: an `IStreamingMusicProvider` registered at
+`Engine.Instance.Managers.StreamingMusic` and played with `MusicManager.Instance.PlayStreaming(fadeIn)`.
+The result is an ordinary `StreamingMusicTrack`, so fades, ducks, stingers, the music slider and the
+global pause all apply, and `PlayStreaming` is idempotent while that provider streams, so it is safe to
+call on every screen change. Silence while a provider starts or falls behind is part of the contract,
+never an error. The [generated music package](#the-generated-music-package) is the provider in this
+repository.
 
 Adaptive layers come three ways. For MIDI, `track.SetLayerVolume(channel, 0f)` and
 `track.FadeLayerTo(channel, 1f, TimeSpan.FromSeconds(2))` address channels 0 to 15, alongside
@@ -1083,6 +1456,20 @@ serializable pointer to one entry, with `IsValid` guarding a missing one.
 `AudioResourceManager.LoadFromEngineAssetsFile(pack)` bulk-loads every audio entry,
 `SvgResourceManager.Instance.LoadFromEngineAssetsFile(pack)` does the same for SVGs, and
 `TilesheetRegistry.LoadFromAssetsFile` and `LoadFromDefinitionAsset` pull images and `.gts` definitions.
+
+`AssetsFile.Load(Stream stream, string? password = null, bool register = true)` loads a bundle from a
+stream - an embedded resource, packaged application assets, a download - with no file path. The caller
+owns the stream: `Load` reads it from its current position, copies every entry into memory before
+returning and never closes it, so dispose it right away. The result has no file path, so `Save()`
+throws `InvalidOperationException` and an engine save leaves it out.
+
+Assets that live in somebody else's layout - a third-party art pack, an archive, a folder tree - come in
+through an asset provider registered with `Engine.Managers.AssetProviders`. Keys are namespaced as
+`<providerId>:<identifier>`, and the registry's `LoadTilesheet`, `LoadAudio`, `LoadFont`,
+`ImportTiledMap`, `LoadModel` and `LoadModelAnimation` return the engine's own types. A key no provider
+holds throws `KeyNotFoundException` with a "Did you mean" list of up to three of the closest real keys.
+The [Kenney assets package](#the-kenney-assets-package) is the provider in this repository and the
+worked example for writing your own.
 
 ### Configuration
 
@@ -1573,8 +1960,9 @@ Head-specific notes are short. GPU rendering maps to OpenGL or OpenGL ES on the 
 and frame-buffer heads and to Metal on macOS; on Windows it needs a real OpenGL driver, and
 Windows-on-ARM devices commonly need the OpenCL and OpenGL Compatibility Pack from the Microsoft Store.
 Gamepads work on all six heads, frame buffer included, with the system SDL2 runtime as the one Linux
-prerequisite. And the resume trigger for the global pause belongs at the XAML layer of the head's page -
-minimize maps to `Pause()`, restore maps to `Resume()`.
+prerequisite. And resuming from the global pause belongs at the application's UI layer -
+minimize maps to `Pause()`, restore maps to `Resume()` - which `GameWindowLifecycle.Attach(window)` wires
+in one call where the application creates its window.
 
 ## Pitfalls
 
@@ -1591,6 +1979,9 @@ minimize maps to `Pause()`, restore maps to `Resume()`.
   state.
 - Do not call blocking waits - `Task.Wait`, lock convoys, I/O - inside cycle events, timer handlers or
   `OnTic`. One slow handler stalls the whole game.
+- Build a `DrawList` on one thread and read only `DrawList.Published` elsewhere. Under GPU rendering
+  retained sprites can show a mixed frame, and a custom drawing's `OnDraw` must not iterate collections
+  the engine thread changes; a published draw list is safe on both tiers.
 
 ### Mutual exclusivity, each of which throws when violated
 
@@ -1598,12 +1989,16 @@ minimize maps to `Pause()`, restore maps to `Resume()`.
 - `InputPump.PollNow()` only when the engine loop is not running.
 - `AudioSystem.Initialize` before any `SoundChannel` or callback stream.
 - `Presenter.Configure` before the software-rendered loop starts, in `OnLoadContent`.
-- `SetRenderResolution` and `UseGpuRendering` before the first access to `Host`.
+- `UseGpuRendering` before the first access to `Host`. `SetRenderResolution` is safe before or after,
+  and `TrackWindowSize` is the alternative to it: use one or the other, not both.
+- `Engine.StopAndWait()` never on the engine thread.
 - `ConfigureSingleFullView` and `Bind` only from `FirstStarted` onward, on the UI thread.
 
 ### Pause correctness
 
 - Wire the hosting application: minimize to `Pause()`, restore to `Resume()`.
+  `GameWindowLifecycle.Attach(window)` does both, plus refocus on activate, and it resumes only a pause
+  it made itself: a pause the game made stays in place when the window is shown again.
 - Register save-game and pause-screen logic on `Paused`, or `OnEnginePaused`, and tear it down on
   `Resumed`. Never poll `IsPaused` from game logic to stop yourself - the engine already stopped you.
 - Put un-pause input at the UI layer, never on engine input, because the pollers are parked.
@@ -1612,9 +2007,11 @@ minimize maps to `Pause()`, restore maps to `Resume()`.
 
 ### Resources and shutdown
 
-- Dispose the game host when the page closes. `CodeBrixGameHost` stops the loop, unhooks events and
-  tears the engine down in the right order; after `Engine.Dispose()` the singleton is finished for the
-  process.
+- Dispose the game host when the page closes. `CodeBrixGameHost` stops platform scheduling and joins
+  the cycle with `Engine.StopAndWait()` before any cleanup hook runs, then unhooks events and tears the
+  engine down in the right order; after `Engine.Dispose()` the singleton is finished for the process.
+- Releasing native drawing resources by hand: call `Engine.StopAndWait()` first, from a thread that is
+  not the engine thread (it throws there). `Stop()` alone returns while a cycle may still be rendering.
 - `SoftwareRenderedGameHostBase.Dispose` does not dispose the engine, so call `AudioSystem.Shutdown()`
   and `MusicManager.Instance.Dispose()` yourself in that mode.
 - Unsubscribe any engine events you subscribed outside the host base classes; the bases unhook their
@@ -1662,6 +2059,13 @@ public void ShutDown()
   without restoring its state.
 - Keyboard focus: a toolbar click steals focus from the canvas and the engine poller then sees nothing.
   Call `EnsureFocus()` and hand focus back after toolbar interactions.
+- Keys the game registers or claims are marked handled while the canvas has focus, so they never reach
+  an application keyboard accelerator or Tab navigation, and `StartMonitoringAllKeys` takes every key.
+  A key the game only polls with `IsDown` and never claims is left unhandled, so a menu accelerator on
+  it fires as well: claim it with `ClaimKeys`.
+- An `InputActionMap` ignores whatever is held at its first poll until it is released, and
+  `SuppressHeld()` does the same when a screen starts. Call `Update` first in each step, once per step.
+- Set `FixedUpdateRate` in `OnEngineInitialized`: the configuration is replaced before that.
 - Sprite positions are grid cells, while `RenderSize`, the nudges and `CollisionArea` are pixels.
   `SizeNewSpritesToSceneLayer` (default true) sizes new sprites to the layer's tile size rather than the
   frame's native size.
@@ -1682,6 +2086,8 @@ public void ShutDown()
   do not round-trip.
 - `MusicDuckMultiplier` is owned by `MusicManager`: duck through `PushDuck` or `Duck`, never by writing
   `AudioMixer.MusicVolume`. `ClearDucks()` rescues a leaked duck handle.
+- `PlayStinger` rides the music bus: the music slider and any duck turn it down. A warning cue the
+  player must hear goes on `AudioBus.Sfx` through `PlayStingerOnBus` or `PlayStingerWithHeldDuck`.
 - An instrument from an asset pack must reach the disk, except a `.sf2`. A `.sfz` and a `.dspreset`
   reference sample files beside them; a `.dslibrary` or `.dsbundle` is one file, but it is read in
   place by path and nothing is unpacked. Only a `.sf2` loads from a `Stream`. Extract the rest from an
@@ -1750,8 +2156,8 @@ public void ShutDown()
 
 ## Samples and tools in the repository
 
-Nothing in this section ships in either NuGet package, and nothing here builds as part of the library
-build, the test run or the packaging build. Each sample carries its own `.slnx` and Linux X11, Windows
+Nothing in this section ships in any of the NuGet packages, and nothing here builds as part of the
+library build, the test run or the packaging build. Each sample carries its own `.slnx` and Linux X11, Windows
 Win32-Skia and macOS heads, and is built and run on its own.
 
 | Name | What it demonstrates | Where |
@@ -1759,6 +2165,7 @@ Win32-Skia and macOS heads, and is built and run on its own.
 | Spot.Brix | The recommended hosting shape end to end: a splash title card, a XAML dialog driving the engine through `EngineDispatcher.Post`, option persistence in `gameengine.json`, and save-on-game-over | [`samples/Spot.Brix`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/Spot.Brix) |
 | Platformer.Brix | The reference consumer for fixed layer-tile colliders: collision profiles, `CollisionAdjust` insets, a foot probe through `ColliderRegistry.QueryAabb`, gravity, camera follow with a dead zone, and a procedural tilesheet painted in code | [`samples/Platformer.Brix`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/Platformer.Brix) |
 | SpaceDuel.Brix | The GPU tier: `Sprite.Rotation`, a wrap-around world, parallax star layers, particle explosions, health bars, and a HUD fed by `CPSCalculated` | [`samples/SpaceDuel.Brix`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/SpaceDuel.Brix) |
+| KenneyAssetsDemo | The reference consumer for the Kenney assets package: packs registered with one `UseKenneyAssets` call, a Tiled map imported into scene layers, a glTF character pre-rendered into eight-direction sprite frames and walked with the keyboard, atlas sprites as collectible gems, a pick-up sound, HUD text in Kenney fonts, a rasterized SVG badge, and a start-up report of what each pack delivered | [`samples/KenneyAssetsDemo`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/KenneyAssetsDemo) |
 | Slider | Driving `Engine` directly with no host base: sprites built on the engine thread, and rebuilding the board while the engine keeps running | [`samples/Slider`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/Slider) |
 | CoordinateTest | Coordinate systems - orthogonal, isometric and hex - plus cameras and views | [`samples/CoordinateTest`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/CoordinateTest) |
 | ParticleTest | `ParticleSurface` and emitters, composites and text, movement easing, and a click that toggles the global pause through UI-level pointer input with letterbox mapping | [`samples/ParticleTest`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/ParticleTest) |
@@ -1772,6 +2179,13 @@ The reference application in [CodeBrix.Samples](https://github.com/ellisnet/Code
 [GameEngineMusicDemo](https://github.com/ellisnet/CodeBrix.Samples/tree/main/GameEngineMusicDemo), a standalone six-head
 application built against the published packages that puts the music control surface in an ordinary
 XAML page and generates every asset it plays on first run.
+
+The reference application for a complete game is
+[BrixInvaders](https://github.com/ellisnet/CodeBrix.Samples/tree/main/BrixInvaders), an arcade space game in
+the same repository built against the published packages: a page that is only a game canvas, rules in a
+deterministic library stepped from the fixed-step hook, frames built as engine draw lists, Kenney zips read
+where they lie, gamepads through the SDL2 package and endless generated music. Its recipes are in the
+[game-engine blueprints](../samples/blueprints.md#hosting-a-game-engine).
 
 Run any sample from the repository root, swapping the head project for `<Name>.Win32Skia` or
 `<Name>.MacOS`:
@@ -1799,14 +2213,18 @@ dotnet run -- 45 --pump    # the InputPump path
 | Overview (README) | [README.md](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/README.md) |
 | Complete API guide for the engine package (ships inside the package too) | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/AGENT-README.txt) |
 | Complete API guide for the gamepad package (ships inside that package too) | [src/CodeBrix.Platform.GameEngine.Sdl2/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/src/CodeBrix.Platform.GameEngine.Sdl2/AGENT-README.txt) |
+| Complete API guide for the Kenney assets package (ships inside that package too) | [src/CodeBrix.Platform.GameEngine.KenneyAssets/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/src/CodeBrix.Platform.GameEngine.KenneyAssets/AGENT-README.txt) |
+| Complete API guide for the generated music package (ships inside that package too) | [src/CodeBrix.Platform.GameEngine.GeneratedMusic/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/src/CodeBrix.Platform.GameEngine.GeneratedMusic/AGENT-README.txt) |
 | Samples, tools and other non-package content | [EXTRAS-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/EXTRAS-README.txt) |
 | Map of every document in the repository | [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/README-INDEX.txt) |
 | Engine tests (headless worked examples) | [tests/CodeBrix.Platform.GameEngine.Tests](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tests/CodeBrix.Platform.GameEngine.Tests) |
 | Host tests | [tests/CodeBrix.Platform.GameEngine.Host.Tests](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tests/CodeBrix.Platform.GameEngine.Host.Tests) |
 | Gamepad tests | [tests/CodeBrix.Platform.GameEngine.Sdl2.Tests](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tests/CodeBrix.Platform.GameEngine.Sdl2.Tests) |
+| Kenney assets tests | [tests/CodeBrix.Platform.GameEngine.KenneyAssets.Tests](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tests/CodeBrix.Platform.GameEngine.KenneyAssets.Tests) |
+| Generated music tests | [tests/CodeBrix.Platform.GameEngine.GeneratedMusic.Tests](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tests/CodeBrix.Platform.GameEngine.GeneratedMusic.Tests) |
 | Samples | [samples](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples) |
 
-XML documentation ships alongside both assemblies, and each package carries the `AGENT-README.txt` that
+XML documentation ships alongside every assembly, and each package carries the `AGENT-README.txt` that
 covers it - point an AI coding agent at the one for the package it is writing against.
 
 ## License
@@ -1815,7 +2233,10 @@ CodeBrix.Platform.GameEngine is licensed under the MIT License, and the license 
 package ID (`CodeBrix.Platform.GameEngine.MitLicenseForever`). The optional gamepad package
 (`CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever`) is licensed `MIT AND Zlib`, because it
 redistributes the SDL2 native libraries: the managed binding code is MIT and the SDL2 native binaries
-are zlib, and the suffix names the more notice-demanding of the two. For the provenance and licensing of
+are zlib, and the suffix names the more notice-demanding of the two. The Kenney assets package
+(`CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever`) and the generated music package
+(`CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever`) are MIT; the Kenney packs a game reads
+are CC0 and are the game's own content, not part of the package. For the provenance and licensing of
 open source code included in this library, see
 [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/THIRD-PARTY-NOTICES.txt)
 in the repository.

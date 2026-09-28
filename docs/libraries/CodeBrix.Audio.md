@@ -17,8 +17,8 @@ detail, the examples and the pitfalls.
 | | |
 | --- | --- |
 | **Repository** | [ellisnet/CodeBrix.Audio](https://github.com/ellisnet/CodeBrix.Audio) |
-| **Packages** | [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever) - ships the `CodeBrix.Audio` and `CodeBrix.Audio.Engine` assemblies<br>[`CodeBrix.Audio.ModestSynth.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.ModestSynth.MitLicenseForever) - the synthesis add-on, on its own [page](CodeBrix.Audio.ModestSynth.md) |
-| **License** | MIT for both; see [License](#license) |
+| **Packages** | [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever) - the desktop package, the one an application references: it brings in Core and adds the Windows, Linux and macOS native backends<br>[`CodeBrix.Audio.Core.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.Core.MitLicenseForever) - ships the `CodeBrix.Audio` and `CodeBrix.Audio.Engine` assemblies, with no audio device backend; the desktop package references it automatically<br>[`CodeBrix.Audio.ModestSynth.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.ModestSynth.MitLicenseForever) - the synthesis add-on, on its own [page](CodeBrix.Audio.ModestSynth.md) |
+| **License** | MIT for all three; see [License](#license) |
 | **Requires** | .NET 10 or later. No system audio package and no system-wide codec is required on Windows, macOS or Linux |
 | **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application, through the [AudioPlayer add-in](../platform/add-ins/AudioPlayer.md) |
 | **Platforms** | Windows, macOS and Linux. The bundled native backend ships for `win-x64`, `win-arm64`, `linux-x64`, `linux-arm64`, `linux-riscv64`, `osx-x64` and `osx-arm64` |
@@ -51,7 +51,7 @@ Every bullet is a page.
   applied identically across all three sampled instrument formats.
 - **[Bundles a full audio engine](audio/audio-engine.md)** - devices, recording, effects, editing and
   mixing, metadata, an instrument-building synthesis architecture and visualization, in the second
-  assembly the same package ships.
+  assembly the same reference brings in.
 - **[Supplies DSP building blocks](audio/dsp.md)** - FFT, biquad filters, an envelope follower and
   voice-activity detection.
 
@@ -72,6 +72,13 @@ Opus is not in this package. `.opus` files are recognized - metadata, duration, 
 read correctly - but do not decode, and fail with a message saying so. Opus is BSD-3-Clause rather
 than MIT, so it ships as the separate add-on [CodeBrix.Audio.Opus](CodeBrix.Audio.Opus.md); one call
 wires it in.
+
+Music that a model writes while it plays is a separate repository built on this library:
+[CodeBrix.Audio.MusicGeneration](CodeBrix.Audio.MusicGeneration.md) streams endless generated music through a
+session, voiced by a CodeBrix.Audio instrument library, and renders long pieces ahead of time. Start
+from its [page](CodeBrix.Audio.MusicGeneration.md), its
+[README](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration/blob/main/README.md) and its
+[blueprints](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration/blob/main/BLUEPRINTS-GeneratingMusic.md).
 
 What the library deliberately does not do:
 
@@ -105,9 +112,11 @@ What the library deliberately does not do:
 dotnet add package CodeBrix.Audio.MitLicenseForever
 ```
 
-The package has no NuGet dependencies of its own. Everything it needs, including the second assembly
-it ships and that assembly's native backend, is inside it, and both assemblies are referenced
-automatically.
+This is the desktop package. It references `CodeBrix.Audio.Core.MitLicenseForever`, which ships both
+assemblies, and adds the native backend for Windows, Linux and macOS, so both assemblies are referenced
+automatically and nothing else needs to be installed. A library that only reads, writes or renders
+audio offline can reference Core alone; an application that opens an audio device references the
+desktop package.
 
 ```csharp
 using CodeBrix.Audio.Wave;       // readers/writers, WaveFormat, MP3 frames, ID3,
@@ -224,7 +233,7 @@ a sequencer, which normally carries no configuration message.
 
 ### The bundled audio engine
 
-The same package ships a second assembly with device playback and recording, effects, an editing and
+The same reference brings in a second assembly with device playback and recording, effects, an editing and
 mixing layer, metadata, an instrument-building synthesis architecture and visualization. You do not
 need it for ordinary playback. The page covers what only it does, the native backend, and the five
 type names that collide across the two assemblies.
@@ -376,9 +385,9 @@ whichever part of the library they start with.
 
 ## Samples and tools in the repository
 
-The repository ships two packages and has no sample applications and no demo projects. Everything
+The repository ships three packages and has no sample applications and no demo projects. Everything
 below is developer tooling and test data: none of it is packed, and none of it is needed to consume
-either package. Nothing in `tools/` installs anything on your machine - every script checks for what
+any of the packages. Nothing in `tools/` installs anything on your machine - every script checks for what
 it needs, names anything missing, prints the command that would install it, and stops.
 
 | Name | What it demonstrates | Where |
@@ -416,14 +425,15 @@ real SoundFont and no sampler library is committed anywhere in the repository.
 | Add-on tests | [tests/CodeBrix.Audio.ModestSynth.Tests](https://github.com/ellisnet/CodeBrix.Audio/tree/main/tests/CodeBrix.Audio.ModestSynth.Tests) |
 
 XML documentation ships alongside every assembly, and one `AGENT-README.txt` covers both bundled
-assemblies, because one package ships both.
+assemblies, because one package, Core, ships both.
 
 ## License
 
-CodeBrix.Audio is licensed under the MIT License, and the license is also named in the package ID
-(`CodeBrix.Audio.MitLicenseForever`), which covers both bundled assemblies. The synthesis add-on,
-`CodeBrix.Audio.ModestSynth.MitLicenseForever`, is MIT as well, and the two packages are built and
-published from this one repository at the same version. License acceptance is required at install
+CodeBrix.Audio is licensed under the MIT License, and the license is also named in the package IDs:
+the desktop package, `CodeBrix.Audio.MitLicenseForever`, and `CodeBrix.Audio.Core.MitLicenseForever`,
+which carries both assemblies. The synthesis add-on, `CodeBrix.Audio.ModestSynth.MitLicenseForever`, is
+MIT as well, and the three packages are built and published from this one repository at the same
+version. License acceptance is required at install
 time, and the license notice for the bundled native backend travels with the native binaries into your
 application's output folder. For the provenance and licensing of open source code included in this
 library, see

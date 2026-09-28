@@ -56,8 +56,9 @@ named in the same cell.
 | [CodeBrix.ArgumentParser](libraries/CodeBrix.ArgumentParser.md) | MIT |
 | [CodeBrix.AssemblyTools](libraries/CodeBrix.AssemblyTools.md) | MIT |
 | [CodeBrix.Audio](libraries/CodeBrix.Audio.md) | MIT |
-| [CodeBrix.Audio.ModestSynth](libraries/CodeBrix.Audio.ModestSynth.md) | MIT, like the CodeBrix.Audio package it depends on; the two are published together at the same version |
-| [CodeBrix.Audio.Opus](libraries/CodeBrix.Audio.Opus.md) | BSD 3-Clause; the CodeBrix.Audio package it depends on is MIT |
+| [CodeBrix.Audio.ModestSynth](libraries/CodeBrix.Audio.ModestSynth.md) | MIT, like the CodeBrix.Audio Core package it depends on; the two are published together at the same version |
+| [CodeBrix.Audio.MusicGeneration](libraries/CodeBrix.Audio.MusicGeneration.md) | MIT |
+| [CodeBrix.Audio.Opus](libraries/CodeBrix.Audio.Opus.md) | BSD 3-Clause; the CodeBrix.Audio Core package it depends on is MIT |
 | [CodeBrix.Compression](libraries/CodeBrix.Compression.md) | MIT |
 | [CodeBrix.Cryptography](libraries/CodeBrix.Cryptography.md) | MIT |
 | [CodeBrix.Docker](libraries/CodeBrix.Docker.md) | MIT |

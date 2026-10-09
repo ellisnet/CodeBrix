@@ -227,7 +227,12 @@ unsupported codepoint therefore renders as a blank gap, not as a tofu box.
 
 > [!WARNING]
 > Plan for silent gaps rather than visible boxes when you audit coverage, and never rely on a system
-> font to fill them in: CodeBrix.Platform does not fall back to system fonts.
+> font to fill them in. By default CodeBrix.Platform tries the symbols font, then the fonts listed in
+> `FeatureConfiguration.Font.FallbackFontFamilies` and then the host machine's installed fonts, so a
+> gap can look filled on a development desktop and still be blank on a device that has only the
+> application's fonts. Audit with `FeatureConfiguration.Font.RestrictToEmbeddedFonts = true` - which
+> the PlayTest head and the font-isolated frame-buffer emulator set for you - so host fonts are never
+> consulted and the gaps show.
 
 ## Examples
 
@@ -360,11 +365,7 @@ and the fonts sit under `lib/net10.0/CodeBrix.Platform.Fonts.OpenSans/Fonts/`.
 ## Pitfalls
 
 - **Never append `#FamilyName` to a font URI.** CodeBrix.Platform strips the fragment during
-  resolution, so it never helps - and on the value assigned to
-  `FeatureConfiguration.Font.DefaultTextFontFamily` it silently disables the startup manifest
-  preload, because the `.manifest` suffix the preload appends lands inside the fragment and is
-  dropped by `Uri.PathAndQuery`. The symptom is subtle: text still renders, but weight, style and
-  stretch requests stop resolving to the right static instance.
+  resolution, so it never helps.
 - **There is no italic axis in the variable font.** On a head where the statics are pruned,
   `FontStyle="Italic"` has no italic face to resolve to and the platform will synthesize or ignore
   it. If real italics matter on such a head, this package cannot supply them.
@@ -380,7 +381,8 @@ and the fonts sit under `lib/net10.0/CodeBrix.Platform.Fonts.OpenSans/Fonts/`.
 - **`family_name` holds a URI**, not a typographic family name. Do not feed it to an API that expects
   `Open Sans`.
 - **Armenian and Georgian will not render from this package**, and it ships no companions to supply
-  them. Because `.notdef` is an empty glyph, the failure is invisible - blank space, not boxes.
+  them. Wherever the host's fonts do not fill the gap (always, under `RestrictToEmbeddedFonts`),
+  `.notdef` is an empty glyph, so the failure is invisible - blank space, not boxes.
 - **`ms-appx:///` URIs are resolved by the CodeBrix.Platform runtime, not by .NET.** In a plain
   .NET 10 console or test application that merely references this package, those URIs resolve to
   nothing.
@@ -395,8 +397,9 @@ Four habits keep the font cost down: prefer one family URI plus `FontWeight` / `
 `FontStretch` over a different file URI per face, because every distinct font URI is a separate font
 resource to load and cache; declare the family URI once as an `App.xaml` resource; set
 `DefaultTextFontFamily` rather than `FontFamily` on every element, which also lets the startup
-font-manifest preload warm the manifest once; and let the head prune. On a manifest-capable head the
-variable font covers weights 300-800 continuously, so intermediate weights cost no extra files.
+font-manifest preload warm the manifest once; and let the head prune. Every CodeBrix.Platform head
+resolves through the manifest, so a requested weight snaps to the nearest static instance; the variable
+font's weight axis is not applied at run time.
 
 ## Samples and tools in the repository
 

@@ -402,7 +402,7 @@ var buffer = new byte[4096];
 int n;
 while ((n = shell.Read(buffer, 0, buffer.Length)) > 0)
 {
-    terminal.Feed(buffer, 0, n);    // render the chunk
+    terminal.Feed(buffer, n);       // render the chunk
 }
 // n == 0: channel closed -- tear down the session UI here.
 ```

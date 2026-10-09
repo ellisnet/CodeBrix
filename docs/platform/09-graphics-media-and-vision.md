@@ -160,13 +160,32 @@ public ImageCanvasPainter ImagePainter { get; } = new();
 
 /// <inheritdoc />
 public Action InvalidateImageCanvas { get; set; }
-
+// ...
+/// <summary>The zoom caption, e.g. <c>125%</c>.</summary>
 public string ZoomText => $"{ImagePainter.ZoomFactor * 100:0}%";
 
-public SimpleCommand ZoomInCommand => field ??= new SimpleCommand(() => AdjustZoom(1.25f));
-public SimpleCommand ZoomOutCommand => field ??= new SimpleCommand(() => AdjustZoom(0.8f));
+/// <summary>Zooms the 2D viewer in one step.</summary>
+public SimpleCommand ZoomInCommand => field ??= new SimpleCommand(CanZoom, () => AdjustZoom(1.25f));
 
-/// <summary>Applies one wheel notch of zoom from the page's pointer-wheel handler.</summary>
+/// <summary>Zooms the 2D viewer out one step.</summary>
+public SimpleCommand ZoomOutCommand => field ??= new SimpleCommand(CanZoom, () => AdjustZoom(0.8f));
+
+/// <summary>Resets the 2D viewer's zoom to fit.</summary>
+public SimpleCommand ZoomResetCommand => field ??= new SimpleCommand(CanZoom, () =>
+{
+    ImagePainter.ZoomFactor = 1f;
+    NotifyPropertyChanged(nameof(ZoomText));
+    InvalidateImageCanvas?.Invoke();
+});
+
+//Only the 2D viewer has a zoom; the toolbar carrying these is shown with the same test,
+//and SetViewerMode's notification for it is what refreshes them.
+private bool CanZoom() => _viewerMode == ViewerMode.Image;
+
+/// <summary>
+/// Applies one wheel notch of zoom from the page's pointer-wheel handler.
+/// </summary>
+/// <param name="wheelDelta">The wheel delta (positive zooms in).</param>
 public void AdjustZoomFromWheel(int wheelDelta) => AdjustZoom(wheelDelta > 0 ? 1.25f : 0.8f);
 
 private void AdjustZoom(float factor)
@@ -182,8 +201,8 @@ The page contributes three lines: it fills in the delegate, forwards the paint e
 ```csharp
 // From CodeBrix.Samples/KenneyAssetBrowser/src/KenneyAssetBrowser.UI/Views/MainPage.xaml.cs
 //Marshal 2D-canvas invalidations from the view model onto the UI thread
-viewModel.InvalidateImageCanvas = () => DispatcherQueue?.TryEnqueue(() => ImageCanvas?.Invalidate());
-
+canvasBridge.InvalidateImageCanvas = () => DispatcherQueue?.TryEnqueue(() => ImageCanvas?.Invalidate());
+// ...
 //The 2D viewer: the view model's painter draws images and spritesheets (checkerboard,
 //zoom, sprite spotlight) onto this SkiaSharp surface.
 ImageCanvas.PaintSurface += (_, e) =>
@@ -273,7 +292,21 @@ Subclass `GLCanvasElement`, drive a framework-free renderer through its lifecycl
 // From CodeBrix.Samples/KenneyAssetBrowser/src/libs/KenneyAssetBrowser.Rendering/GL/ModelSceneGlCanvas.cs
 public sealed class ModelSceneGlCanvas : GLCanvasElement
 {
+    // Orbit sensitivity: how many degrees the camera turns per pixel (DIP) of drag. The base
+    // renders at the element's logical size, so drag deltas are measured in the same units.
+    private const float OrbitDegreesPerPixel = 0.25f;
+
+    // The dark solid clear colour behind the model (linear RGBA in [0, 1]).
+    private static readonly (float R, float G, float B, float A) SolidBackground = (0.13f, 0.13f, 0.15f, 1f);
+
+    // The framework-free shader renderer. It owns the OrbitCamera and knows nothing about the
+    // element, the framebuffer, or pointer input; this control drives it through the
+    // GLCanvasElement lifecycle (Init/RenderOverride/OnDestroy) on the GL thread.
     private readonly IModelSceneRenderer _renderer = new GlModelSceneRenderer();
+
+    private bool _dragging;
+    private double _lastX;
+    private double _lastY;
 
     /// <summary>Creates the preview control and wires its pointer (rotate/zoom) input.</summary>
     // getWindowFunc is only used on WinUI; on CodeBrix.Platform heads it is null.
@@ -288,6 +321,10 @@ public sealed class ModelSceneGlCanvas : GLCanvasElement
         PointerWheelChanged += OnPointerWheelChanged;
     }
 
+    /// <summary>
+    /// Identifies the <see cref="Model"/> dependency property - the 3D model to preview, or
+    /// <see langword="null"/> to clear it.
+    /// </summary>
     public static readonly DependencyProperty ModelProperty =
         DependencyProperty.Register(
             nameof(Model),
@@ -295,6 +332,10 @@ public sealed class ModelSceneGlCanvas : GLCanvasElement
             typeof(ModelSceneGlCanvas),
             new PropertyMetadata(null, OnModelChanged));
 
+    /// <summary>
+    /// The 3D model to preview, or <see langword="null"/> to show an empty scene. Set this
+    /// (typically via a binding); the camera re-frames to each new model automatically.
+    /// </summary>
     public LoadedModel? Model
     {
         get => (LoadedModel?)GetValue(ModelProperty);
@@ -305,10 +346,15 @@ public sealed class ModelSceneGlCanvas : GLCanvasElement
     {
         var canvas = (ModelSceneGlCanvas)d;
 
+        // Re-frame each new model from the same default angle/margins the app has always used,
+        // even if the user had orbited/zoomed the previous one.
         ApplyDefaultFraming(canvas._renderer.Camera);
         canvas._renderer.SetModel(e.NewValue as LoadedModel, frameCamera: true);
         canvas.Invalidate();
+        // ...
     }
+
+    private bool _rendererInitialized;
 
     /// <inheritdoc />
     protected override void Init(GL gl) => EnsureInitialized(gl);
@@ -318,7 +364,10 @@ public sealed class ModelSceneGlCanvas : GLCanvasElement
     // runs before the first RenderOverride on every head (e.g. a canvas that starts collapsed).
     private void EnsureInitialized(GL gl)
     {
-        if (_rendererInitialized) { return; }
+        if (_rendererInitialized)
+        {
+            return;
+        }
         _renderer.Initialize(gl);
         _rendererInitialized = true;
     }
@@ -326,6 +375,8 @@ public sealed class ModelSceneGlCanvas : GLCanvasElement
     /// <inheritdoc />
     protected override void RenderOverride(GL gl)
     {
+        // Defensive: GLCanvasElement calls Init before the first RenderOverride, but initializing
+        // here too (idempotent) keeps the control robust against any host lifecycle ordering.
         EnsureInitialized(gl);
 
         // Both this preview and the head's own Skia renderer share the GL context, so save the
@@ -352,6 +403,7 @@ public sealed class ModelSceneGlCanvas : GLCanvasElement
         _renderer.Uninitialize(gl);
         _rendererInitialized = false;
     }
+    // ...
 }
 ```
 
@@ -377,14 +429,16 @@ And the view model parses off the UI thread and publishes a plain property:
 // From CodeBrix.Samples/PolyHavenBrowser/src/PolyHavenBrowser.Core/ViewModels/MainViewModel.cs
 /// <summary>The model shown in the 3D preview (null while browsing); the preview control binds to this.</summary>
 public LoadedModel CurrentModel => _currentModel;
-
+// ...
 private async Task OpenModelViewAsync(PolyHavenAsset asset, DownloadedModel downloaded)
 {
+    DownloadStatusText = $"Loading “{asset.Name ?? downloaded.Slug}”…";
+
     //Parse the glTF and gather its stats off the UI thread; GPU upload happens lazily
     //at first paint.
     var (model, stats) = await Task.Run(() =>
     {
-        var loaded = new GltfModelLoader().LoadFile(downloaded.GltfPath);
+        var loaded = _modelLoader.LoadFile(downloaded.GltfPath);
         return (loaded, ModelFileStats.FromLoadedModel(loaded, downloaded.ModelFolder));
     });
 
@@ -410,15 +464,29 @@ The renderer interface mirrors the canvas lifecycle exactly and says which threa
 /// orbit camera. The lifecycle mirrors the Graphics3DGL <c>GLCanvasElement</c> contract:
 /// the host element calls <see cref="Initialize"/> from its <c>Init(GL)</c>,
 /// <see cref="Render"/> from <c>RenderOverride(GL)</c>, and <see cref="Uninitialize"/>
-/// from <c>OnDestroy(GL)</c> — all on the GL thread. <see cref="SetModel"/> may be called
+/// from <c>OnDestroy(GL)</c> - all on the GL thread. <see cref="SetModel"/> may be called
 /// from any thread; the model is uploaded on the next render.
 /// </summary>
 public interface IModelSceneRenderer
 {
+    /// <summary>The orbit camera driven by the host's pointer/scroll input.</summary>
     OrbitCamera Camera { get; }
+
+    /// <summary>The background clear color as linear RGBA in [0, 1].</summary>
     (float R, float G, float B, float A) BackgroundColor { get; set; }
 
+    /// <summary>
+    /// Sets the model to display (or <see langword="null"/> to clear). Takes effect on the
+    /// next <see cref="Render"/>; when <paramref name="frameCamera"/> is true the camera is
+    /// re-framed to the model's bounds at that time.
+    /// </summary>
     void SetModel(LoadedModel? model, bool frameCamera = true);
+
+    /// <summary>
+    /// Queues one baked animation frame's vertex data (aligned with the current model's
+    /// primitives) to overwrite the vertex buffers at the next render, or <see langword="null"/>
+    /// to leave them as they are. May be called from any thread.
+    /// </summary>
     void SetFrameVertices(IReadOnlyList<ModelFramePrimitive>? frame);
 
     /// <summary>Compiles shaders and creates GL resources. Call once, on the GL thread.</summary>
@@ -464,6 +532,7 @@ public void Initialize(GL gl)
         .Contains("OpenGL ES", StringComparison.OrdinalIgnoreCase);
     var header = isGles ? "#version 300 es\n" : "#version 330 core\n";
 
+    // Compile the vertex + fragment shaders and link them into a program.
     var vertexShader = CompileShader(gl, ShaderType.VertexShader, header + VertexShaderBody);
     var fragmentShader = CompileShader(gl, ShaderType.FragmentShader, header + FragmentShaderBody);
     // ... link, check LinkStatus, then cache every uniform location once ...
@@ -522,6 +591,9 @@ Glass that hides what is behind it is a two-pass problem. Classify materials at 
 DrawPrimitives(gl, blendPass: false);
 
 gl.Enable(EnableCap.Blend);
+// Straight-alpha "over": colour is weighted by source alpha, while the alpha channel
+// accumulates coverage (One, OneMinusSrcAlpha) so a region already opaque behind the
+// glass stays opaque.
 gl.BlendFuncSeparate(
     BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha,
     BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
@@ -557,7 +629,7 @@ The high-resolution product-shot pipeline in the 3D browser stages the work: pur
 
 ```csharp
 // From CodeBrix.Samples/PolyHavenBrowser/src/PolyHavenBrowser.Core/ViewModels/MainViewModel.cs
-//Stage 2: build the photography sets (pure CPU — off the UI thread).
+//Stage 2: build the photography sets (pure CPU - off the UI thread).
 var scenes = await Task.Run(() => (
     Tabletop: ShotSceneBuilder.Build(model, stages.Tabletop),
     Light: ShotSceneBuilder.Build(model, stages.Light),
@@ -604,8 +676,13 @@ When you read pixels back from a GPU API and draw them on a Skia surface, put th
 // From CodeBrix.Samples/PolyHavenBrowser_viewer_only/src/PolyHavenBrowser.Core/Display/ModelScenePainter.cs
 public void Paint(SKSurface surface, SKImageInfo info)
 {
-    if (_disposed || info.Width <= 0 || info.Height <= 0) { return; }
+    if (_disposed || info.Width <= 0 || info.Height <= 0)
+    {
+        return;
+    }
 
+    // When a background texture is present, render the model over a transparent clear so it
+    // composites onto the texture we draw behind it; otherwise use the solid dark colour.
     var hasBackground = _backgroundBitmap != null;
     var background = hasBackground ? (0f, 0f, 0f, 0f) : SolidBackground;
 
@@ -615,6 +692,8 @@ public void Paint(SKSurface surface, SKImageInfo info)
     DrawFrame(surface, info, frame);
 }
 
+// Composites one engine frame onto the Skia canvas: the darkened background texture first,
+// then the rendered model (flipped if the engine's pixels are bottom-up, as OpenGL's are).
 private void DrawFrame(SKSurface surface, SKImageInfo info, RenderedFrame frame)
 {
     var canvas = surface.Canvas;
@@ -701,10 +780,15 @@ A capability that works only on some heads deserves a policy, not a driver probe
 // From CodeBrix.Samples/PolyHavenBrowser_viewer_only/src/libs/PolyHavenBrowser.Rendering/Vulkan/VulkanPlatformSupport.cs
 public static class VulkanPlatformSupport
 {
+    // Head runtime assembly names (exactly one is loaded per app), checked as prefixes so
+    // satellite assemblies such as CodeBrix.Platform.UI.Runtime.Skia.Win32.Support match
+    // their head too. Longer names are listed before their prefixes (FrameBuffer before
+    // X11/Wayland ordering doesn't matter, but Wpf/Win32 are distinct).
     private const string HeadAssemblyPrefix = "CodeBrix.Platform.UI.Runtime.Skia.";
 
     private static readonly Lazy<PlatformHead> DetectedHead = new(DetectCurrentHead);
 
+    /// <summary>Whether Vulkan rendering is okayed for the given platform head.</summary>
     public static bool IsSupported(PlatformHead head) => head switch
     {
         PlatformHead.LinuxX11 => true,
@@ -714,10 +798,17 @@ public static class VulkanPlatformSupport
         _ => false,
     };
 
+    /// <summary>Whether Vulkan rendering is okayed for the platform the app is running on.</summary>
     public static bool IsCurrentPlatformSupported => IsSupported(CurrentHead);
 
+    /// <summary>The platform head the app is running on (detected once, then cached).</summary>
     public static PlatformHead CurrentHead => DetectedHead.Value;
 
+    /// <summary>
+    /// Classifies a CodeBrix.Platform head runtime assembly name (e.g.
+    /// <c>CodeBrix.Platform.UI.Runtime.Skia.X11</c>), returning
+    /// <see cref="PlatformHead.Unknown"/> for anything that is not a head runtime.
+    /// </summary>
     public static PlatformHead ClassifyAssemblyName(string? assemblyName)
     {
         if (assemblyName is null || !assemblyName.StartsWith(HeadAssemblyPrefix, StringComparison.Ordinal))
@@ -738,6 +829,7 @@ public static class VulkanPlatformSupport
 
         return PlatformHead.Unknown;
     }
+    // ...
 }
 ```
 
@@ -752,8 +844,10 @@ public sealed class ModelRenderEngineSelector : IModelRenderEngineSelector
     private static readonly RenderEngineKind[] Kinds =
         [RenderEngineKind.OpenGL, RenderEngineKind.Vulkan, RenderEngineKind.Metal];
 
+    /// <inheritdoc />
     public IReadOnlyList<RenderEngineKind> AvailableKinds => Kinds;
 
+    /// <inheritdoc />
     public bool IsSupported(RenderEngineKind kind) => kind switch
     {
         RenderEngineKind.OpenGL => true,
@@ -762,6 +856,7 @@ public sealed class ModelRenderEngineSelector : IModelRenderEngineSelector
         _ => false,
     };
 
+    /// <inheritdoc />
     public IModelRenderEngine Create(RenderEngineKind kind, Func<XamlRoot> getXamlRoot)
     {
         if (!IsSupported(kind))
@@ -780,13 +875,15 @@ public sealed class ModelRenderEngineSelector : IModelRenderEngineSelector
 }
 ```
 
-The view model exposes the kind names as a bound list and the selection as a bound string, and the page is a drop-down:
+The view model exposes the kinds as a bound list and the selection as a bound `RenderEngineKind`, and the page is a drop-down:
 
 ```xml
 <!-- From CodeBrix.Samples/PolyHavenBrowser_viewer_only/src/PolyHavenBrowser.UI/Views/MainPage.xaml -->
 <ComboBox Width="130" Height="36" VerticalAlignment="Center"
-          ItemsSource="{d:Binding RenderEngineNames}"
-          SelectedItem="{d:Binding SelectedRenderEngineName, Mode=TwoWay}"
+          a:AutomationProperties.AutomationId="RenderEngine"
+          a:AutomationProperties.Name="Rendering engine"
+          ItemsSource="{d:Binding RenderEngineKinds}"
+          SelectedItem="{d:Binding SelectedRenderEngine, Mode=TwoWay}"
           IsEnabled="{d:Binding IsNotBusy}"
           Visibility="{d:Binding EngineSelectorVisibility}" />
 ```
@@ -839,7 +936,7 @@ static async Task<SvgImageSource> LoadEmbeddedSvgAsync(string resourceName)
 Logo.Source = await LoadEmbeddedSvgAsync("MyApp.Assets.padlock-icon.svg");
 ```
 
-Loading errors do not throw. A bad path or an unreachable URI leaves the `Image` blank and raises nothing; only a malformed document raises `OpenFailed` with `InvalidFormat`. A blank image plus a log line saying an SVG package is needed means the add-in is not referenced by the project chain that compiles the application: the log message reads `To use SVG on this platform, make sure to install the CodeBrix.Platform.WinUI.Svg package.`, and the package to install is `CodeBrix.Platform.Svg.ApacheLicenseForever`. The full surface is on the [Svg add-in page](add-ins/Svg.md).
+Loading errors do not throw. A bad path or an unreachable URI leaves the `Image` blank and raises nothing; only a malformed document raises `OpenFailed` with `InvalidFormat`. A blank image plus a log line saying an SVG package is needed means the add-in is not referenced by the project chain that compiles the application: the once-per-process warning reads `SvgImageSource: no SVG provider is registered, SVG images stay empty. To use SVG on this platform, install the CodeBrix.Platform.Svg.ApacheLicenseForever package.` The full surface is on the [Svg add-in page](add-ins/Svg.md).
 
 ### Rasterize SVG yourself
 
@@ -879,7 +976,7 @@ public static SKBitmap Render(byte[] svgBytes, int maxDimension = 1024)
     canvas.Clear(SKColors.Transparent);
 
     //Drawn by hand rather than through SKPictureExtensions.ToBitmap, which does not
-    //translate by CullRect's origin — an SVG whose content does not start at (0,0)
+    //translate by CullRect's origin - an SVG whose content does not start at (0,0)
     //would come out clipped
     canvas.Scale(scale);
     canvas.Translate(-rect.Left, -rect.Top);
@@ -950,7 +1047,7 @@ public static unsafe SKBitmap Decode(Stream stream)
 
 /// <summary>
 /// Decodes an image from a byte buffer into a raw RGBA byte array (4 bytes per pixel,
-/// row-major, top-left origin) — the form GPU texture uploads want.
+/// row-major, top-left origin) - the form GPU texture uploads want.
 /// </summary>
 public static (byte[] Rgba, int Width, int Height) DecodeToRgbaBytes(byte[] data) { /* ... */ }
 ```
@@ -970,12 +1067,25 @@ using CodeBrix.Imaging.Formats.Jpeg;
 using CodeBrix.Imaging.Formats.Png;
 using CodeBrix.Imaging.Formats.Webp;
 using CodeBrix.Imaging.Processing;
+using System;
+using System.IO;
 
+namespace NotionDocumentCreator.CreateDocument.Internal;
+
+/// <summary>
+/// Normalises a downloaded image for PDF embedding: capped pixel width, JPEG for
+/// photographs, PNG for graphics with transparency (which also converts formats
+/// the PDF embedder cannot take, such as WebP and GIF).
+/// </summary>
 internal static class ImagePipeline
 {
     private const int MaxPixelWidth = 1800;
     private const int JpegQuality = 87;
 
+    /// <summary>
+    /// Decodes and normalises image bytes. Throws on undecodable data - callers
+    /// turn that into a warning plus a media card, never a failed document.
+    /// </summary>
     public static ProcessedImage ProcessForPrint(byte[] bytes)
     {
         ArgumentNullException.ThrowIfNull(bytes);
@@ -985,7 +1095,7 @@ internal static class ImagePipeline
         var keepsTransparency = format is PngFormat or WebpFormat or GifFormat;
         var needsResize = image.Width > MaxPixelWidth;
 
-        //Untouched JPEG/PNG bytes embed best — only re-encode when we must
+        //Untouched JPEG/PNG bytes embed best - only re-encode when we must
         if (!needsResize && (format is JpegFormat || format is PngFormat))
         {
             return new ProcessedImage { Bytes = bytes, Width = image.Width, Height = image.Height };
@@ -1064,7 +1174,7 @@ public static ImageSource? Create (string iconName, int size)
     pixels.CopyTo (bitmap.PixelBuffer);
     bitmap.Invalidate ();
 
-    cache[(iconName, size)] = bitmap;
+    cache.Set ((iconName, size), bitmap);
     return bitmap;
 }
 ```
@@ -1083,16 +1193,27 @@ public const string PainLayerName = "Pain";
 public const string NumbnessLayerName = "Numbness";
 public const string TinglingLayerName = "Tingling";
 
+//The body-map image is embedded with this logical name by every head that compiles
+//  this file (PainDiagram.Core, PainDiagram.WinUI, and PainDiagram.Wpf)
+private const string BodyMapResourceName = "PainDiagram.Assets.body_map_master.png";
+
+private const int ExportPixelSize = 1000;
+
+private DrawingSession _session;
+
 public MainViewModel()
 {
     if (!IsDesignMode(true))
     {
+        Debug.WriteLine("Main view model startup.");
+
         _session = new DrawingSession(new DrawingSessionOptions
         {
             BackgroundFillColor = Color.White,
             SurfaceClearColor = Color.White,
         });
 
+        //The same highlighter colors the original NuraPad application used
         _session.AddLayer(PainLayerName, Color.FromRgb(255, 30, 230));
         _session.AddLayer(NumbnessLayerName, Color.FromRgb(30, 128, 204));
         _session.AddLayer(TinglingLayerName, Color.FromRgb(204, 170, 10));
@@ -1107,7 +1228,7 @@ public MainViewModel()
 /// forwards pointer events to it.
 /// </summary>
 public DrawingSession Session => _session;
-
+// ...
 private void SetActiveLayer(string layerName)
 {
     DrawingLayer layer = _session?.GetLayer(layerName);
@@ -1121,15 +1242,21 @@ private void SetActiveLayer(string layerName)
 
 One layer per color is what makes the highlighter effect work: repeated passes of one color over the same area do not darken where they cross. Keep the layer names as constants and use them both as the session key and as the value of the bound "active" property, so the two cannot drift apart, and change the bound name only when the lookup actually returned a layer. The session is null in the designer, because the view model skips construction in design mode, so every handler uses null-conditional access.
 
-The page's whole contribution is two lines:
+The page's whole contribution is one line, because a shared binder wires the paint handler, the pointer events and the resize repaint to the session:
 
 ```csharp
 // From CodeBrix.Samples/PainDiagram/CodeBrixPlatform/PainDiagram.UI/Views/MainPage.xaml.cs
-DrawCanvas.PaintSurface += (_, e) => ViewModel?.Session?.Render(e.Surface, e.Info);
+DrawCanvas.BindToSession(() => ViewModel?.Session);
+```
+
+```csharp
+// From CodeBrix.Samples/PainDiagram/Shared/Drawing/DrawingCanvasBinder.cs
+canvas.PaintSurface += (_, e) => sessionGetter()?.Render(e.Surface, e.Info);
 
 // ...
 
-DrawCanvas.SizeChanged += (_, _) => DrawCanvas.Invalidate();
+//SKXamlCanvas does not repaint itself when it is resized
+canvas.SizeChanged += (_, _) => canvas.Invalidate();
 ```
 
 Exporting is one call on the session, at a size that has nothing to do with the window:
@@ -1153,15 +1280,24 @@ When the strokes come from something other than a pointer - a tracker, a control
 public bool BeginStroke(float normX, float normY)
     => _session.PointerPressedNormalized(normX, normY);
 
+/// <summary>
+/// Extends the in-progress stroke to the given normalized still-image position.
+/// </summary>
+/// <param name="normX">Horizontal position across the still, 0..1.</param>
+/// <param name="normY">Vertical position down the still, 0..1.</param>
+/// <returns><c>true</c> when the stroke was extended.</returns>
 public bool ContinueStroke(float normX, float normY)
     => _session.PointerMovedNormalized(normX, normY);
 
+/// <summary>Completes and commits the in-progress stroke ("spatula" lifted).</summary>
+/// <returns><c>true</c> when a stroke was committed.</returns>
 public bool EndStroke() => _session.PointerReleased();
 
+/// <summary>Discards the in-progress stroke without committing it.</summary>
 public void CancelStroke() => _session.PointerCanceled();
 ```
 
-Normalized input works before the first render, because the drawing space is calibrated from the background image rather than from a view size. A position outside the normalized range is ignored rather than clamped.
+Normalized input works before the first render, because the drawing space is calibrated from the background image rather than from a view size. A press outside the normalized range is ignored; a move outside it is clamped to the edge.
 
 ## Video and audio in a page
 
@@ -1195,24 +1331,58 @@ Now the page. The view model owns every decision - what is open, whether it can 
 // From CodeBrix.Samples/CodeBrixVideoTool/src/libs/CodeBrixVideoTool.Playback/Services/IVideoPlayerSurface.cs
 public interface IVideoPlayerSurface
 {
+    /// <summary>Opens a file and leaves it paused at the start.</summary>
+    /// <param name="path">The file to open.</param>
     void Open(string path);
+
+    /// <summary>Unloads whatever is open.</summary>
     void Close();
+
+    /// <summary>Starts or resumes playback.</summary>
     void Play();
+
+    /// <summary>Holds playback where it is.</summary>
     void Pause();
+
+    /// <summary>Stops playback and returns to the start.</summary>
     void Stop();
+
+    /// <summary>Jumps to the start of one chapter.</summary>
+    /// <param name="index">The chapter's position in the file, from zero.</param>
     void SeekToChapter(int index);
+
+    /// <summary>Shows one caption track, or none.</summary>
+    /// <param name="track">The track to show, or null to show none.</param>
     void SelectCaptionTrack(CaptionTrack track);
 
+    /// <summary>How long the open file runs.</summary>
     TimeSpan Duration { get; }
+
+    /// <summary>Whether the open file is playing right now.</summary>
     bool IsPlaying { get; }
+
+    /// <summary>The chapters the open file carries.</summary>
     IReadOnlyList<Chapter> Chapters { get; }
+
+    /// <summary>The caption tracks the open file carries.</summary>
     IReadOnlyList<CaptionTrack> CaptionTracks { get; }
+
+    /// <summary>Which chapter playback is inside now, or -1 when there are no chapters.</summary>
     int CurrentChapterIndex { get; }
 
+    /// <summary>Raised once a file is open and its duration, chapters and captions are known.</summary>
     event EventHandler MediaOpened;
+
+    /// <summary>Raised when playback reaches the end.</summary>
     event EventHandler PlaybackEnded;
+
+    /// <summary>Raised when a file cannot be opened or played, with the reason.</summary>
     event EventHandler<string> MediaFailed;
+
+    /// <summary>Raised when playback starts or stops, so the transport can enable and disable itself.</summary>
     event EventHandler PlayStateChanged;
+
+    /// <summary>Raised when playback moves into a different chapter, so the drop-down can follow it.</summary>
     event EventHandler ChapterChanged;
 }
 ```
@@ -1250,11 +1420,19 @@ private sealed class VideoPlayerSurface : IVideoPlayerSurface
 
     public void Play() => player.Play();
 
+    public void Pause() => player.Pause();
+
+    public void Stop() => player.Stop();
+
     public void SeekToChapter(int index) => player.SeekToChapter(index);
 
     public void SelectCaptionTrack(CaptionTrack track) => player.SelectedCaptionTrack = track;
 
     internal void RaiseMediaOpened() => MediaOpened?.Invoke(this, EventArgs.Empty);
+
+    internal void RaisePlaybackEnded() => PlaybackEnded?.Invoke(this, EventArgs.Empty);
+
+    internal void RaiseMediaFailed(string message) => MediaFailed?.Invoke(this, message);
 }
 ```
 
@@ -1273,9 +1451,21 @@ private void WireViewModel()
 
     surface ??= new VideoPlayerSurface(Player);
     viewModel.Playback.AttachSurface(surface);
-    viewModel.PickMediaFileAsync = PickMediaFileAsync;
-    viewModel.Conversion.PickOutputPathAsync = PickOutputPathAsync;
+
+    //Each bridge is handed over through the interface that declares it rather than through the
+    //view model's own type, so what the page has to supply is the contract and nothing more.
+    if (DataContext is IMediaFileBridge mediaFile)
+    {
+        mediaFile.PickMediaFileAsync = PickMediaFileAsync;
+    }
+
+    if (viewModel.Conversion is IOutputPathBridge outputPath)
+    {
+        outputPath.PickOutputPathAsync = PickOutputPathAsync;
+    }
 }
+
+#region | Player element events |
 
 private void Player_MediaOpened(object sender, EventArgs e) => surface?.RaiseMediaOpened();
 
@@ -1308,7 +1498,11 @@ When you want the framework's own `MediaPlayerElement` and its built-in transpor
 ```csharp
 // From CodeBrix.Samples/MediaPlayerDemo/src/MediaPlayerDemo.Core/ViewModels/MainViewModel.cs
 using CodeBrix.Platform.Simple;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.UI.Xaml.Media;
 using System;
+using System.Collections.Generic;
 using Windows.Media.Core;
 using Windows.Media.Playback;
 // ...
@@ -1317,15 +1511,16 @@ private void LoadMedia()
     try
     {
         var uri = new Uri(MediaAddress);
-        PlayerSource = MediaSource.CreateFromUri(uri);
+        SetPlayerSource(MediaSource.CreateFromUri(uri));
         StatusText = $"Loaded: {uri}";
     }
     catch (Exception ex)
     {
+        _log.LogWarning(ex, "Cannot load '{MediaAddress}'.", MediaAddress);
         StatusText = $"Cannot load '{MediaAddress}': {ex.Message}";
     }
 }
-
+// ...
 public IMediaPlaybackSource PlayerSource
 {
     get;
@@ -1360,10 +1555,29 @@ public interface IAudioPlayerBridge
     /// </summary>
     Action<Stream> LoadAudioSource { get; set; }
 
+    /// <summary>Starts (or resumes) playback.</summary>
     Action PlayAudio { get; set; }
+
+    /// <summary>Pauses playback, keeping the position.</summary>
     Action PauseAudio { get; set; }
+
+    /// <summary>Stops playback and rewinds.</summary>
     Action StopAudio { get; set; }
+
+    /// <summary>Sets whether playback loops.</summary>
     Action<bool> SetAudioLooping { get; set; }
+
+    /// <summary>Whether the player is currently advancing.</summary>
+    Func<bool> IsAudioPlaying { get; set; }
+
+    /// <summary>The player's position within the clip.</summary>
+    Func<TimeSpan> AudioPosition { get; set; }
+
+    /// <summary>The loaded clip's duration.</summary>
+    Func<TimeSpan> AudioDuration { get; set; }
+
+    /// <summary>Moves the player to a position within the clip.</summary>
+    Action<TimeSpan> SeekAudio { get; set; }
 }
 ```
 
@@ -1376,22 +1590,35 @@ private async Task OpenAudioAsync(AssetEntry entry)
     var bytes = await ReadArchiveBytesAsync(entry.EntryPath)
         ?? throw new InvalidDataException($"The bundle has no entry “{entry.EntryPath}”.");
 
+    //Kenney audio is Ogg Vorbis, which the AudioPlayer add-in decodes itself (as it does
+    //WAV, MP3 and FLAC) - the bytes go straight to the player, whatever the format.
     var audioStream = new MemoryStream(bytes, writable: false);
 
     // ... header and facts ...
 
     IsAudioLooping = false;
     SetAudioLooping?.Invoke(false);
+    _audioPlaybackEnded = false;
     LoadAudioSource?.Invoke(audioStream);
+    HasAudioClip = LoadAudioSource != null;
     SetViewerMode(ViewerMode.Audio,
         LoadAudioSource == null ? "audio playback is not available on this head" : string.Empty);
+// ...
 }
 
-public SimpleCommand PlayAudioCommand => field ??= new SimpleCommand(() => PlayAudio?.Invoke());
-public SimpleCommand PauseAudioCommand => field ??= new SimpleCommand(() => PauseAudio?.Invoke());
-public SimpleCommand StopAudioCommand => field ??= new SimpleCommand(() => StopAudio?.Invoke());
+/// <summary>Starts (or resumes) audio playback; a clip parked at its end replays instead.</summary>
+public SimpleCommand PlayAudioCommand => field ??= new SimpleCommand(CanUseAudioTransport, DoPlayAudio);
 
-public SimpleCommand ToggleAudioLoopCommand => field ??= new SimpleCommand(() =>
+/// <summary>Pauses audio playback.</summary>
+public SimpleCommand PauseAudioCommand => field ??=
+    new SimpleCommand(CanUseAudioTransport, () => PauseAudio?.Invoke());
+
+/// <summary>Stops audio playback and rewinds.</summary>
+public SimpleCommand StopAudioCommand => field ??=
+    new SimpleCommand(CanUseAudioTransport, StopAudioPlayback);
+
+/// <summary>Toggles whether audio playback loops.</summary>
+public SimpleCommand ToggleAudioLoopCommand => field ??= new SimpleCommand(CanUseAudioTransport, () =>
 {
     IsAudioLooping = !IsAudioLooping;
     SetAudioLooping?.Invoke(IsAudioLooping);
@@ -1402,20 +1629,13 @@ public SimpleCommand ToggleAudioLoopCommand => field ??= new SimpleCommand(() =>
 // From CodeBrix.Samples/KenneyAssetBrowser/src/KenneyAssetBrowser.UI/Views/MainPage.xaml.cs
 //Audio bridge: the view model hands over the clip's raw stream and transport
 //calls; the AudioPlayer element does the decoding and playing (it takes
-//stream ownership)
-viewModel.LoadAudioSource = stream =>
-{
-    _audioPlaybackEnded = false;
-    AudioElement?.SetSourceStream(stream);
-};
-viewModel.PlayAudio = PlayAudio;
-viewModel.PauseAudio = () => AudioElement?.Pause();
-viewModel.StopAudio = () =>
-{
-    _audioPlaybackEnded = false;
-    AudioElement?.Stop();
-};
-viewModel.SetAudioLooping = looping =>
+//stream ownership). The last four members are the transport facts the view
+//model's replay policy reads back, plus the seek it uses to rewind.
+audioBridge.LoadAudioSource = stream => AudioElement?.SetSourceStream(stream);
+audioBridge.PlayAudio = () => AudioElement?.Play();
+audioBridge.PauseAudio = () => AudioElement?.Pause();
+audioBridge.StopAudio = () => AudioElement?.Stop();
+audioBridge.SetAudioLooping = looping =>
 {
     if (AudioElement != null) { AudioElement.IsLooping = looping; }
 };
@@ -1442,6 +1662,12 @@ public interface IMediaProbe
     /// Probes one file. A <c>.cbv</c> file is read by the playback core's own container readers; every
     /// other file is probed with ffprobe through CodeBrix.VideoProcessing.
     /// </summary>
+    /// <param name="path">The file to look at.</param>
+    /// <param name="cancellationToken">Stops the probe.</param>
+    /// <returns>What the file turned out to be.</returns>
+    /// <exception cref="VideoToolProcessingException">
+    /// The file is missing, is not a media file this application can work with, or carries no video.
+    /// </exception>
     Task<SourceMediaInfo> ProbeAsync(string path, CancellationToken cancellationToken);
 }
 ```
@@ -1549,8 +1775,14 @@ private static MediaFormatKind SniffSignature(string path)
 
         return first.SequenceEqual(CbvFormat.EbmlMagic) ? MediaFormatKind.CodeBrixMode1 : MediaFormatKind.Unknown;
     }
-    catch (IOException) { return MediaFormatKind.Unknown; }
-    catch (UnauthorizedAccessException) { return MediaFormatKind.Unknown; }
+    catch (IOException)
+    {
+        return MediaFormatKind.Unknown;
+    }
+    catch (UnauthorizedAccessException)
+    {
+        return MediaFormatKind.Unknown;
+    }
 }
 ```
 
@@ -1598,7 +1830,7 @@ request.Audio.Include = plan.Source.HasAudio;
 request.Audio.Codec = plan.AudioCodec == TargetAudioCodec.Vorbis
     ? AuthoringAudioCodec.LibVorbis
     : AuthoringAudioCodec.LibOpus;
-
+// ...
 foreach (var caption in sidecars.Captions)
 {
     request.Captions.Add(new AuthoringCaptionInput(
@@ -1688,7 +1920,6 @@ var processor = arguments
     .CancellableThrough(cancellationToken);
 
 var commands = new[] { "ffmpeg " + processor.Arguments };
-var succeeded = await processor.ProcessAsynchronously(false).ConfigureAwait(false);
 ```
 
 Progress needs the source duration to turn a position into a percentage, which is why the probe refuses a file that states none. `ProcessAsynchronously(false)` returns a boolean rather than throwing, so the code checks the result and the output file itself and reports the last few error lines it collected. Cancellation is checked twice - the exception from the cancellable wrapper, and the token after the call returns - and both delete the part-written file. Order matters in the option chain: the streaming-friendly flag comes before the forced format.
@@ -1700,7 +1931,7 @@ A rung that names the short side is the industry convention, and it is what keep
 ```csharp
 // From CodeBrix.Samples/CodeBrixVideoTool/src/libs/CodeBrixVideoTool.Processing/Resolution/ResolutionLadder.cs
 public static IReadOnlyList<int> StandardShortSides { get; } = [1440, 1080, 720, 480];
-
+// ...
 public static IReadOnlyList<ResolutionOption> Build(int sourceWidth, int sourceHeight)
 {
     // ... positive-dimension guards ...
@@ -1710,6 +1941,9 @@ public static IReadOnlyList<ResolutionOption> Build(int sourceWidth, int sourceH
         ResolutionOption.Original(MakeEven(sourceWidth), MakeEven(sourceHeight)),
     };
 
+    //The rung names the SHORT side, so a portrait source is measured across its width and a
+    //landscape one across its height - which is what height keying did for every landscape source,
+    //and is why landscape ladders are unchanged.
     var sourceShortSide = Math.Min(sourceWidth, sourceHeight);
     var sourceLongSide = Math.Max(sourceWidth, sourceHeight);
     var isPortrait = sourceWidth < sourceHeight;
@@ -1733,8 +1967,10 @@ public static IReadOnlyList<ResolutionOption> Build(int sourceWidth, int sourceH
 
     return rungs;
 }
-
+// ...
 /// <summary>Rounds a dimension to the nearest even number of pixels, never below 2.</summary>
+/// <param name="value">The dimension to round.</param>
+/// <returns>An even value of at least 2.</returns>
 public static int MakeEven(int value)
 {
     if (value <= 2)
@@ -1759,9 +1995,10 @@ A quality choice should mean one thing. Move the encoder's rate factor and nothi
 //PINNED: the quality knob moves the rate factor only, so an encode takes about as long whichever
 //stop is chosen.
 private const int Av1SpeedPreset = 8;
-
+// ...
 //THE QUALITY KNOB, IN ITS ENTIRETY. A quality stop moves the encoder's constant rate factor and
 //nothing else: the speed presets above stay pinned, and sound is settled by the destination alone.
+// ...
 private static int Av1RateFactor(QualityLevel quality) => quality switch
 {
     QualityLevel.Fair => 42,
@@ -1769,7 +2006,7 @@ private static int Av1RateFactor(QualityLevel quality) => quality switch
     QualityLevel.Best => 18,
     _ => 30,
 };
-
+// ...
 private static int H264RateFactor(QualityLevel quality) => quality switch
 {
     QualityLevel.Fair => 27,
@@ -1799,7 +2036,7 @@ public static async Task<IReadOnlyList<CameraDevice>> GetCamerasAsync()
     }
     return cameras;
 }
-
+// ...
 public void Start(CameraDevice camera)
 {
     if (camera == null) { throw new ArgumentNullException(nameof(camera)); }
@@ -1809,6 +2046,7 @@ public void Start(CameraDevice camera)
     _session = new WebcamSession(camera.Device);
     _session.FrameReceived += OnFrameReceived;
     _session.Start();
+    // ...
 }
 
 private void OnFrameReceived(object sender, WebcamFrameEventArgs frame)
@@ -1818,7 +2056,7 @@ private void OnFrameReceived(object sender, WebcamFrameEventArgs frame)
     _hasFrame = true;
     FrameArrived?.Invoke(this, EventArgs.Empty);
 }
-
+// ...
 public bool TryCopyLatestFrame(ref byte[] buffer, out int width, out int height)
 {
     WebcamSession session = _session;
@@ -1842,7 +2080,7 @@ private async Task InitializeAsync()
 {
     try
     {
-        var cameras = await WebcamCaptureService.GetCamerasAsync();
+        var cameras = await _captureService.DiscoverCamerasAsync();
         InvokeOnMainThread(() =>
         {
             Cameras.Clear();
@@ -1866,27 +2104,58 @@ private async Task InitializeAsync()
         InvokeOnMainThread(() => StatusText = $"Camera discovery failed: {e.Message}");
     }
 }
-
 // ...
-
 private void SwitchCamera(CameraDevice camera)
+{
+    //The setter only kicks the switch off: opening a device can take long enough to
+    //  stall the UI thread, so the switch itself runs on a worker and the status line
+    //  carries the result
+    HasFrame = false;
+    _ = SwitchCameraAsync(camera, ++_cameraSwitchVersion);
+}
+
+/// <summary>
+/// Starts (or stops) live capture off the UI thread - the capture service serializes its
+/// own start and stop, so two devices are never opened at once - and lets only the newest
+/// switch report: a camera that finishes opening late must not overwrite the status of
+/// the one the user has since chosen.
+/// </summary>
+private async Task SwitchCameraAsync(CameraDevice camera, int version)
 {
     try
     {
-        HasFrame = false;
+        var service = _captureService;
+        if (service == null) { return; }
+
+        await Task.Run(() =>
+        {
+            if (camera == null)
+            {
+                service.Stop();
+            }
+            else
+            {
+                service.Start(camera);
+            }
+        }).ConfigureAwait(false);
+
+        if (version != _cameraSwitchVersion) { return; } //a newer switch took over
+
         if (camera == null)
         {
-            _captureService.Stop();
+            //The page's delegate marshals the repaint itself
             InvalidatePreviewCanvas?.Invoke();
             return;
         }
-
-        _captureService.Start(camera);
-        StatusText = $"Live: {camera.FriendlyName}";
+        InvokeOnMainThread(() => StatusText = $"Live: {camera.FriendlyName}");
     }
     catch (Exception e)
     {
-        StatusText = $"Could not start '{camera?.FriendlyName}': {e.Message}";
+        if (version == _cameraSwitchVersion)
+        {
+            InvokeOnMainThread(() =>
+                StatusText = $"Could not start '{camera?.FriendlyName}': {e.Message}");
+        }
     }
 }
 ```
@@ -2002,8 +2271,15 @@ internal static class OpenPalmClassifier
     /// </summary>
     internal const float ExtendedRatio = 1.1f;
 
+    //MediaPipe hand-landmark topology: 0 = wrist; each finger runs MCP -> PIP -> DIP -> TIP
+    //  (index 5-8, middle 9-12, ring 13-16, pinky 17-20; thumb 1-4)
     private static readonly (int Tip, int Pip)[] Fingers = { (8, 6), (12, 10), (16, 14), (20, 18) };
 
+    /// <summary>
+    /// Classifies the landmarks as open palm (all four fingers extended) or not.
+    /// </summary>
+    /// <param name="landmarks">The 21 hand landmarks, in any consistent coordinate space.</param>
+    /// <returns><c>true</c> for an open palm.</returns>
     internal static bool IsOpenPalm(Point2f[] landmarks)
     {
         if (landmarks == null || landmarks.Length < 21) { return false; }
@@ -2022,6 +2298,8 @@ internal static class OpenPalmClassifier
     /// <summary>
     /// The palm's center: the mean of the wrist and the four finger MCP knuckles.
     /// </summary>
+    /// <param name="landmarks">The 21 hand landmarks.</param>
+    /// <returns>The palm center, in the landmarks' coordinate space.</returns>
     internal static Point2f GetPalmCenter(Point2f[] landmarks)
     {
         var sumX = 0f;
@@ -2032,6 +2310,13 @@ internal static class OpenPalmClassifier
             sumY += landmarks[i].Y;
         }
         return new Point2f(sumX / 5f, sumY / 5f);
+    }
+
+    private static float Distance(Point2f a, Point2f b)
+    {
+        float dx = a.X - b.X;
+        float dy = a.Y - b.Y;
+        return (float)Math.Sqrt((dx * dx) + (dy * dy));
     }
 }
 ```
@@ -2119,8 +2404,8 @@ The GameEngine package puts an engine-driven surface alongside ordinary pages an
 public interface IManageGameCanvas
 {
     /// <summary>Called once, on the UI thread, at the canvas's FirstStarted event.</summary>
-    /// <param name="canvas">The game canvas the visualizer renders into.</param>
-    void CanvasFirstStart(GameSurfaceCanvas canvas);
+    /// <param name="host">The page that owns the game canvas the visualizer renders into.</param>
+    void CanvasFirstStart(IGameCanvasHost host);
 }
 ```
 
@@ -2128,16 +2413,20 @@ public interface IManageGameCanvas
 // From CodeBrix.Samples/PalmVisualizer/src/PalmVisualizer.UI/Views/MainPage.xaml.cs
 //Fires once, at the canvas's first non-zero layout size - i.e. the first time
 //  Visualize Mode is shown - which is when the engine can start
-VisualizerCanvas.FirstStarted += (_, _) => _gameCanvasManager?.CanvasFirstStart(VisualizerCanvas);
+VisualizerCanvas.FirstStarted += (_, _) => _gameCanvasManager?.CanvasFirstStart(this);
+}
+
+//The one thing the visualizer session needs from this page (see IGameCanvasHost)
+GameSurfaceCanvas IGameCanvasHost.Canvas => VisualizerCanvas;
 ```
 
 ```csharp
 // From CodeBrix.Samples/PalmVisualizer/src/PalmVisualizer.Core/ViewModels/MainViewModel.cs
-public void CanvasFirstStart(GameSurfaceCanvas canvas)
+public void CanvasFirstStart(IGameCanvasHost host)
 {
     //UI thread, the first time Visualize Mode is shown with a real size: build the
     //  shader scene and start the engine. Later mode switches pause and resume it.
-    _visualizerSession = new VisualizerSession(canvas);
+    _visualizerSession = _sessionFactory.CreateSession(host);
     _visualizerSession.Start();
 }
 ```
@@ -2160,6 +2449,9 @@ public void Start()
 {
     if (IsStarted) { return; }
 
+    //GpuRendering-OpenGL (GPU) by default; must be chosen before the first access to Host. The
+    //  render resolution tracks the window (no SetRenderResolution) - the shader
+    //  scene is resolution-independent.
     _canvas.UseGpuRendering = Environment.GetEnvironmentVariable("PALMVISUALIZER_USE_CPU") != "1";
 
     _renderSurface = _canvas.Host;
@@ -2181,6 +2473,11 @@ public void Start()
     IsStarted = true;
 }
 
+/// <summary>
+/// Parks the visual at ~zero cost (the global engine pause) while the user is back at
+/// Camera Mode, releasing every palm attractor so a later <see cref="Resume"/> starts
+/// from the undisturbed visual. Safe to call when not started or already paused.
+/// </summary>
 public void Pause()
 {
     if (!IsStarted || Engine.Instance.IsPaused) { return; }
@@ -2189,13 +2486,17 @@ public void Pause()
     Engine.Instance.Pause();
 }
 
+/// <summary>
+/// Wakes the visual after a <see cref="Pause"/> - the pause is invisible to engine
+/// time, so the colors resume mid-motion. Safe to call when not started or not paused.
+/// </summary>
 public void Resume()
 {
     if (!IsStarted || !Engine.Instance.IsPaused) { return; }
 
     Engine.Instance.Resume();
 }
-
+// ...
 public void Stop()
 {
     if (!IsStarted) { return; }
@@ -2222,11 +2523,7 @@ private Task DoVisualize()
 {
     if (!CanVisualize()) { return Task.CompletedTask; }
 
-    if (_tracker == null)
-    {
-        _tracker = new PalmTracker();
-        _tracker.TrackingUpdated += OnTrackingUpdated;
-    }
+    //Starting the tracker is what loads the models, on its own worker thread
     _tracker.Start();
     _reportedOpenPalmCount = 0;
 
@@ -2239,6 +2536,16 @@ private Task DoVisualize()
     StatusText = "Show the camera your open palm - the colors will gather toward it.";
     return Task.CompletedTask;
 }
+
+#endregion
+
+#region BackCommand
+
+private SimpleCommand _backCommand;
+public SimpleCommand BackCommand =>
+    (_backCommand ??= new SimpleCommand(CanGoBack, DoGoBack));
+
+private bool CanGoBack() => IsVisualizeMode;
 
 private Task DoGoBack()
 {
@@ -2256,7 +2563,7 @@ private Task DoGoBack()
 }
 ```
 
-The engine core has no UI-framework dependency and is headless-usable, which is why the same scene can be exercised in tests with no window; [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md) covers tile maps, sprites, physics, input, audio and the save system.
+The engine core has no UI-framework dependency and is headless-usable, which is why the same scene can be exercised in tests with no window; [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md) covers tile maps, sprites, physics, input, audio and the save system. Its optional add-ons each have a page: [cards and dice](../libraries/gameengine/cards-and-dice.md) puts decks, piles, dice and an animated tabletop on the game surface for card, dice and board-style games, [Kenney assets](../libraries/gameengine/kenney-assets.md) loads art, sound, fonts, maps and models straight from downloaded Kenney zips, [generated music](../libraries/gameengine/generated-music.md) plays endless music an AI model writes while the game runs, and [gamepads](../libraries/gameengine/gamepads.md) adds SDL2 game controllers.
 
 ## Checklist
 

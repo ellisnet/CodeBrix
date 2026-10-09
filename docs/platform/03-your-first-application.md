@@ -534,7 +534,7 @@ Add-ins bring their own dependencies automatically, and some name a companion pa
 
 ## The files you now have
 
-The minimum viable project is eight files - one `.Core`, one `.UI`, one head:
+The minimum viable project is nine files - one `.Core`, one `.UI`, one head:
 
 ```text
 MyApp.Core/MyApp.Core.csproj          THE .Core PROJECT, keeping only the

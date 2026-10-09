@@ -658,7 +658,7 @@ public sealed class EmailAddressBuilder : ISpecimenBuilder
         if (name == null ||
             !name.EndsWith("Email", StringComparison.OrdinalIgnoreCase))
         {
-            return NoSpecimen.Instance;   // not mine — let others try
+            return NoSpecimen.Instance;   // not mine - let others try
         }
 
         var local = context.Resolve(typeof(string));
@@ -668,7 +668,7 @@ public sealed class EmailAddressBuilder : ISpecimenBuilder
     }
 }
 
-// Register it — Customizations are consulted before everything else
+// Register it - Customizations are consulted before everything else
 var fixture = new Fixture();
 fixture.Customizations.Add(new EmailAddressBuilder());
 

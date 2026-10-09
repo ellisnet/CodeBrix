@@ -8,14 +8,14 @@ through a [CodeBrix.Audio](CodeBrix.Audio.md) instrument library, and either pla
 or renders them to an audio file.** The music does not stop: when a model reaches the end of what it
 was writing, it is asked to carry on at the next bar line, for as long as anybody is listening. You
 reach for it from any .NET 10 application, or from a CodeBrix.Platform game through the GameEngine's
-GeneratedMusic add-in.
+[GeneratedMusic add-in](gameengine/generated-music.md).
 
 | | |
 | --- | --- |
 | **Repository** | [ellisnet/CodeBrix.Audio.MusicGeneration](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration) |
-| **Packages** | [`CodeBrix.Audio.MusicGeneration.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MusicGeneration.MitLicenseForever) |
-| **License** | MIT; see [License](#license) |
-| **Requires** | .NET 10 or later. The package depends on [`CodeBrix.Audio.Core.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.Core.MitLicenseForever), [CodeBrix.Audio.ModestSynth](CodeBrix.Audio.ModestSynth.md) and the ModelRunner library from CodeBrix.Ollama, which it pulls in automatically. To play through a speaker, the application also references the desktop package, [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever) |
+| **Packages** | [`CodeBrix.Audio.MusicGeneration.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MusicGeneration.MitLicenseForever) - the library, with the model adapters<br>[`CodeBrix.Audio.MusicGeneration.SkyTNT.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MusicGeneration.SkyTNT.ApacheLicenseForever) - the SkyTNT model, packaged, from [its own repository](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.SkyTNT)<br>[`CodeBrix.Audio.MusicGeneration.MuPT.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MusicGeneration.MuPT.ApacheLicenseForever) - the MuPT model, packaged, from [its own repository](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.MuPT) |
+| **License** | MIT for the library; Apache 2.0 for the two model packages. See [License](#license) |
+| **Requires** | .NET 10 or later. The package depends on [`CodeBrix.Audio.Core.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.Core.MitLicenseForever), [CodeBrix.Audio.ModestSynth](CodeBrix.Audio.ModestSynth.md) and [CodeBrix.Ollama.ModelRunner](CodeBrix.Ollama.ModelRunner.md), which it pulls in automatically. To play through a speaker, the application also references the desktop package, [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever) |
 | **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application, through the GameEngine's GeneratedMusic add-in in a game |
 | **Platforms** | Windows, Linux and macOS for playback, through the desktop package. Generating music and rendering it to a file need no audio device |
 
@@ -175,8 +175,9 @@ of the work.
 An adapter is code and a model is files. The SkyTNT and MuPT adapters are in this package and take a
 path you supply: a folder, or a map of file names against the paths they are really at, for SkyTNT,
 and a single file for MuPT. The two models also come as packages of their own that register a shared
-instance with one call, and the recorded General MIDI instrument set, FluidR3Gm, is a package of its own
-too. The blueprint file registers everything an application might ask for, once, early:
+instance with one call, and the recorded General MIDI instrument set,
+[FluidR3Gm](CodeBrix.Audio.Samples.FluidR3Gm.md), is a package of its own too. The blueprint file
+registers everything an application might ask for, once, early:
 
 ```csharp
 using CodeBrix.Audio.ModestSynth;
@@ -209,6 +210,23 @@ public static class MusicSetup
 }
 ```
 
+Each model package - `CodeBrix.Audio.MusicGeneration.SkyTNT.ApacheLicenseForever` and
+`CodeBrix.Audio.MusicGeneration.MuPT.ApacheLicenseForever` - holds the model's inference files and a
+small registration class, `SkyTNTModel` or `MuPTModel`, and depends on this package and nothing else.
+`Register()` puts the shared `Instance` into `MusicGeneratorRegistry` under `GeneratorName`; it is
+idempotent and loads nothing, and registering does not select the generator - name it in the options.
+`IsAvailable` checks that the files exist, `IsLoaded` says whether the weights are loaded, and
+`ModelDirectory`, `ResolveDirectory` and `ResolveFiles` say where the files are. The package's build
+targets copy the files into `Models/CodeBrix.Audio.MusicGeneration.SkyTNT/` or
+`Models/CodeBrix.Audio.MusicGeneration.MuPT/` in the build and publish output of every project that
+reaches it, including an executable that reaches it through a library of its own; deploy that folder
+with the application, because the files are never embedded in an assembly or a single-file executable.
+`CodeBrixSkyTNTCopyAssetsToOutput` or `CodeBrixMuPTCopyAssetsToOutput` set to false stops the copy, for
+an application that places the files itself and constructs the adapter with its own path. The two
+packages can be installed together. SkyTNT runs on the model runner's managed engine; MuPT runs on the
+model runner's bundled native engine, so the native library for the deployment platform must be kept.
+The size of a model's files is not a bound on the memory inference takes.
+
 A model loads on first use; `PreloadAsync` moves that cost to a loading screen. Once loaded it stays
 loaded in the registry and serves every later session: disposing a session releases nothing, and
 `Release()` gives the memory back. No Python and no ModelManager run in the application.
@@ -217,7 +235,7 @@ loaded in the registry and serves every later session: disposing a session relea
 
 An instrument library is a named set of instruments addressed the way MIDI addresses them. `ModestSynthGm`
 is the whole General MIDI set, synthesized, with nothing to ship; any `.sf2` becomes a named library; the
-FluidR3Gm package gives recorded instruments at the cost of a larger download; and a mapped library
+[FluidR3Gm](CodeBrix.Audio.Samples.FluidR3Gm.md) package gives recorded instruments at the cost of a larger download; and a mapped library
 replaces one voice at a time. The first library registered is the default for a session that names
 none, so name the library whenever more than one is registered.
 
@@ -236,7 +254,7 @@ meter, tempo, number of parts and drum kit, and each model turns it into what it
 and a two-part opening for MuPT, a key signature, tempo and drum kit for SkyTNT. A part of a request the
 chosen generator does not act on is refused by name before anything starts - MuPT refuses a drum kit
 and instrument hints, SkyTNT refuses a voice count and a unit note length, and both refuse free text.
-`MuPTPresets` (reels, jigs, hornpipes, airs, waltzes and two duets) and `SkyTNTPresets`
+`MuPTPresets` (reels, jigs, hornpipes, airs, waltzes, duets and an open header the model completes) and `SkyTNTPresets`
 (`AmbientElectronica`, `ClubArrangement`, `FourOnTheFloor`) are requests to start from; a preset names no
 generator, and `CreateRequest()` hands back a new request every call.
 
@@ -352,7 +370,8 @@ exactly as a paused game should.
 
 ## Using it in a CodeBrix.Platform application
 
-A CodeBrix.Platform game reaches this library through the GeneratedMusic add-in of
+A CodeBrix.Platform game reaches this library through the
+[GeneratedMusic add-in](gameengine/generated-music.md) of
 [CodeBrix.Platform.GameEngine](CodeBrix.Platform.GameEngine.md), the engine's streaming-music provider
 built on this library. The game still makes the two decisions this
 library never makes for it - which instrument library and which model to register - one `Register()`
@@ -423,14 +442,22 @@ an ordinary `dotnet test` skips them and says why.
 | Tests and other non-package content | [EXTRAS-README.txt](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration/blob/main/EXTRAS-README.txt) |
 | Map of every document in the repository | [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration/blob/main/README-INDEX.txt) |
 | Tests (worked examples of every API) | [tests/CodeBrix.Audio.MusicGeneration.Tests](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration/tree/main/tests/CodeBrix.Audio.MusicGeneration.Tests) |
+| The SkyTNT model package's guide (ships inside that package too) | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.SkyTNT/blob/main/AGENT-README.txt) · [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.SkyTNT/blob/main/README-INDEX.txt) · [tests](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.SkyTNT/tree/main/tests) |
+| The MuPT model package's guide (ships inside that package too) | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.MuPT/blob/main/AGENT-README.txt) · [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.MuPT/blob/main/README-INDEX.txt) · [tests](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.MuPT/tree/main/tests) |
 
 XML documentation ships alongside the assembly.
 
 ## License
 
 CodeBrix.Audio.MusicGeneration is licensed under the MIT License; the license is also named in the
-package ID (`CodeBrix.Audio.MusicGeneration.MitLicenseForever`). Model files are never in the package:
-they are external assets the application obtains and deploys. For the provenance and licensing of open source code included in this library, see
+package ID (`CodeBrix.Audio.MusicGeneration.MitLicenseForever`). Model files are never in that package.
+The two model packages, `CodeBrix.Audio.MusicGeneration.SkyTNT.ApacheLicenseForever` and
+`CodeBrix.Audio.MusicGeneration.MuPT.ApacheLicenseForever`, are licensed under the Apache License 2.0,
+wrapper code and model alike; each carries the publisher's unmodified model card, the license and a
+modifications notice beside the model files. For the attribution of each model, see
+[SkyTNT THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.SkyTNT/blob/main/THIRD-PARTY-NOTICES.txt)
+and
+[MuPT THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.MuPT/blob/main/THIRD-PARTY-NOTICES.txt) in the two model repositories. For the provenance and licensing of open source code included in this library, see
 [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration/blob/main/THIRD-PARTY-NOTICES.txt)
 in the repository.
 
@@ -439,6 +466,7 @@ in the repository.
 **Where to go next**
 
 - [CodeBrix.Audio](CodeBrix.Audio.md) - the library this builds on: instrument libraries, MIDI and the players
-- [CodeBrix.Platform.GameEngine](CodeBrix.Platform.GameEngine.md) - endless generated music in a game, through the GeneratedMusic add-in
+- [CodeBrix.Audio.Samples.FluidR3Gm](CodeBrix.Audio.Samples.FluidR3Gm.md) - recorded General MIDI instruments to voice the music
+- [The GeneratedMusic add-in](gameengine/generated-music.md) - endless generated music in a CodeBrix.Platform.GameEngine game
 - [The music-generation blueprints](../samples/blueprints.md#the-music-generation-blueprints) - every recipe, by task
 - [ellisnet/CodeBrix.Audio.MusicGeneration on GitHub](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration) - source, tests and blueprints

@@ -478,9 +478,10 @@ Nothing in this package is UI-aware or head-specific: it has no platform-specifi
 restrictions, so a CodeBrix.Platform application references it from the `.Core` library like any
 other package and needs no per-head registration.
 
-The one integration inside the family is on the consuming side.
-[CodeBrix.Platform.Extensions](CodeBrix.Platform.Extensions.md) takes this package as a dependency
-and uses it in exactly one place: `LogExtensionPoint` resolves an `ILoggerFactory` from
+The integration inside the family is on the consuming side: the framework package
+`CodeBrix.Platform.ApacheLicenseForever`, `CodeBrix.Android.ApacheLicenseForever` and
+[CodeBrix.Platform.Extensions](CodeBrix.Platform.Extensions.md) all take this package as a dependency.
+Extensions uses it in exactly one place: `LogExtensionPoint` resolves an `ILoggerFactory` from
 `ServiceLocator.Current` when `ServiceLocator.IsLocationProviderSet` is true. That is the optional
 second bootstrap route for logging; assigning `LogExtensionPoint.AmbientLoggerFactory` directly is
 the first, and needs no service locator at all.

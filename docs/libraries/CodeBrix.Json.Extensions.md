@@ -37,7 +37,7 @@ These are the things it deliberately does not do:
 - No reference preservation for types without a usable parameterless constructor or without settable members - constructor-only and init-only shapes throw or silently skip members on read.
 - No replacement for `System.Text.Json`'s own polymorphism attributes; do not put both on one type.
 - No writing of the discriminator value on serialize - the discriminator is your own model property.
-- No source-generated `JsonSerializerContext`. The reference paths fall back to the reflection-based `DefaultJsonTypeInfoResolver` when you supply no resolver, so treat it as a reflection-based library; it is not designed for trimmed or AOT-only applications.
+- No NativeAOT support is claimed. The default paths are reflection-based; a fully trimmed application must preserve its model members or supply metadata through `options.TypeInfoResolver` (for example a metadata-mode `JsonSerializerContext`), which `ReferenceJson` honors. Partial trimming is the simpler option when model preservation has not been verified.
 - No automatic deferral of unresolved by-id references; deferral is a call you make on `JsonReferenceRegistry`.
 - No interchange between the two reference features inside one member: a member is either inlined with an id envelope or written as a bare id.
 - No general-purpose converters for dates, enums, dictionaries or numbers - use `System.Text.Json`'s own converters for those.
@@ -515,7 +515,7 @@ dotnet run
 
 Add the package to your `.Core` library and use it from your services and view models. There is no UI surface, no native library and nothing to register at start-up: polymorphism works through plain `JsonSerializer` once the attributes are in place or the factory has been added to your options, and the reference features are reached through their own static entry points. Behavior is identical on every head.
 
-The one deployment-shaped caveat: this is a reflection-based library with no source-generated serializer context, so it is not designed for trimmed or AOT-only applications.
+The one deployment-shaped caveat is trimming, which matters on Android: the default paths are reflection-based, so a fully trimmed application must preserve its model members or supply metadata through `options.TypeInfoResolver`. NativeAOT is not claimed.
 
 ## Pitfalls
 
@@ -577,4 +577,4 @@ in the repository.
 - [CodeBrix.YamlParse](CodeBrix.YamlParse.md) - the same kind of work when the wire format is YAML
 - [Project architecture](../platform/04-project-architecture.md) - where a library package belongs in a CodeBrix.Platform solution
 - [Library catalog](README.md) - every CodeBrix library by topic
-- [ellisnet/CodeBrix.Json.Extensions on GitHub](https://github.com/ellisnet/CodeBrix.Json.Extensions) - source, tests and samples
+- [ellisnet/CodeBrix.Json.Extensions on GitHub](https://github.com/ellisnet/CodeBrix.Json.Extensions) - source and tests

@@ -86,8 +86,10 @@ One element in the family's variable font:
 ```
 
 > [!IMPORTANT]
-> The variable font's default instance is weight 300 (Light), not Regular. Set `FontWeight`
-> explicitly when you want Regular (400) - the line above renders Light.
+> The variable font's default instance is weight 300 (Light), not Regular. On the CodeBrix.Platform
+> heads an unset weight is Normal and resolves through the manifest to `Merriweather-Regular.ttf`; the
+> Light default matters only where the variable font is rendered directly. Set `FontWeight` explicitly
+> whenever the weight matters.
 
 ## Key concepts
 
@@ -176,9 +178,8 @@ flowchart LR
 
 Those three properties are exactly the triple the `.ttf.manifest` files are keyed on. On a platform
 that resolves fonts through the manifest, the requested triple selects the matching static file
-listed in the manifest. Where the manifest is not used, the same properties drive the variable font's
-own weight and width axes, and the statics are not in the payload at all because the build prunes
-them.
+listed in the manifest. Every CodeBrix.Platform head resolves through the manifest; the variable font's
+own weight and width axes are not applied at run time.
 
 ### The prune and `SupportsFontManifest`
 
@@ -191,8 +192,9 @@ NuGet package ID, so NuGet's auto-import convention picks it up.
 ```
 
 When `$(SupportsFontManifest)` is not `'true'`, it removes the dash-bearing static font files from
-the application's asset items, leaving the four variable fonts. Set `SupportsFontManifest` to `true`
-in a head project to keep the statics. The prune runs after the `_CodeBrixAddLibraryAssets` target,
+the application's asset items, leaving the four variable fonts. Every CodeBrix.Platform head package
+already sets `SupportsFontManifest` to `true`, so an application head keeps the statics with no setting
+of its own. The prune runs after the `_CodeBrixAddLibraryAssets` target,
 so it fires in a CodeBrix.Platform application build; a build that never runs that target keeps every
 font.
 
@@ -214,14 +216,18 @@ reach for the Noto Serif companion for Greek.
 
 ### Missing glyphs are visible here
 
-Nothing in the package covers Hebrew, Arabic, Indic scripts, CJK, emoji or musical notation. The
-CodeBrix family never falls back to a system font, so a codepoint outside the coverage above renders
-as `.notdef` - and all four bundled families draw a `.notdef` box, so missing text shows as tofu
-boxes rather than disappearing.
+Nothing in the package covers Hebrew, Arabic, Indic scripts, CJK, emoji or musical notation. By
+default CodeBrix.Platform looks for a codepoint outside the coverage above in the symbols font, then in the fonts listed in
+`FeatureConfiguration.Font.FallbackFontFamilies` and then in the host machine's installed fonts; with
+`FeatureConfiguration.Font.RestrictToEmbeddedFonts = true` - which the PlayTest head and the
+font-isolated frame-buffer emulator set for you - host fonts are never consulted. Whatever none of the
+consulted fonts covers renders as `.notdef` - and all four bundled families draw a `.notdef` box, so
+missing text shows as tofu boxes rather than disappearing.
 
 > [!WARNING]
-> Uncovered codepoints do not silently borrow a font from the OS. Check coverage before assuming a
-> rendering bug.
+> An uncovered codepoint may borrow a host font on a development desktop and still show a box on a
+> device that has only the application's fonts. Ship the fonts the text needs, and check coverage
+> before assuming a rendering bug.
 
 ## Examples
 
@@ -296,7 +302,7 @@ directly or through a style:
 Making Merriweather the application-wide default text font:
 
 ```csharp
-// Run this before the first UI element is created — typically at the
+// Run this before the first UI element is created - typically at the
 // top of the App constructor, before InitializeComponent().
 global::CodeBrix.Platform.UI.FeatureConfiguration.Font.DefaultTextFontFamily =
     "ms-appx:///CodeBrix.Platform.Fonts.Merriweather/Fonts/Merriweather.ttf";
@@ -372,9 +378,10 @@ Dash-bearing files are exactly what the `.targets` prunes when `SupportsFontMani
 ## Using it in a CodeBrix.Platform application
 
 Adding the `PackageReference` contributes the fonts and manifests to the application's asset set;
-nothing else is required to make the font files available. To keep the static instances in the
-payload, the head project sets `<SupportsFontManifest>true</SupportsFontManifest>`; otherwise the
-package's `.targets` prunes them and only the four variable fonts ship. Because the prune runs
+nothing else is required to make the font files available. Every CodeBrix.Platform head package
+already sets `<SupportsFontManifest>true</SupportsFontManifest>`, which keeps the static instances in
+the payload; in a build where it is not `true`, the package's `.targets` prunes them and only the four
+variable fonts ship. Because the prune runs
 `AfterTargets="_CodeBrixAddLibraryAssets"`, it fires in a CodeBrix.Platform application build, and a
 build that never runs that target keeps every font.
 
@@ -382,7 +389,8 @@ The application then chooses the font in one of three ways: assign `DefaultTextF
 the `MerriweatherFont` resource and bind with `{StaticResource}`, or name the URI per element.
 
 The package does not implement font fallback - the companions are files, and consulting them for a
-codepoint the primary font lacks is CodeBrix.Platform's job. When you want a guarantee rather than a
+codepoint the primary font lacks is CodeBrix.Platform's job once they are listed in
+`FeatureConfiguration.Font.FallbackFontFamilies`. When you want a guarantee rather than a
 per-codepoint lookup, name the companion URI on the run that carries Greek, Armenian or Georgian.
 
 Outside a CodeBrix.Platform host there is no `ms-appx:///` resolver; a plain .NET 10 program must
@@ -392,8 +400,7 @@ find the file itself in the restored package folder, under
 ## Pitfalls
 
 - **Never add a `#FamilyName` fragment to a font URI.** CodeBrix.Platform strips it during font
-  resolution, and on `DefaultTextFontFamily` it silently disables the startup manifest preload - the
-  appended `.manifest` lands inside the fragment and is dropped by `Uri.PathAndQuery`.
+  resolution, so it never helps.
 - **Do not hard-code a dash-bearing static URI in code or XAML that must work everywhere.** Those
   files are what the `.targets` prunes when `SupportsFontManifest` is not `'true'`. Use the dash-free
   URI plus `FontWeight="Bold"` instead. The four variable fonts are never pruned, which is why the
@@ -403,9 +410,10 @@ find the file itself in the restored package folder, under
 - **Do not expect Greek, Armenian or Georgian from Merriweather itself** - it has no glyphs for them.
   That is what the three companion families are for.
 - **Italic Armenian and Georgian render upright.** There is no italic face for either family.
-- **There is no system-font fallback anywhere in the CodeBrix family.** Uncovered codepoints render
-  as `.notdef`, and every font in this package draws a box for it, so unsupported text shows as tofu
-  boxes.
+- **Do not count on a system font to fill a gap.** By default CodeBrix.Platform consults the host's
+  installed fonts after the symbols font and `FallbackFontFamilies`, so an uncovered codepoint can render on a desktop and
+  not on a device; under `FeatureConfiguration.Font.RestrictToEmbeddedFonts` it renders as `.notdef`,
+  and every font in this package draws a box for it, so unsupported text shows as tofu boxes.
 - **Merriweather declares the Reserved Font Name `Merriweather`,** so SIL OFL 1.1 condition 3
   applies: do not alter the font bytes or the internal name tables, and do not redistribute a
   modified font under that name. The three Noto Serif families declare no Reserved Font Name.

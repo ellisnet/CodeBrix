@@ -11,7 +11,7 @@ A few of the reference applications, captured on the Linux X11 head. The same ap
 | | |
 | --- | --- |
 | ![Doom.Brix: the shareware episode running as a CodeBrix.Platform application](docs/images/doombrix-linux-x11.png) | ![Fresco.Brix: a score typed in the editor and engraved in process in the Music View](docs/images/frescobrix-linux-x11.png) |
-| **Doom.Brix** - the classic shareware episode, rendered through the game engine add-in ([CodeBrix.Samples.Gpl2](docs/samples/README.md#codebrixsamplesgpl2)) | **Fresco.Brix** - a music-notation editor that engraves the score in process ([CodeBrix.Samples.Gpl3](docs/samples/README.md#codebrixsamplesgpl3)) |
+| **Doom.Brix** - the classic shareware episode, rendered through the game engine library ([CodeBrix.Samples.Gpl2](docs/samples/README.md#codebrixsamplesgpl2)) | **Fresco.Brix** - a music-notation editor that engraves the score in process ([CodeBrix.Samples.Gpl3](docs/samples/README.md#codebrixsamplesgpl3)) |
 | ![Pinta.Brix: a layered raster paint editor with tools, palette, layers and history](docs/images/pintabrix-linux-x11.png) | ![PainDiagram: a body-map drawing application with three highlighter layers](docs/images/paindiagram-linux-x11.png) |
 | **Pinta.Brix** - a layered raster paint and image editor ([CodeBrix.Samples](docs/samples/README.md#codebrixsamples)) | **PainDiagram** - symptom mapping over a medical body map ([CodeBrix.Samples](docs/samples/README.md#codebrixsamples)) |
 | ![GitHubIssueFinder: unassigned issues grouped by repository, in the Light color scheme](docs/images/githubissuefinder-linux-x11.png) | |
@@ -31,6 +31,8 @@ One `.Core` library and one `.UI` shared project of XAML drive every platform. A
 | macOS | [`CodeBrix.Platform.Runtime.Skia.MacOS.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.MacOS.ApacheLicenseForever) | `.UseMacOS()` |
 
 Each head draws with the GPU where the machine offers one and with software Skia otherwise: OpenGL on Win32 and X11, Vulkan on Wayland, OpenGL ES over DRM and GBM on the frame buffer, and Metal on macOS. [02 - Runs on every laptop](docs/platform/02-runs-on-every-laptop.md) gives each head's operating-system requirements, render-path options and known limits.
+
+The same application also runs on Android, with the desktop as a first-class form factor. [CodeBrix.Android](docs/libraries/CodeBrix.Android.md) targets Googlebooks - the Android laptops from Google and its partners - and phones docked in desktop mode, and treats tablets and phones as first-class targets too. The pages, view models and code-behind compile unchanged and are shown with native Material Components views that adapt to the window size; an Android head references [`CodeBrix.Android.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.ApacheLicenseForever), `.Core` gains an Android target framework, and each add-in has an Android package of its own. [15 - Android and Googlebooks](docs/platform/15-android.md) walks through it.
 
 ## Five-minute quick start
 
@@ -134,6 +136,7 @@ What completes the application is the shared XAML the quick start does not show 
 | Add a capability to a page: 3D, video, a browser, a terminal, charts | [Add-ins](docs/platform/08-add-ins.md) |
 | Read complete applications that use all of this for real | [Reference applications](docs/samples/README.md) |
 | Copy a recipe for the task in front of you | [Blueprints](docs/samples/blueprints.md) |
+| Test an application's UI with Playwright-style locators, actions and assertions | [PlayTest](docs/platform/playtest/README.md) |
 | Know what you may ship and on what terms | [Licensing](docs/licensing.md) |
 | Jump to a repository, its tests or its API guide | [Repository directory](docs/repo-directory.md) |
 
@@ -159,7 +162,7 @@ The add-ins are the packages that make the framework do more. Many of them are a
 
 | Topic | Libraries |
 | --- | --- |
-| Platform companions | [CodeBrix.Platform](docs/libraries/CodeBrix.Platform.md) · [CodeBrix.Platform.Extensions](docs/libraries/CodeBrix.Platform.Extensions.md) · [CodeBrix.ServiceLocator](docs/libraries/CodeBrix.ServiceLocator.md) · [CodeBrix.Platform.Unicode](docs/libraries/CodeBrix.Platform.Unicode.md) · [CodeBrix.Platform.LinuxDBus](docs/libraries/CodeBrix.Platform.LinuxDBus.md) |
+| Platform companions | [CodeBrix.Platform](docs/libraries/CodeBrix.Platform.md) · [CodeBrix.Android](docs/libraries/CodeBrix.Android.md) · [CodeBrix.Platform.Extensions](docs/libraries/CodeBrix.Platform.Extensions.md) · [CodeBrix.ServiceLocator](docs/libraries/CodeBrix.ServiceLocator.md) · [CodeBrix.Platform.Unicode](docs/libraries/CodeBrix.Platform.Unicode.md) · [CodeBrix.Platform.LinuxDBus](docs/libraries/CodeBrix.Platform.LinuxDBus.md) |
 | Fonts | [Fluent](docs/libraries/CodeBrix.Platform.Fonts.Fluent.md) · [Merriweather](docs/libraries/CodeBrix.Platform.Fonts.Merriweather.md) · [NotoMusic](docs/libraries/CodeBrix.Platform.Fonts.NotoMusic.md) · [OpenSans](docs/libraries/CodeBrix.Platform.Fonts.OpenSans.md) · [Roboto](docs/libraries/CodeBrix.Platform.Fonts.Roboto.md) · [RobotoMono](docs/libraries/CodeBrix.Platform.Fonts.RobotoMono.md) |
 | SVG, imaging and drawing | [CodeBrix.Imaging](docs/libraries/CodeBrix.Imaging.md) · [CodeBrix.Imaging.Drawing](docs/libraries/CodeBrix.Imaging.Drawing.md) · [CodeBrix.SkiaSvg](docs/libraries/CodeBrix.SkiaSvg.md) · [CodeBrix.SvgParse](docs/libraries/CodeBrix.SvgParse.md) · [CodeBrix.PolygonTools](docs/libraries/CodeBrix.PolygonTools.md) |
 | Audio, media core, graphics and games | [CodeBrix.Audio](docs/libraries/CodeBrix.Audio.md) · [CodeBrix.Audio.ModestSynth](docs/libraries/CodeBrix.Audio.ModestSynth.md) · [CodeBrix.Audio.MusicGeneration](docs/libraries/CodeBrix.Audio.MusicGeneration.md) · [CodeBrix.Audio.Opus](docs/libraries/CodeBrix.Audio.Opus.md) · [CodeBrix.Platform.MediaPlayerCore](docs/libraries/CodeBrix.Platform.MediaPlayerCore.md) · [CodeBrix.Platform.OpenGL](docs/libraries/CodeBrix.Platform.OpenGL.md) · [CodeBrix.Platform.GameEngine](docs/libraries/CodeBrix.Platform.GameEngine.md) |

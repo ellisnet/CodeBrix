@@ -39,9 +39,11 @@ anything that needs a Unicode property table - line breaking, for example - fail
 
 ## When to use it
 
-Reference the Windows package from a Windows head, console tool or test project, and the macOS
-package from a macOS head, console tool or test project. Reference neither from a Linux head: Linux
-distributions ship their own ICU and a CodeBrix.Platform Linux head uses that. Nothing here is
+A CodeBrix.Platform Win32, WPF or macOS head already receives the right package through its head
+package, which depends on it, so a head project adds nothing. Reference the Windows package yourself
+from a Windows console tool or test project, and the macOS package from a macOS console tool or test
+project. Reference neither from a Linux head: Linux distributions ship their own ICU and a
+CodeBrix.Platform Linux head uses that. Nothing here is
 shipped for Android, iOS or browser-wasm targets.
 
 These packages serve the CodeBrix.Platform ICU engine, not `System.Globalization`. Referencing them
@@ -90,14 +92,15 @@ The two packages are per-OS, not alternatives.
 
 | Project | Package |
 | --- | --- |
-| Windows head, console tool or test project | `CodeBrix.Platform.Unicode.ApacheLicenseForever` |
-| macOS head, console tool or test project | `CodeBrix.Platform.UnicodeMacOs.ApacheLicenseForever` |
+| Win32 or WPF head | Nothing to add - the head package depends on `CodeBrix.Platform.Unicode.ApacheLicenseForever` |
+| macOS head | Nothing to add - the head package depends on `CodeBrix.Platform.UnicodeMacOs.ApacheLicenseForever` |
+| Windows console tool or test project | `CodeBrix.Platform.Unicode.ApacheLicenseForever` |
+| macOS console tool or test project | `CodeBrix.Platform.UnicodeMacOs.ApacheLicenseForever` |
 | Linux head (X11, Wayland, frame buffer) | Neither - Linux has a system ICU |
 | Android, iOS, browser-wasm | Neither - not shipped |
 
-In a multi-head solution, reference the Windows package from the Windows head project and the macOS
-package from the macOS head project. Referencing both from one project is also safe and explicitly
-supported: the two packages share one sentinel so `icudt.dat` is delivered exactly once, and their
+In a multi-head solution the heads need no explicit reference; a tool or test project that must run
+on both operating systems may reference both packages, which is safe and explicitly supported: the two packages share one sentinel so `icudt.dat` is delivered exactly once, and their
 MSBuild target names are deliberately distinct, so importing both produces no target-redefinition
 error. Which package's copy of `icudt.dat` wins is not defined and does not matter - the two archives
 are byte-identical.

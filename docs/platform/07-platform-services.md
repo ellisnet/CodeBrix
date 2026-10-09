@@ -16,11 +16,16 @@ The view model declares a small interface holding a delegate, implements it itse
 /// </summary>
 public interface IMediaFileBridge
 {
+    /// <summary>
+    /// Shows an "open file" dialog filtered to the containers this application reads, and returns
+    /// the full path the person chose, or null if they cancelled. The head leaves this null when it
+    /// has no file dialog, in which case nothing can be opened by hand.
+    /// </summary>
     Func<Task<string>> PickMediaFileAsync { get; set; }
 }
 ```
 
-Notice where the interface lives: in the view model's own file, not in a head assembly. That is what lets four unrelated UI stacks satisfy it - the Skia heads, a native WinUI head, a WPF head and a mobile head each fill in the same delegate with their own API.
+Notice where the interface lives: in the view model's own project, not in a head assembly. That is what lets four unrelated UI stacks satisfy it - the Skia heads, a native WinUI head, a WPF head and a mobile head each fill in the same delegate with their own API.
 
 Five rules make the shape work, and they apply to every recipe in this chapter.
 
@@ -51,6 +56,10 @@ DataContextChanged += (_, _) =>
         canvasBridge.InvalidateSelfView = () => DispatcherQueue?.TryEnqueue(() => SelfViewCanvas?.Invalidate());
     }
 };
+
+//Nothing else owns the view model - the XAML declares it - so the page is what runs its
+//  teardown: the camera stopped, the tracking thread joined, the bridge delegates dropped
+Unloaded += (_, _) => (DataContext as IDisposable)?.Dispose();
 
 InitializeComponent();
 ```
@@ -128,7 +137,7 @@ Let the model expose `Initialize*` methods that take delegates, and let the UI l
 public delegate Task<ErrorDialogResponse> ErrorDialogHandler (string message, string body, string details);
 public delegate Task MessageDialogHandler (string message, string body);
 public delegate Task<bool> SimpleEffectDialogHandler (BaseEffect effect, IWorkspaceService workspace);
-
+// ...
 public interface IProgressDialog
 {
     void Show ();
@@ -212,8 +221,21 @@ The view model owns the decision, the page owns the dialog:
 public SimpleCommand OpenCommand => field ??= new SimpleCommand(
     () => !IsBusy, (Func<object, Task>)(_ => DoOpenAsync()));
 
+/// <summary>Takes the selected file out of the list. The file itself is left alone.</summary>
+public SimpleCommand RemoveCommand => field ??= new SimpleCommand(
+    () => !IsBusy && SelectedItem is not null, _ => DoRemove());
+
 private async Task DoOpenAsync()
 {
+    //The FIRST Open of the session checks the external tools, once, and warns about the first one that is
+    //missing. The flag is set before the check runs, so a second click never checks or warns again. The
+    //warning is dismissed with OK and the Open carries on: a .cbv file opens and plays without FFmpeg.
+    if (!toolsChecked)
+    {
+        toolsChecked = true;
+        await WarnAboutMissingToolsAsync();
+    }
+
     if (PickMediaFileAsync is null)
     {
         StatusText = "This head has no file dialog, so a file cannot be chosen by hand.";
@@ -294,7 +316,7 @@ private async Task DoSelectOutputFile()
 
     if (PickSavePdfPathAsync == null)
     {
-        //No native file dialog on this head — the user types the destination
+        //No native file dialog on this head - the user types the destination
         //  path directly into the box instead.
         await ShowInfo(
             "This head has no file dialog. Type the full path (including the .pdf file name) " +
@@ -307,13 +329,21 @@ private async Task DoSelectOutputFile()
         var chosenPath = await PickSavePdfPathAsync(GetSuggestedFileName());
         if (!string.IsNullOrWhiteSpace(chosenPath))
         {
-            OutputFilePath = chosenPath.Trim();
+            var destination = chosenPath.Trim();
+
+            //Deciding that a brand-new, still-empty file the picker created is a destination
+            //  rather than a document is this application's policy, so it lives here and not
+            //  in the page: the create-time "replace existing file?" prompt should fire only
+            //  for a file that really has content in it.
+            FileDialogHelper.RemoveEmptyPlaceholder(destination);
+
+            OutputFilePath = destination;
             StatusText = $"Will save to: {OutputFilePath}";
         }
     }
     catch (NotSupportedException)
     {
-        //Some heads register no picker — there is no window to host a dialog
+        //Some heads register no picker - there is no window to host a dialog
         await ShowInfo(
             "File dialogs are not supported on this head. Type the full path (including the " +
             ".pdf file name) for the PDF into the “Save PDF to” box.");
@@ -341,11 +371,9 @@ private static async Task<string> PickSavePdfPathAsync(string suggestedFileName)
     if (file == null) { return null; }
 
     //Some heads percent-encode the path they return, which would save "My Book.pdf" as
-    //  "My%20Book.pdf"; decode it before anything touches the disk.
-    var path = FileDialogHelper.ToFileSystemPath(file.Path);
-
-    FileDialogHelper.RemoveEmptyPlaceholder(path);
-    return path;
+    //  "My%20Book.pdf"; decode it before anything touches the disk. That is the only thing
+    //  done to it here: what the chosen path then means is the view model's business.
+    return FileDialogHelper.ToFileSystemPath(file.Path);
 }
 ```
 
@@ -421,8 +449,8 @@ Two small static helpers in the shared library make every head hand the view mod
 /// percent-encoded, so a name with a space in it arrives as <c>My%20Book.pdf</c> and
 /// would be written to disk under that literal name; accented names fare worse still
 /// (<c>Ölberg</c> arrives as <c>%C3%96lberg</c>). Nothing is decoded unless the text
-/// really does carry escapes, so paths from heads that already return a plain one — the
-/// Win32 and WPF save dialogs — pass through untouched.
+/// really does carry escapes, so paths from heads that already return a plain one - the
+/// Win32 and WPF save dialogs - pass through untouched.
 /// </summary>
 public static string ToFileSystemPath(string path)
 {
@@ -484,7 +512,7 @@ public static void RemoveEmptyPlaceholder(string path)
 }
 ```
 
-Notice that decoding is conditional. Unconditional decoding would corrupt a legitimate name containing a percent sign, which is why the helper looks for a real escape first. The placeholder is deleted only when its length is zero, and a failure to delete is deliberately swallowed - the worst case is one extra confirmation prompt, never lost data. Call both helpers in the page, before the path reaches the view model, so the view model only ever sees real paths.
+Notice that decoding is conditional. Unconditional decoding would corrupt a legitimate name containing a percent sign, which is why the helper looks for a real escape first. The placeholder is deleted only when its length is zero, and a failure to delete is deliberately swallowed - the worst case is one extra confirmation prompt, never lost data. Decode in the page, before the path reaches the view model, so the view model only ever sees real paths; removing the placeholder is the view model's policy decision, made where it accepts the destination.
 
 A folder picker needs the same decoding, incidentally: a folder called "My Models" would otherwise send every download to a literally named `My%20Models`.
 
@@ -516,12 +544,16 @@ A picker result is worth persisting, and the derived properties that swap a firs
 // From CodeBrix.Samples/KenneyAssetBrowser/src/KenneyAssetBrowser.Core/ViewModels/MainViewModel.cs
 public bool HasAssetsFolder => !string.IsNullOrWhiteSpace(_assetsFolder);
 
+/// <summary>The folder-picker button's caption: an invitation, or the chosen path.</summary>
 public string AssetsFolderLabel => HasAssetsFolder ? _assetsFolder : "Choose assets folder…";
 
+/// <summary>The first-launch prompt's visibility (shown until an assets folder is chosen).</summary>
 public Visibility FolderPromptVisibility => HasAssetsFolder ? Visibility.Collapsed : Visibility.Visible;
 
+/// <summary>The catalog area's visibility (the inverse of the first-launch prompt).</summary>
 public Visibility CatalogAreaVisibility => HasAssetsFolder ? Visibility.Visible : Visibility.Collapsed;
 
+/// <summary>Opens the folder picker to choose where the bundle zips live; the choice persists in settings.sqlite.</summary>
 public SimpleCommand PickFolderCommand => field ??=
     new SimpleCommand((Func<object, Task>)(_ => PickFolderAsync()));
 
@@ -591,7 +623,7 @@ public interface ICopyToClipboard { Action<string> CopyTextToClipboard { get; se
 
 // ...
 
-public class MainViewModel : SimpleViewModel, ICopyToClipboard
+public class MainViewModel : SimpleViewModel, ICopyToClipboard, IPageReadyNotifier
 {
     // ...
     private async Task DoCopyToClipboard()
@@ -614,8 +646,9 @@ public class MainViewModel : SimpleViewModel, ICopyToClipboard
             }
         }
     }
-
+    // ...
     public Action<string> CopyTextToClipboard { get; set; }
+    // ...
 }
 ```
 
@@ -642,6 +675,10 @@ public MainPage()
             };
         }
     };
+
+    //The view model waits for this before it shows its startup dialog: a dialog needs a XamlRoot,
+    //  and the page does not have one until it is on screen.
+    Loaded += (sender, args) => (DataContext as IPageReadyNotifier)?.NotifyPageReady();
 
     InitializeComponent();
 }
@@ -692,11 +729,13 @@ public void SetImage (ImageSurface surface)
     using SKImage image = SKImage.FromBitmap (surface.Bitmap);
     using SKData data = image.Encode (SKEncodedImageFormat.Png, 100);
 
+    // The write adapter is deliberately NOT disposed: disposing it closes
+    // the stream underneath, which the clipboard still has to read from
+    // (the Seek below threw ObjectDisposedException, so Copy never worked).
     InMemoryRandomAccessStream stream = new ();
-    using (Stream outStream = stream.AsStreamForWrite ()) {
+    Stream outStream = stream.AsStreamForWrite ();
         data.SaveTo (outStream);
         outStream.Flush ();
-    }
     stream.Seek (0);
 
     DataPackage package = new ();
@@ -713,19 +752,34 @@ Notice the asymmetry: the reads are asynchronous and the writes are not. Keep it
 
 ## Repainting a canvas
 
-Background work changes what should be drawn, and the view model has to trigger a repaint without holding a control reference. One `Action` per canvas is the whole interface:
+Background work changes what should be drawn, and the view model has to trigger a repaint without holding a control reference. One `Action` per canvas is the whole of the repaint direction; the same bridge carries the paint handler's call back into the view model, which keeps the decision about what the main canvas shows:
 
 ```csharp
-// From CodeBrix.Samples/WebcamPainter/src/WebcamPainter.Core/ViewModels/MainViewModel.cs
+// From CodeBrix.Samples/WebcamPainter/src/WebcamPainter.Core/Bridges/ICanvasBridge.cs
 /// <summary>
-/// Lets the hosting page hand the view model the invalidate (repaint) delegates for the two
-/// Skia canvases. Frames and tracking results arrive on capture/worker threads; the page's
-/// delegates are responsible for marshalling their invalidates onto the UI thread.
+/// The main and self-view canvas contract between the hosting page and the view model, in
+/// both directions. The page hands the view model the invalidate (repaint) delegates for the
+/// two Skia canvases; frames and tracking results arrive on capture/worker threads, so the
+/// page's delegates are responsible for marshalling their invalidates onto the UI thread.
+/// The other direction is <see cref="RenderMainCanvas"/>: the page's paint handler forwards
+/// the surface, so what the main canvas shows stays the view model's decision.
 /// </summary>
 public interface ICanvasBridge
 {
+    /// <summary>Invalidates the main canvas (live preview in Capture Mode; the painting in Paint Mode).</summary>
     Action InvalidateMainCanvas { get; set; }
+
+    /// <summary>Invalidates the small self-view canvas shown beside the painting in Paint Mode.</summary>
     Action InvalidateSelfView { get; set; }
+
+    /// <summary>
+    /// Draws whatever the main canvas should be showing right now - the mirrored live preview
+    /// in Capture Mode, the painting and its crosshair in Paint Mode. Called from the page's
+    /// <c>PaintSurface</c> handler, so always on the UI thread.
+    /// </summary>
+    /// <param name="surface">The Skia surface to render onto.</param>
+    /// <param name="info">The image info describing the surface.</param>
+    void RenderMainCanvas(SKSurface surface, SKImageInfo info);
 }
 ```
 
@@ -826,6 +880,13 @@ public IDisposable Start (uint intervalMilliseconds, Func<bool> callback)
 /// </summary>
 public sealed class TimerServiceProxy : ITimerService
 {
+    private sealed class NullHandle : IDisposable
+    {
+        public void Dispose ()
+        {
+        }
+    }
+
     public ITimerService? Inner { get; set; }
 
     public IDisposable Start (uint intervalMilliseconds, Func<bool> callback)
@@ -882,7 +943,7 @@ private static InputSystemCursorShape MapCursor (ToolCursor? cursor)
 | Type | The members an application reaches for |
 | --- | --- |
 | `Window` | `Title`, `Content`, `Activate()`, `Close()`, `ExtendsContentIntoTitleBar`, `AppWindow`, `DispatcherQueue`, and the `Activated`, `SizeChanged` and `VisibilityChanged` events |
-| `AppWindow` | `Title`, `Size`, `ClientSize`, `Position`, `IsVisible`, `Presenter`, `TitleBar`, `Show()`, `Move()`, `Resize()`, `SetPresenter()`, `SetIcon()`, and the `Changed` and `Closing` events |
+| `AppWindow` | `Title`, `Size`, `ClientSize`, `Position`, `IsVisible`, `Presenter`, `TitleBar`, `Show()`, `Move()`, `Resize()`, `ResizeClient()`, `SetPresenter()`, `SetIcon()`, and the `Changed` and `Closing` events |
 | `OverlappedPresenter` | `IsAlwaysOnTop`, `IsMaximizable`, `IsMinimizable`, `IsModal`, `IsResizable`, `HasBorder`, `HasTitleBar`, the preferred minimum and maximum sizes, `State`, `Maximize()`, `Minimize()`, `Restore()`, `SetBorderAndTitleBar()` |
 
 ```csharp
@@ -893,6 +954,8 @@ if (MainWindow.AppWindow.Presenter is OverlappedPresenter p)
     p.Maximize();
 }
 ```
+
+`Resize()` takes the framed window size in raw pixels, the same kind of number `AppWindow.Size` reports. `ResizeClient()` takes the client area in effective pixels, the same kind of number `Window.Bounds` reports, so it is the call that restores a saved `Window.Bounds`. On the frame-buffer head the window is the whole screen and `ResizeClient()` does nothing; on Wayland a floating window takes the size, and a maximized, tiled or full-screen one keeps the size the compositor gave it.
 
 > [!WARNING]
 > Several of these are permanent no-ops on the Wayland head, because the protocol gives them to the compositor rather than the client: window positioning and position readback, forced resize, always-on-top, and minimized-state readback. Design the window so it does not need them, or accept that they work on X11, Windows and macOS only. [02 - Runs on every laptop](02-runs-on-every-laptop.md) has the full per-head list.
@@ -924,9 +987,9 @@ if (MainWindow.AppWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter
 
 Notice three things. The `is` test succeeds the instant `new Window()` returns, because the constructor builds the native window once the application has finished starting and installs the default `OverlappedPresenter`; setting the constraint before `Activate()` hands it to the window manager before the window is ever shown. `Window.AppWindow` is public here because the core package's build targets define `HAS_CODEBRIX_WINUI` in your project, so nothing has to be declared by hand. And no maximum is set: an unset maximum is the largest possible value, which is what keeps maximize working.
 
-The heads do not agree on the units. The X11 and Win32 heads read both numbers as native pixels, the Wayland and macOS heads read them as logical units, and the WPF head reads the launch size as device-independent units and the minimum as native pixels; the heads also differ on whether the numbers describe the client area or the whole framed window. At a display scale of 1 they all read the same, which is why one pair of constants is the right thing to write. Do not try to correct for the scale from application code: the scale is not knowable until the `XamlRoot` exists, which is after the native window has been created, so any correction is a visible resize of an existing window, and a correction that suits one head is wrong on another.
+Every head takes both numbers in effective pixels - the logical units the XAML tree is laid out in - and converts them itself to whatever its native windowing call expects, multiplying by the display scale where that call speaks device pixels. That is why one pair of constants is the right thing to write on every display. Do not correct for the scale from application code: the head already does, and a second correction makes the window the wrong size on a scaled display.
 
-Two applications show the whole shape, constants included: [GitHubIssueFinder App.xaml.cs](https://github.com/ellisnet/CodeBrix.Samples/blob/main/GitHubIssueFinder/src/GitHubIssueFinder.UI/App.xaml.cs) and [Fresco.Brix App.xaml.cs](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/Fresco.Brix/src/Fresco.Brix.UI/App.xaml.cs). To reopen at the size the user left instead of a fixed one, feed the same property from your settings store; see [Restore a window size before any window exists](#restore-a-window-size-before-any-window-exists).
+Two applications show the whole shape, constants included: [GitHubIssueFinder App.xaml.cs](https://github.com/ellisnet/CodeBrix.Samples/blob/main/GitHubIssueFinder/src/GitHubIssueFinder.UI/App.xaml.cs) and [Fresco.Brix App.xaml.cs](https://github.com/ellisnet/CodeBrix.Samples.Gpl3/blob/main/Fresco.Brix/src/Fresco.Brix.UI/App.xaml.cs). To reopen at the size the user left instead of a fixed one, feed the same property from your settings store, and put the framed size back once the page loads for the heads that open the launch size as the framed window; see [Restore a window size before any window exists](#restore-a-window-size-before-any-window-exists).
 
 ### Veto a close until unsaved work is handled
 
@@ -938,7 +1001,8 @@ Two applications show the whole shape, constants included: [GitHubIssueFinder Ap
 //event: setting Handled vetoes the close, and the X11 head reports
 //SupportsClosingCancellation. The save-prompt loop is async, so when
 //dirty documents exist the close is vetoed first and re-issued once
-//the user has decided.
+//the user has decided. Mirrors upstream's exit-path prompt loop; it
+//is triggered by window close because there is no File > Quit here.
 MainWindow.Closed += async (_, e) =>
 {
     if (windowCloseConfirmed) { return; }
@@ -949,7 +1013,12 @@ MainWindow.Closed += async (_, e) =>
 
     try
     {
-        if (Views.MainPage.Current is { } page && await page.ConfirmCloseApplicationAsync())
+        //The shell installs its save-prompt loop on this service, so the
+        //window close reaches it without knowing which page is showing.
+        IShellCloseService closeService =
+            SimpleServiceResolver.Instance?.GetService<IShellCloseService>();
+
+        if (closeService is not null && await closeService.ConfirmCloseAsync())
         {
             windowCloseConfirmed = true;
             MainWindow.Close();
@@ -971,14 +1040,14 @@ Notice the re-entrancy guard. The confirmed `Close()` raises `Closed` again, and
 
 ## An embedded browser
 
-Every Skia head can host a `WebView2`. The Windows, Skia-on-WPF and macOS runtimes have one built in; the Linux heads get one from [CodeBrix.Platform.WebView.ApacheLicenseForever](https://www.nuget.org/packages/CodeBrix.Platform.WebView.ApacheLicenseForever), which is built on WPE WebKit. Reference the add-in once, in the library that carries the application's packages: it is inert where a browser already exists, so one reference covers every head.
+Every Skia head can host a `WebView2`. The macOS runtime has one built in; the Windows and Skia-on-WPF heads get one from [CodeBrix.Platform.WebView.ApacheLicenseForever](https://www.nuget.org/packages/CodeBrix.Platform.WebView.ApacheLicenseForever), backed by the Microsoft Edge WebView2 runtime, and the Linux heads get one from the same package, built on WPE WebKit. Reference the add-in once, in the library that carries the application's packages: it is inert where a browser already exists, so one reference covers every head.
 
 ```xml
 <!-- From CodeBrix.Samples/WikipediaPublisher/CodeBrixPlatform/WikipediaPublisher.UI/Views/MainPage.xaml -->
 <WebView2 Grid.Row="1" x:Name="Browser" />
 ```
 
-The view model never names a browser type. It declares an action to navigate and a method the page calls back:
+The view model never names a browser type. It declares an action to navigate and two methods the page calls back:
 
 ```csharp
 // From CodeBrix.Samples/WikipediaPublisher/Shared/ViewModels/MainViewModel.cs
@@ -986,6 +1055,12 @@ public interface IWebViewBridge
 {
     /// <summary>Navigates the embedded browser to the given URL (null when no WebView).</summary>
     Action<string> NavigateToUrl { get; set; }
+
+    /// <summary>
+    /// Called by the page once its embedded browser exists and <see cref="NavigateToUrl"/> has
+    /// been set, so the view model decides which page the browser opens on.
+    /// </summary>
+    void NotifyBrowserReady();
 
     /// <summary>Called by the page whenever the embedded browser lands on a new URL.</summary>
     void SetCurrentBrowserUrl(string url);
@@ -1000,13 +1075,14 @@ private Task DoSearch()
     //  picks an article by navigating to it, and Publish uses whatever page is displayed.
     if (CanSearch() && NavigateToUrl != null)
     {
-        var searchUrl =
-            $"https://{WikiHost}/w/index.php?search={Uri.EscapeDataString(SearchTerms.Trim())}";
-        InvokeOnMainThread(() => NavigateToUrl(searchUrl));
+        var searchUrl = new Uri(_wikiBaseUri,
+            "w/index.php?search=" + Uri.EscapeDataString(SearchTerms.Trim())).AbsoluteUri;
+        Navigate(searchUrl);
         StatusText = "Browse to the article you want, then click Publish.";
     }
 
     return Task.CompletedTask;
+// ...
 }
 
 public void SetCurrentBrowserUrl(string url)
@@ -1027,15 +1103,17 @@ public void SetCurrentBrowserUrl(string url)
 // From CodeBrix.Samples/WikipediaPublisher/CodeBrixPlatform/WikipediaPublisher.UI/Views/MainPage.xaml.cs
 private void InitializeBrowser()
 {
-    if (_browserInitialized || DataContext is not MainViewModel viewModel) { return; }
+    //Reached through the bridge interface, not the concrete view model type: the page needs
+    //  nothing from the view model beyond the three members the browser contract names.
+    if (_browserInitialized || DataContext is not IWebViewBridge browser) { return; }
     _browserInitialized = true;
 
     //Use CoreWebView2.Source (the authoritative current URL after redirects / user
     //  navigation); the XAML Browser.Source property does not reliably reflect those.
     Browser.NavigationCompleted += (_, _) =>
-        viewModel.SetCurrentBrowserUrl(Browser.CoreWebView2?.Source ?? Browser.Source?.AbsoluteUri);
+        browser.SetCurrentBrowserUrl(Browser.CoreWebView2?.Source ?? Browser.Source?.AbsoluteUri);
 
-    viewModel.NavigateToUrl = url =>
+    browser.NavigateToUrl = url =>
     {
         if (!string.IsNullOrWhiteSpace(url))
         {
@@ -1043,7 +1121,8 @@ private void InitializeBrowser()
         }
     };
 
-    Browser.Source = new Uri(MainViewModel.HomeUrl);
+    //The view model owns the start page too, so every navigation flows the same way.
+    browser.NotifyBrowserReady();
 }
 ```
 
@@ -1090,9 +1169,9 @@ Notice that the element exposes the same value twice - a `TimeSpan` for the labe
 What the view model does own is policy. "Play" on a clip that has run to its end should replay it, and that decision belongs with the state, not in the page:
 
 ```csharp
-// Adapted from CodeBrix.Samples/KenneyAssetBrowser/src/KenneyAssetBrowser.UI/Views/MainPage.xaml.cs
-// The sample implements this in the page; the logic is unchanged, but here the state and
-// the decision live on the view model, and the bridge grows read-only transport facts.
+// Condensed from CodeBrix.Samples/KenneyAssetBrowser/src/KenneyAssetBrowser.Core/ (IAudioPlayerBridge
+// and ViewModels/MainViewModel.cs): the state and the decision live on the view model, and the
+// bridge carries read-only transport facts.
 public interface IAudioPlayerBridge
 {
     // ... LoadAudioSource, PlayAudio, PauseAudio, StopAudio, SetAudioLooping ...
@@ -1135,15 +1214,16 @@ public SimpleCommand PlayAudioCommand => field ??= new SimpleCommand(() =>
 ```
 
 ```csharp
-// Adapted from CodeBrix.Samples/KenneyAssetBrowser/src/KenneyAssetBrowser.UI/Views/MainPage.xaml.cs
+// From CodeBrix.Samples/KenneyAssetBrowser/src/KenneyAssetBrowser.UI/Views/MainPage.xaml.cs
+audioBridge.IsAudioPlaying = () => AudioElement?.IsPlaying ?? false;
+audioBridge.AudioPosition = () => AudioElement?.Position ?? TimeSpan.Zero;
+audioBridge.AudioDuration = () => AudioElement?.Duration ?? TimeSpan.Zero;
+audioBridge.SeekAudio = position => AudioElement?.Seek(position);
+// ...
 AudioElement.PlaybackEnded += (_, _) => ViewModel?.NotifyAudioPlaybackEnded();
-viewModel.IsAudioPlaying = () => AudioElement?.IsPlaying ?? false;
-viewModel.AudioPosition = () => AudioElement?.Position ?? TimeSpan.Zero;
-viewModel.AudioDuration = () => AudioElement?.Duration ?? TimeSpan.Zero;
-viewModel.SeekAudio = position => AudioElement?.Seek(position);
 ```
 
-Both blocks are adapted from the sample, which implements this in the page: the logic is the sample's, the placement is the shape to prefer. Notice the tolerance window - the player refreshes its reported position on an interval, so the last value before the end can sit slightly short of the duration - and the "is it playing" check, which is what stops a looping clip being rewound mid-play. Loading a new source and stopping both clear the flag. The element itself is on the [AudioPlayer add-in page](add-ins/AudioPlayer.md).
+Notice the tolerance window - the player refreshes its reported position on an interval, so the last value before the end can sit slightly short of the duration - and the "is it playing" check, which is what stops a looping clip being rewound mid-play. Loading a new source and stopping both clear the flag. The element itself is on the [AudioPlayer add-in page](add-ins/AudioPlayer.md).
 
 ## Say why a capability is missing
 
@@ -1168,8 +1248,11 @@ public async Task ShowRenderingUnavailableAsync(GLInitializationState state)
     var osInfo = await SimpleOsInfo.GatherInfo(withConsoleOutput: false);
     if (osInfo.IsWindows)
     {
-        message += "On Windows, you may be able to fix this by installing the free Microsoft " +
-            "\"OpenCL and OpenGL Compatibility Pack\"...\n\n";
+        message +=
+            "On Windows, you may be able to fix this by installing the free Microsoft " +
+            "\"OpenCL and OpenGL Compatibility Pack\". Download and install it from:\n" +
+            "https://apps.microsoft.com/detail/9NQPSL29BFFF\n\n" +
+            "After installing it, restart this app.\n\n";
     }
 
     message += $"Details:\nStatus: {state.Status}\n{state.FailedReason ?? "(none reported)"}";
@@ -1184,7 +1267,7 @@ public async Task ShowRenderingUnavailableAsync(GLInitializationState state)
 //The canvas may only attempt its OpenGL initialization when it loads into the visual
 //tree, which can happen after IsModelViewActive is set - so check at both moments.
 ModelCanvas.Loaded += (_, _) => _ = MaybeReportRenderingUnavailableAsync();
-
+// ...
 //When the Model View is active and the preview canvas reports failed OpenGL initialization,
 //surface the failure (status + reason) in a dialog instead of leaving a silently empty pane.
 private async Task MaybeReportRenderingUnavailableAsync()
@@ -1244,7 +1327,14 @@ The add-in stores every configurable value as JSON text, and provides no setting
 //including its startup auto-backup and pruning - before anything reads
 //a setting. PintaCore's static constructor builds the palette manager,
 //which reads settings, so this must come first.
-Pinta.Brix.Settings.SettingsService.Initialize();
+if (settingsDirectory is null)
+{
+    Pinta.Brix.Settings.SettingsService.Initialize();
+}
+else
+{
+    Pinta.Brix.Settings.SettingsService.Initialize(settingsDirectory);
+}
 ```
 
 The default location is `{per-user configuration folder}/CodeBrix/{appName}/settings/settings.sqlite`, which on Linux is `~/.config/CodeBrix/{appName}/settings/settings.sqlite` and the equivalent per-user application-data location on Windows and macOS. A two-argument overload takes a folder of your own. The application name becomes a folder name, so it must be non-blank and free of characters that are invalid in a file name. A second `Initialize` throws; `AppSettingsService.Shutdown()` closes the store and permits a later one, which is what a test host needs between cases.
@@ -1276,7 +1366,7 @@ The default location is `{per-user configuration folder}/CodeBrix/{appName}/sett
     AppSettingsService.Set("MyApp.AssetsFolder", null);     // removes the key
 ```
 
-`Set` is not generic: it takes `object?` and serializes by the value's runtime type, with enums written as their names. Every `Set` writes through to the file immediately and synchronously, and a null value removes the key rather than storing null. `Get<T>(key, defaultValue)` returns the default when the key is unset, when the stored JSON deserializes to null, or when it cannot be read as `T` - that last case is logged as a warning and never thrown. Keys are ordinal and case-sensitive; prefix your own with the application name so they stay apart from the one key the package uses for itself.
+The everyday `Set` is not generic: it takes `object?` and serializes by the value's runtime type (a trimmed or AOT application uses the `JsonTypeInfo<T>` overloads of `Get`, `Set` and `Wrap` instead), with enums written as their names. Every `Set` writes through to the file immediately and synchronously, and a null value removes the key rather than storing null. `Get<T>(key, defaultValue)` returns the default when the key is unset, when the stored JSON deserializes to null, or when it cannot be read as `T` - that last case is logged as a warning and never thrown. Keys are ordinal and case-sensitive; prefix your own with the application name so they stay apart from the one key the package uses for itself.
 
 Anything `System.Text.Json` serializes with default options round-trips, which means a plain object with public get and set properties is a single setting:
 
@@ -1399,32 +1489,96 @@ The heads consult the preferred launch size when they create the native window, 
 //Restore the persisted window size BEFORE any window exists - the
 //Skia heads consult ApplicationView.PreferredLaunchViewSize when they
 //create the native window, and that is the only public seam for the
-//initial size. The maximized flag is not restored: the platform exposes
+//initial size. Setting names and the 1100x750 defaults match
+//upstream. The maximized flag is not restored: the platform exposes
 //no public presenter state on the Skia heads.
+//The launch size is the client area in effective pixels, which is
+//what X11, Wayland and macOS open; Win32Skia and WPF open it as the
+//framed window instead, a frame too small. RestoreFramedWindowSize
+//puts that right once the page has loaded.
 int windowWidth = Pinta.Brix.Settings.SettingsService.Get("window-size-width", 1100);
 int windowHeight = Pinta.Brix.Settings.SettingsService.Get("window-size-height", 750);
 Windows.UI.ViewManagement.ApplicationView.PreferredLaunchViewSize =
     new Windows.Foundation.Size(windowWidth, windowHeight);
+
+//The framed size the window had when it last changed. It is read now,
+//before the window exists, because the window's own first layout
+//writes over it.
+savedFramedWidth = Pinta.Brix.Settings.SettingsService.Get("window-framed-width", 0);
+savedFramedHeight = Pinta.Brix.Settings.SettingsService.Get("window-framed-height", 0);
 ```
 
 ```csharp
 // From CodeBrix.Samples/Pinta.Brix/src/Pinta.Brix.UI/App.xaml.cs
 //Write-through persistence of the window size; the store ignores
-//writes when the value is unchanged. args.Size is in logical units
-//but the X11 head consumes PreferredLaunchViewSize as NATIVE pixels,
-//so the stored value must be native pixels or every restart would
-//rescale the window by the display-scale factor.
+//writes when the value is unchanged. args.Size is the client area in
+//effective pixels - the same unit PreferredLaunchViewSize takes.
 MainWindow.SizeChanged += (_, args) =>
 {
-    if (MainWindow.Content?.XamlRoot is not { } root) { return; }
+    //Sizes reported before the content is in place are not the
+    //window the user sees.
+    if (MainWindow.Content?.XamlRoot is null) { return; }
 
-    double scale = root.RasterizationScale;
-    Pinta.Brix.Settings.SettingsService.Set("window-size-width", (int)Math.Round(args.Size.Width * scale));
-    Pinta.Brix.Settings.SettingsService.Set("window-size-height", (int)Math.Round(args.Size.Height * scale));
+    Pinta.Brix.Settings.SettingsService.Set("window-size-width", (int)Math.Round(args.Size.Width));
+    Pinta.Brix.Settings.SettingsService.Set("window-size-height", (int)Math.Round(args.Size.Height));
+};
+
+//The framed size is stored next to it: AppWindow.Size, the window plus
+//whatever frame the windowing system draws around it, in physical
+//pixels. AppWindow.Resize takes that same quantity, so the pair
+//round-trips exactly. AppWindow.Changed rather than SizeChanged,
+//because some heads update AppWindow.Size after they raise SizeChanged.
+MainWindow.AppWindow.Changed += (sender, args) =>
+{
+    if (!args.DidSizeChange) { return; }
+
+    Pinta.Brix.Settings.SettingsService.Set("window-framed-width", sender.Size.Width);
+    Pinta.Brix.Settings.SettingsService.Set("window-framed-height", sender.Size.Height);
 };
 ```
 
-Notice the scale conversion, which is the part that most often goes wrong: the size-changed event reports logical units while the preferred launch size is consumed as native pixels on the X11 head. Multiply by the root's rasterization scale on the way in, or the window shrinks or grows at every restart on a scaled display.
+```csharp
+// From CodeBrix.Samples/Pinta.Brix/src/Pinta.Brix.UI/App.xaml.cs
+if (MainWindow.Content is not Frame rootFrame)
+{
+    rootFrame = new Frame();
+    MainWindow.Content = rootFrame;
+    rootFrame.NavigationFailed += OnNavigationFailed;
+    rootFrame.Loaded += RestoreFramedWindowSize;
+}
+```
+
+```csharp
+// From CodeBrix.Samples/Pinta.Brix/src/Pinta.Brix.UI/App.xaml.cs
+//Once the page is in place the window has its first real size. On the
+//heads that open the launch size as the framed window (Win32Skia and WPF)
+//it is a frame smaller than the window the user left, so the stored framed
+//size is put back through AppWindow.Resize. Where the launch size already
+//restored the window (X11, Wayland, macOS) the framed size matches and
+//nothing is called, which also keeps Wayland, where a client cannot resize
+//its own window, from logging a warning. A pixel or two either way is
+//rounding between effective and physical pixels, not a frame.
+private void RestoreFramedWindowSize(object sender, RoutedEventArgs e)
+{
+    ((FrameworkElement)sender).Loaded -= RestoreFramedWindowSize;
+
+    if (savedFramedWidth <= 0 || savedFramedHeight <= 0) { return; }
+
+    Windows.Graphics.SizeInt32 current = MainWindow.AppWindow.Size;
+    if (Math.Abs(current.Width - savedFramedWidth) <= 2
+        && Math.Abs(current.Height - savedFramedHeight) <= 2) { return; }
+
+    MainWindow.AppWindow.Resize(new Windows.Graphics.SizeInt32
+    {
+        Width = savedFramedWidth,
+        Height = savedFramedHeight
+    });
+}
+```
+
+Notice the units, which are the part that most often goes wrong: the size-changed event and the preferred launch size both use effective pixels on every head. Multiplying by the root's rasterization scale on the way in makes the window grow at every restart on a scaled display.
+
+Notice too that two sizes are stored. The client size feeds the launch size, which the X11, Wayland and macOS heads open as the client area, so there it round-trips by itself. The Win32Skia and WPF heads open the launch size as the framed window, title bar and borders included, so on its own it would bring the window back a frame smaller each time. The framed `AppWindow.Size` closes that gap: `AppWindow.Size` and `AppWindow.Resize` are a matched pair, both the framed window in physical pixels, so the size stored from one and handed to the other reopens the same window. The stored framed size is read in the constructor because the window's first layout writes over it, and the comparison keeps the `Resize` call away from heads that already have the right size, which matters on Wayland, where a client cannot resize its own window.
 
 The comment in the first block records that application's own decision not to restore a maximized flag. The presenter itself is reachable from application code: `MainWindow.AppWindow.Presenter` is an `OverlappedPresenter` as soon as the `Window` is constructed, and it is where a minimum or maximum window size goes. See [Set the launch size and a minimum size](#set-the-launch-size-and-a-minimum-size).
 
@@ -1439,8 +1593,18 @@ public static class SettingsService
     /// <summary>The application name the settings store is registered under.</summary>
     public const string AppName = "KenneyAssetBrowser";
 
+    /// <summary>Whether <see cref="Initialize()"/> has been called.</summary>
     public static bool IsInitialized => AppSettingsService.IsInitialized;
+
+    /// <summary>
+    /// The settings store; only available after <see cref="Initialize()"/>.
+    /// </summary>
     public static AppSettingsStore Store => AppSettingsService.Store;
+
+    /// <summary>
+    /// The default settings folder: the "settings" subfolder of the
+    /// application's per-user CodeBrix-family configuration folder.
+    /// </summary>
     public static string DefaultDirectory => AppSettingsService.GetDefaultDirectory(AppName);
 
     /// <summary>
@@ -1449,20 +1613,38 @@ public static class SettingsService
     /// </summary>
     public static void Initialize() => AppSettingsService.Initialize(AppName);
 
+    /// <summary>Opens the settings store in the given folder.</summary>
     public static void Initialize(string directoryPath) =>
         AppSettingsService.Initialize(AppName, directoryPath);
 
-    /// <summary>Closes the store and permits a later Initialize() (test hosts).</summary>
+    /// <summary>
+    /// Closes the store and permits a later <see cref="Initialize()"/> (test hosts).
+    /// </summary>
     public static void Shutdown() => AppSettingsService.Shutdown();
 
+    /// <summary>Wraps a setting in a typed <see cref="AppSettingProperty{T}"/> handle.</summary>
     public static AppSettingProperty<T> Wrap<T>(string property, T defaultValue) =>
         AppSettingsService.Wrap(property, defaultValue);
 
+    /// <summary>Whether a value is stored for the given key.</summary>
+    public static bool HasValue(string property) => AppSettingsService.HasValue(property);
+
+    /// <summary>Returns the stored value for the key, or the given default when not set.</summary>
+    public static T Get<T>(string property, T defaultValue) => AppSettingsService.Get(property, defaultValue);
+
+    /// <summary>Returns the stored value for the key, or the type's default when not set.</summary>
     public static T Get<T>(string property) => AppSettingsService.Get<T>(property);
+
+    /// <summary>Stores a value for the key; a null value removes the key.</summary>
     public static void Set(string key, object val) => AppSettingsService.Set(key, val);
 
+    /// <summary>Registers a handler raised when the given key's value changes.</summary>
     public static void AddPropertyHandler(string propertyName, EventHandler<AppSettingChangedEventArgs> handler) =>
         AppSettingsService.AddSettingHandler(propertyName, handler);
+
+    /// <summary>Removes a handler previously added with <see cref="AddPropertyHandler"/>.</summary>
+    public static void RemovePropertyHandler(string propertyName, EventHandler<AppSettingChangedEventArgs> handler) =>
+        AppSettingsService.RemoveSettingHandler(propertyName, handler);
 }
 ```
 
@@ -1601,7 +1783,7 @@ The [AppSettings add-in page](add-ins/AppSettings.md) has the full API surface.
 - [ ] Every `ContentDialog` sets `XamlRoot`, and only one is on screen at a time
 - [ ] A null delegate explains itself; a `NotSupportedException` is caught in the page and returned as null
 - [ ] Suggested file names are sanitized before the picker sees them
-- [ ] Picker paths are decoded and their empty placeholder removed in the page, before the view model sees them
+- [ ] Picker paths are decoded in the page, before the view model sees them, and the view model removes an empty placeholder when it accepts the destination
 - [ ] The busy flag is set after a modal picker closes, not before it opens
 - [ ] Repaint delegates marshal to the UI thread inside the delegate, with null-conditional calls throughout
 - [ ] Every bridge delegate is nulled in `Dispose()`
@@ -1610,7 +1792,7 @@ The [AppSettings add-in page](add-ins/AppSettings.md) has the full API surface.
 - [ ] The launch size is set in the `App` constructor, and the minimum size on the presenter before `Activate()`
 - [ ] `AppSettingsService.Initialize` runs before `InitializeComponent()` and before any static constructor reads a setting
 - [ ] Setting keys are constants, prefixed with the application name, in one place per owning type
-- [ ] Bursty writes are debounced; a window size is stored in native pixels
+- [ ] Bursty writes are debounced; a window size is stored in effective (logical) pixels
 - [ ] No secret is written to the settings store
 
 ---

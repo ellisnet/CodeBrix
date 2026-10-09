@@ -13,7 +13,7 @@ and its package family; the curriculum that teaches it in order is the
 | | |
 | --- | --- |
 | **Repository** | [ellisnet/CodeBrix.Platform](https://github.com/ellisnet/CodeBrix.Platform) |
-| **Packages** | <details><summary>Every CodeBrix.Platform package, by group</summary><strong>Core</strong><br>[`CodeBrix.Platform.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.ApacheLicenseForever)<br>[`CodeBrix.Platform.Runtime.Skia.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.ApacheLicenseForever)<br><br><strong>Platform heads</strong><br>[`CodeBrix.Platform.Runtime.Skia.Win32.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.Win32.ApacheLicenseForever)<br>[`CodeBrix.Platform.Runtime.Skia.Wpf.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.Wpf.ApacheLicenseForever)<br>[`CodeBrix.Platform.Runtime.Skia.X11.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.X11.ApacheLicenseForever)<br>[`CodeBrix.Platform.Runtime.Skia.Wayland.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.Wayland.ApacheLicenseForever)<br>[`CodeBrix.Platform.Runtime.Skia.FrameBuffer.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.FrameBuffer.ApacheLicenseForever)<br>[`CodeBrix.Platform.Runtime.Skia.MacOS.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.MacOS.ApacheLicenseForever)<br>[`CodeBrix.Platform.Runtime.Skia.FrameBuffer.Emulated.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.FrameBuffer.Emulated.ApacheLicenseForever)<br><br><strong>Add-ins</strong><br>[`CodeBrix.Platform.SkiaSharp.Views.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.SkiaSharp.Views.MitLicenseForever)<br>[`CodeBrix.Platform.Graphics2DSK.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Graphics2DSK.ApacheLicenseForever)<br>[`CodeBrix.Platform.Graphics3DGL.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Graphics3DGL.ApacheLicenseForever)<br>[`CodeBrix.Platform.Lottie.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Lottie.ApacheLicenseForever)<br>[`CodeBrix.Platform.Svg.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Svg.ApacheLicenseForever)<br>[`CodeBrix.Platform.TextLayout.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.TextLayout.ApacheLicenseForever)<br>[`CodeBrix.Platform.AdvancedTextEdit.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.AdvancedTextEdit.ApacheLicenseForever)<br>[`CodeBrix.Platform.FlexPanel.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.FlexPanel.ApacheLicenseForever)<br>[`CodeBrix.Platform.CommandBar.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.CommandBar.ApacheLicenseForever)<br>[`CodeBrix.Platform.TerminalView.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.TerminalView.ApacheLicenseForever)<br>[`CodeBrix.Platform.PlotterView.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.PlotterView.ApacheLicenseForever)<br>[`CodeBrix.Platform.AppSettings.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.AppSettings.ApacheLicenseForever)<br>[`CodeBrix.Platform.WebView.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.WebView.ApacheLicenseForever)<br>[`CodeBrix.Platform.MediaPlayer.LgplLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.MediaPlayer.LgplLicenseForever)<br>[`CodeBrix.Platform.AudioPlayer.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.AudioPlayer.ApacheLicenseForever)<br>[`CodeBrix.Platform.VideoPlayer.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.VideoPlayer.ApacheLicenseForever)<br><br><strong>Native-framework toolkits</strong><br>[`CodeBrix.Platform.WinUI.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.WinUI.ApacheLicenseForever)<br>[`CodeBrix.Platform.WinUI.Skia.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.WinUI.Skia.ApacheLicenseForever)<br>[`CodeBrix.Platform.WinUI.Lottie.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.WinUI.Lottie.ApacheLicenseForever)<br>[`CodeBrix.Platform.WPF.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.WPF.ApacheLicenseForever)<br>[`CodeBrix.Platform.Mobile.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Mobile.ApacheLicenseForever)</details> |
+| **Packages** | <details><summary>Every CodeBrix.Platform package, by group</summary><strong>Core</strong><br>[`CodeBrix.Platform.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.ApacheLicenseForever)<br>[`CodeBrix.Platform.Runtime.Skia.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.ApacheLicenseForever)<br><br><strong>Platform heads</strong><br>[`CodeBrix.Platform.Runtime.Skia.Win32.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.Win32.ApacheLicenseForever)<br>[`CodeBrix.Platform.Runtime.Skia.Wpf.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.Wpf.ApacheLicenseForever)<br>[`CodeBrix.Platform.Runtime.Skia.X11.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.X11.ApacheLicenseForever)<br>[`CodeBrix.Platform.Runtime.Skia.Wayland.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.Wayland.ApacheLicenseForever)<br>[`CodeBrix.Platform.Runtime.Skia.FrameBuffer.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.FrameBuffer.ApacheLicenseForever)<br>[`CodeBrix.Platform.Runtime.Skia.MacOS.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.MacOS.ApacheLicenseForever)<br>[`CodeBrix.Platform.Runtime.Skia.FrameBuffer.Emulated.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.FrameBuffer.Emulated.ApacheLicenseForever)<br><br><strong>Add-ins</strong><br>[`CodeBrix.Platform.SkiaSharp.Views.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.SkiaSharp.Views.MitLicenseForever)<br>[`CodeBrix.Platform.Graphics2DSK.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Graphics2DSK.ApacheLicenseForever)<br>[`CodeBrix.Platform.Graphics3DGL.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Graphics3DGL.ApacheLicenseForever)<br>[`CodeBrix.Platform.Lottie.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Lottie.ApacheLicenseForever)<br>[`CodeBrix.Platform.Svg.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Svg.ApacheLicenseForever)<br>[`CodeBrix.Platform.TextLayout.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.TextLayout.ApacheLicenseForever)<br>[`CodeBrix.Platform.AdvancedTextEdit.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.AdvancedTextEdit.ApacheLicenseForever)<br>[`CodeBrix.Platform.FlexPanel.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.FlexPanel.ApacheLicenseForever)<br>[`CodeBrix.Platform.CommandBar.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.CommandBar.ApacheLicenseForever)<br>[`CodeBrix.Platform.TerminalView.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.TerminalView.ApacheLicenseForever)<br>[`CodeBrix.Platform.PlotterView.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.PlotterView.ApacheLicenseForever)<br>[`CodeBrix.Platform.AppSettings.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.AppSettings.ApacheLicenseForever)<br>[`CodeBrix.Platform.WebView.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.WebView.ApacheLicenseForever)<br>[`CodeBrix.Platform.MediaPlayer.LgplLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.MediaPlayer.LgplLicenseForever)<br>[`CodeBrix.Platform.AudioPlayer.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.AudioPlayer.ApacheLicenseForever)<br>[`CodeBrix.Platform.VideoPlayer.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.VideoPlayer.ApacheLicenseForever)<br><br><strong>UI test head</strong><br>[`CodeBrix.Platform.PlayTest.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.PlayTest.ApacheLicenseForever)<br>[`CodeBrix.Platform.PlayTest.OpenGL.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.PlayTest.OpenGL.ApacheLicenseForever)<br><br><strong>Native-framework toolkits</strong><br>[`CodeBrix.Platform.WinUI.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.WinUI.ApacheLicenseForever)<br>[`CodeBrix.Platform.WinUI.Skia.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.WinUI.Skia.ApacheLicenseForever)<br>[`CodeBrix.Platform.WinUI.Lottie.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.WinUI.Lottie.ApacheLicenseForever)<br>[`CodeBrix.Platform.WPF.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.WPF.ApacheLicenseForever)<br>[`CodeBrix.Platform.Mobile.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Mobile.ApacheLicenseForever)</details> |
 | **License** | Apache 2.0, with two exceptions named in the package IDs; see [License](#license) |
 | **Requires** | .NET 10 or later, plus the operating-system prerequisites of the head you ship |
 | **Use it from** | A CodeBrix.Platform application: the core package in the `.Core` library, exactly one head package in each head |
@@ -49,8 +49,9 @@ a single codebase, written in XAML and C# rather than in a web stack. The framew
 layer: the control set, the XAML runtime, layout, binding, dispatching and the window itself. Adding
 a platform means adding one more head project - the view models and the XAML do not change.
 
-It is desktop only. There are no mobile (iOS/Android) targets and no WebAssembly or browser target,
-and none are planned. If the application is a native WinUI 3, WPF or .NET MAUI application rather
+Its six heads are desktop only. There is no iOS, WebAssembly or browser target;
+Android is served by the separate [CodeBrix.Android](CodeBrix.Android.md) family, which runs the same
+pages and view models as a native Android application. If the application is a native WinUI 3, WPF or .NET MAUI application rather
 than a cross-platform one, use the native-framework toolkits instead - they carry the identical
 "Simple" MVVM surface, so view models can be shared across both families. See
 [Sharing code with native frameworks](../platform/14-sharing-code-with-native-frameworks.md).
@@ -134,6 +135,8 @@ platform, run it:
 ```csharp
 using CodeBrix.Platform.UI.Hosting;
 
+App.InitializeLogging();
+
 var host = CodeBrixPlatformHostBuilder.Create()
     .App(() => new App())
     .UseWindowsWin32()   // or UseWindowsWpf / UseLinuxX11 / UseLinuxWayland / UseLinuxFrameBuffer / UseMacOS
@@ -210,7 +213,7 @@ define the head-specific constants for you.
 ### The six heads
 
 Each head package supplies one `.Use...()` extension method in the `CodeBrix.Platform.UI.Hosting`
-namespace, and every one except `UseMacOS()` has an overload taking a configuration lambda.
+namespace, and every one accepts a configuration lambda.
 
 | Head | Bootstrap call | Default render path | What it needs from the OS |
 | --- | --- | --- | --- |
@@ -241,9 +244,18 @@ global::CodeBrix.Platform.UI.FeatureConfiguration.Font.DefaultTextFontFamily =
     "ms-appx:///CodeBrix.Platform.Fonts.OpenSans/Fonts/OpenSans.ttf";
 ```
 
-A character no font can supply renders as the font's `.notdef` glyph - the framework never
-substitutes the host system's fonts unless `FallbackFontFamilies` is empty and the application's own
-fonts have no glyph. Preload a font with `FontFamilyHelper.PreloadAsync` so the first screen does not
+A character the requested font has no glyph for is looked up first in the framework's symbols font
+(`FeatureConfiguration.Font.SymbolsFont`, the Fluent icon font by default), then in the application-shipped
+fonts listed in `FeatureConfiguration.Font.FallbackFontFamilies` (empty by default), in order, and then in
+the host machine's installed fonts; only when none of them has it does it render as the font's own
+`.notdef` glyph. Setting `FeatureConfiguration.Font.RestrictToEmbeddedFonts = true` before the first
+text is measured confines resolution to the fonts the application ships, so the host's fonts are never
+consulted and a missing character renders as `.notdef`. The PlayTest head turns the restriction on
+itself, and the frame-buffer emulated head turns it on when its launch contract asks for font
+isolation, so both show what a device carrying only the application's fonts would show. Ship every
+font the application needs rather than relying on host fonts - that is the recommended practice and
+the only way to get identical rendering on every machine, but the framework enforces it only under
+the restriction. Preload a font with `FontFamilyHelper.PreloadAsync` so the first screen does not
 re-layout when the font arrives. Full treatment:
 [Views and styling](../platform/06-views-and-styling.md).
 
@@ -503,7 +515,7 @@ path is really in use.
 - Do not set `<UseWPF>true</UseWPF>` on the WPF head. WPF is loaded by the host at run time; setting
   the property makes WPF's build targets try to treat the CodeBrix.Platform `<Page>` items as WPF XAML.
 - Do not leave the WPF head on the same target framework moniker the other heads use - it needs the
-  Windows-flavored one shown in its project snippet, or the WPF `FrameworkReference` fails the build
+  Windows-flavored one, `net10.0-windows`, or the WPF `FrameworkReference` fails the build
   with NETSDK1136.
 - Do not omit the software-rendering line on the WPF head. Its default OpenGL renderer draws onto
   WPF's own composited window, which produces an airspace conflict and a blank window on many
@@ -559,14 +571,15 @@ if (host is WpfHost wpfHost)
 
 Every sample under `samples/CodeBrixPlatform` is a complete application in the canonical shape -
 `<Demo>.Core`, `<Demo>.UI` and the six heads - with per-OS solutions (`<Demo>.Linux.slnx`,
-`<Demo>.MacOS.slnx`, `<Demo>.Windows.slnx`). The samples reference the framework through
-`ProjectReference` into `src/` rather than through `PackageReference`: copy their project structure
+`<Demo>.MacOS.slnx`, `<Demo>.Windows.slnx`), except EmulateFrameBufferDemo (three Linux heads, one
+`.slnx`) and ParityDemo (X11 and Wayland heads only). The samples reference the framework through
+`ProjectReference` into `src/` rather than through `PackageReference`, with the exceptions noted below: copy their project structure
 and their XAML and C#, not their reference lines.
 
 | Name | What it demonstrates | Where |
 | --- | --- | --- |
 | JustBetweenUs | The `.Core` + `.UI` + six-heads layout, DI and view-model binding, and four add-ins at once | [`samples/CodeBrixPlatform/JustBetweenUs`](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform/JustBetweenUs) |
-| EmulateFrameBufferDemo | The one sample that consumes the framework from NuGet packages, plus frame-buffer orientation options and `UseDirectSkiaCanvasMode()` | [`samples/CodeBrixPlatform/EmulateFrameBufferDemo`](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform/EmulateFrameBufferDemo) |
+| EmulateFrameBufferDemo | A sample that consumes the framework from NuGet packages (KeyPressTester_packages is the other), plus frame-buffer orientation options and `UseDirectSkiaCanvasMode()` | [`samples/CodeBrixPlatform/EmulateFrameBufferDemo`](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform/EmulateFrameBufferDemo) |
 | ParityDemo | An X11-versus-Wayland behavior harness for popups, clipboard, drag-and-drop and window chrome, with unattended self-test modes | [`samples/CodeBrixPlatform/ParityDemo`](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform/ParityDemo) |
 | FileFolderDialogDemo | `FileOpenPicker`, `FileSavePicker` and `FolderPicker` on every head | [`samples/CodeBrixPlatform/FileFolderDialogDemo`](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform/FileFolderDialogDemo) |
 | AdvancedTextEditDemo | A working code editor: open/save, undo, syntax highlighting, line numbers, word wrap | [`samples/CodeBrixPlatform/AdvancedTextEditDemo`](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform/AdvancedTextEditDemo) |

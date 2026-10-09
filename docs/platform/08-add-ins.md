@@ -9,7 +9,7 @@
 The core package, [`CodeBrix.Platform.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.ApacheLicenseForever), gives you the XAML runtime, the control set, layout, data binding and dispatching. An add-in extends that in one of three shapes:
 
 - **It contributes new types.** You name them in XAML or in code: `SKCanvasElement`, `FlexPanel`, `TerminalControl`, `AudioPlayer`.
-- **It supplies the engine behind a core control.** The core declares `SvgImageSource`, `WebView2` and `MediaPlayerElement` but ships no parser, no browser engine and no decoder. The add-in plugs one in, and application code never names a type from the add-in.
+- **It supplies the engine behind a core control.** The core declares `SvgImageSource`, `WebView2` and `MediaPlayerElement` but ships no parser, no browser engine and no decoder. The add-in plugs one in, and application code normally never names a type from the add-in.
 - **It is not a UI control at all.** [AppSettings](add-ins/AppSettings.md) is a persistent settings store with no visual surface.
 
 An add-in that only works on some heads is inert on the others and never breaks a build.
@@ -110,7 +110,8 @@ Several add-ins are the XAML skin over a library that is fully usable on its own
 | --- | --- | --- |
 | [CodeBrix.Platform.OpenGL](../libraries/CodeBrix.Platform.OpenGL.md) | [Graphics3DGL](add-ins/Graphics3DGL.md) | Automatic dependency; supplies the `GL` binding type |
 | [CodeBrix.SkiaSvg](../libraries/CodeBrix.SkiaSvg.md) | [Svg](add-ins/Svg.md) | Automatic dependency; the SVG parser and renderer |
-| [CodeBrix.Audio](../libraries/CodeBrix.Audio.md) | [AudioPlayer](add-ins/AudioPlayer.md) | Automatic dependency; the managed audio engine |
+| [CodeBrix.Audio](../libraries/CodeBrix.Audio.md) | [AudioPlayer](add-ins/AudioPlayer.md), [VideoPlayer](add-ins/VideoPlayer.md) | Automatic dependency; the managed audio engine |
+| [CodeBrix.VideoPlayback](../libraries/CodeBrix.VideoPlayback.md) | [VideoPlayer](add-ins/VideoPlayer.md) | Automatic dependency; containers, transport, captions and the effect chain |
 | [CodeBrix.Audio.Opus](../libraries/CodeBrix.Audio.Opus.md) | [AudioPlayer](add-ins/AudioPlayer.md), [VideoPlayer](add-ins/VideoPlayer.md) | The application references and registers it for Opus sound |
 | [CodeBrix.Audio.ModestSynth](../libraries/CodeBrix.Audio.ModestSynth.md) | [AudioPlayer](add-ins/AudioPlayer.md) | The application references and registers it for the oscillators and creative effects a Decent Sampler preset may ask for |
 | [CodeBrix.VideoPlayback.Dav1d](../libraries/CodeBrix.VideoPlayback.Dav1d.md) | [VideoPlayer](add-ins/VideoPlayer.md) | The application references and registers it for AV1 decoding |
@@ -121,6 +122,9 @@ Several add-ins are the XAML skin over a library that is fully usable on its own
 
 > [!TIP]
 > Reach for the library rather than the add-in when the work has no visual surface: rasterize SVG in a document pipeline with CodeBrix.SkiaSvg, build a `PlotModel` in a report generator with CodeBrix.Plotter, or lay out text for an image with the TextLayout add-in, which needs no application host at all.
+
+> [!NOTE]
+> The game engine has add-ons of its own, and they are not CodeBrix.Platform add-ins. [CodeBrix.Platform.GameEngine](../libraries/CodeBrix.Platform.GameEngine.md) is a standalone library whose optional packages - [gamepads](../libraries/gameengine/gamepads.md), [Kenney assets](../libraries/gameengine/kenney-assets.md), [generated music](../libraries/gameengine/generated-music.md) and [cards and dice](../libraries/gameengine/cards-and-dice.md) - extend the engine rather than the framework. Each is referenced in the game's shared library next to the engine package, never in a head project, and each attaches with one call on `Engine.Instance` instead of activating itself.
 
 ## What an add-in brings with it
 

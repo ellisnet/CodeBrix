@@ -260,7 +260,7 @@ case-insensitive), and nesting deeper than `ResponseFileSource.MaxNestingDepth` 
 ### Commands and CommandSet
 
 A `Command` is one named sub-command: `Name` (whitespace-normalized, so multi-word names are supported
-and matched greedily), `Help`, an optional `Options` of its own, an optional `Run` action, and a virtual
+and matched shortest-first), `Help`, an optional `Options` of its own, an optional `Run` action, and a virtual
 `Invoke` that parses `arguments` through `Options`, passes what is left to `Run`, and returns `0`.
 Override `Invoke` when you need a different exit code.
 
@@ -271,10 +271,10 @@ process exit code:
 
 1. It registers a `HelpCommand` and hidden `help` / `?` options, if the suite does not already have them.
 2. It parses `args` with the suite-level option set.
-3. With nothing left over it prints `Use '<suite> help' for usage.` and returns `1` - or shows the help
+3. With nothing left over it prints ``Use `<suite> help` for usage.`` and returns `1` - or shows the help
    and returns `0` when `--help` was given.
-4. Otherwise it resolves the leading argument or arguments to a command, longest match first and nested
-   suites included, and returns that command's `Invoke` result.
+4. Otherwise it resolves the leading argument or arguments to a command, shortest match first (the first
+   registered name built from the leading words wins) and nested suites included, and returns that command's `Invoke` result.
 5. An unrecognized command writes "Unknown command" plus a usage hint to the error writer and returns `1`.
 
 `Add(CommandSet)` nests a suite: its commands become reachable as `<nested-suite> <command>` and appear

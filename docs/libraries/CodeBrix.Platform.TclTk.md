@@ -210,16 +210,21 @@ A `ScriptThread` is a dedicated operating-system thread that owns its own interp
 
 ```csharp
 Result error = null;
-using (IScriptThread worker = ScriptThread.Create(null, ref error))
+IScriptThread worker = ScriptThread.Create(null, ref error);
+if (worker == null) throw new InvalidOperationException(error);
+try
 {
-    if (worker == null) throw new InvalidOperationException(error);
     Result result = null;
     worker.Send("proc fib {n} { expr {$n < 2 ? $n : [fib [expr {$n-1}]] + [fib [expr {$n-2}]]} }; fib 20", ref result);
     Console.WriteLine(result);   // 6765
 }
+finally
+{
+    (worker as IDisposable)?.Dispose();   // the returned interface is not IDisposable
+}
 ```
 
-`Send` is synchronous; `Queue(callback, clientData)` and `Queue(dateTime, callback, clientData)` are asynchronous. `ScriptThread` is `IDisposable`, and disposing it stops the thread and disposes its interpreter. For a plain `Interpreter` the rule is one interpreter, one thread at a time: interleaving two evaluations on one interpreter from two threads is not a supported pattern, and creating several interpreters concurrently is also discouraged, because the engine keeps process-global state.
+`Send` is synchronous; `Queue(callback, clientData)` and `Queue(dateTime, callback, clientData)` are asynchronous. The `ScriptThread` class is `IDisposable` - the `IScriptThread` interface `Create` returns is not, hence the cast - and disposing it stops the thread and disposes its interpreter. For a plain `Interpreter` the rule is one interpreter, one thread at a time: interleaving two evaluations on one interpreter from two threads is not a supported pattern, and creating several interpreters concurrently is also discouraged, because the engine keeps process-global state.
 
 ### Events, timers and the event loop
 
@@ -227,7 +232,7 @@ using (IScriptThread worker = ScriptThread.Create(null, ref error))
 
 ### Hosts and the shell
 
-A host is the interpreter's console and I/O surface: `[puts]` to standard output, prompts, title, colors, "read line". `IHost` is the union of `IDisplayHost`, `IInteractiveHost`, `IFileSystemHost`, `IThreadHost`, `IProcessHost`, `IStreamHost` and `IDebugHost`. The shipped hosts in `CodeBrix.Platform.TclTk._Hosts` are `Console` (the real process console, which is what `Create(ref Result)` gives when a console exists), `Diagnostic`, `Null` (discards everything - headless services and tests), `Fake` and `Wrapper`, plus the abstract chain `Default -> Engine -> File -> Profile -> Shell -> Core`, of which `Core` is the usual base to derive from.
+A host is the interpreter's console and I/O surface: `[puts]` to standard output, prompts, title, colors, "read line". `IHost` is the union of `IDisplayHost`, `IInteractiveHost`, `IFileSystemHost`, `IThreadHost`, `IProcessHost`, `IStreamHost`, `IDebugHost`, `IReadHost`, `IWriteHost` and `IInformationHost`. The shipped hosts in `CodeBrix.Platform.TclTk._Hosts` are `Console` (the real process console, which is what `Create(ref Result)` gives when a console exists), `Diagnostic`, `Null` (discards everything - headless services and tests), `Fake` and `Wrapper`, plus the abstract chain `Default -> Engine -> File -> Profile -> Shell -> Core`, of which `Core` is the usual base to derive from.
 
 A `[puts]` with no channel goes to the host's `Write`, so redirecting script output into your application means either a custom host or a Tcl channel of your own. `Interpreter.ShellMain(args)` is a complete shell entry point, so an application can be its own script shell in three lines, and `Interpreter.InteractiveLoop` runs the read-evaluate-print loop over an interpreter you already have.
 
@@ -521,7 +526,7 @@ Declaring a Tk UI in XAML inside a `TkHostView`.
 </Page>
 ```
 
-That is the whole view. Because there is deliberately no live two-way binding between widget state and view-model properties, the code-behind hands the view model the two accessors it needs and nothing more.
+That is the whole view. Because there is deliberately no live two-way binding between widget state and view-model properties, the code-behind hands the view model the two accessors it needs and nothing more. `ITkWidgetBridge` is the application's own view-model interface - two delegate properties, `GetEntryText` and `AppendOutputLine` - not a toolkit type.
 
 ```csharp
 public sealed partial class MainPage : Page
@@ -548,8 +553,13 @@ public sealed partial class MainPage : Page
 Headless: build a tree, lay it out, render it to a PNG, and drive it with synthetic input - no display and no head.
 
 ```csharp
+using System.Collections.Generic;
 using SkiaSharp;
+using CodeBrix.Platform.TkCanvas.Events;
+using CodeBrix.Platform.TkCanvas.Layout;
 using CodeBrix.Platform.TkCanvas.Rendering;
+using CodeBrix.Platform.TkCanvas.Widgets;
+using CodeBrix.Platform.TkCanvas.Windowing;
 
 TkWindow root = TkWindow.CreateRoot();
 root.SetForcedSize(320, 200);
@@ -637,7 +647,7 @@ internal class Program
 }
 ```
 
-Other heads swap only the head package and the `UseXxx()` call: `UseLinuxWayland`, `UseLinuxFrameBuffer`, `UseMacOS`, `UseWin32Skia`, `UseWpfSkia`. For a Tcl-driven UI, the page is an empty `TkHostView` and the boot sequence below.
+Other heads swap only the head package and the `UseXxx()` call: `UseLinuxWayland`, `UseLinuxFrameBuffer`, `UseMacOS`, `UseWindowsWin32`, `UseWindowsWpf`. For a Tcl-driven UI, the page is an empty `TkHostView` and the boot sequence below.
 
 ```csharp
 using System;
@@ -694,7 +704,7 @@ private void StopTcl()
 Register the extras commands either before handing the interpreter to the hosted bridge, on whichever thread created it, or afterwards by posting the work onto the Tcl thread. Never call `RegisterAll` - or `EvaluateScript` - on a hosted interpreter from the UI thread.
 
 ```csharp
-// (a) register BEFORE handing the interpreter to the hosted bridge —
+// (a) register BEFORE handing the interpreter to the hosted bridge -
 //     on whichever thread created it (a background Task is fine):
 Result error = null;
 if (TclTkExtras.RegisterAll(interpreter, ref error) != ReturnCode.Ok) { ... }

@@ -24,8 +24,8 @@ detector here and no audio-to-MIDI transcriber. You build those on top.
 - `BiQuadFilter` - low-pass, high-pass, band-pass, peaking and shelving.
 - `EnvelopeFollower` - amplitude envelope tracking, a good basis for drum-hit and onset detection.
 - `VoiceActivityDetector` - energy-based activity detection.
-- `Decibels` - linear amplitude to and from decibels.
-- `CircularBuffer` - the ring buffer `BufferedWaveProvider` is built on.
+- `Decibels` (in `CodeBrix.Audio.Utils`) - linear amplitude to and from decibels.
+- `CircularBuffer` (in `CodeBrix.Audio.Utils`) - the ring buffer `BufferedWaveProvider` is built on.
 
 ## When to use it
 

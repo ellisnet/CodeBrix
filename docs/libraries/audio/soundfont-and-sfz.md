@@ -99,6 +99,12 @@ music.Play();
 // Same surface as AudioFilePlayer: Position, Duration, Seek, Volume, Pause, Stop, Dispose.
 ```
 
+The package ships no SoundFont: the `.sf2` is one you supply. When you want a complete General MIDI
+SoundFont that may be redistributed with your application, the
+[CodeBrix.Audio.Samples.FluidR3Gm](../CodeBrix.Audio.Samples.FluidR3Gm.md) package carries one - MIT
+licensed, landed in the output folder at build time - and registers it as the `FluidR3Gm` instrument
+library.
+
 ## Key concepts
 
 ### The SoundFont types

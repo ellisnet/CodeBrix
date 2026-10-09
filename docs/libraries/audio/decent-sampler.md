@@ -78,6 +78,8 @@ using CodeBrix.Audio.Synth.DecentSampler.Model;       // the typed document, for
 Four lines play an instrument, and everything after this section is the detail behind them:
 
 ```csharp
+using CodeBrix.Audio.Playback;
+using CodeBrix.Audio.Synth;
 using CodeBrix.Audio.Synth.DecentSampler;
 
 using var instrument = DecentSamplerInstrument.Load(@"D:\Libraries\Choir.dslibrary");
@@ -309,7 +311,7 @@ identical either way.
 
 A modulator's own parameters are themselves bindable, so a knob can move a running LFO's rate or an
 envelope's attack. Every random draw is seeded, so a modulated preset renders the same bytes from the
-same events, and `settings.EnableModulators = false` plays the preset as the sampler alone.
+same events on the same machine, and `settings.EnableModulators = false` plays the preset as the sampler alone.
 
 ### The MIDI element and key switches
 
@@ -648,7 +650,8 @@ synthesizer.Render(left, right);
 A synthesizer never disposes its instrument, and is not thread-safe. The defaults worth knowing:
 192-voice polyphony, because a preset routinely layers a dozen groups; 64-frame blocks; a master
 volume of 0.5; and a seeded random stream, so the same instrument and the same events render the same
-bytes every run.
+bytes every run on the same machine. Renders made on different operating systems match to about one
+part in a million, not bit for bit, so compare them with a tolerance.
 
 ## Pitfalls
 

@@ -172,7 +172,7 @@ runtime-identifier-specific publish, the matching package is the only one whose 
 referencing only that one keeps restore small; referencing them all is also fine.
 
 Reference the `.Wpf` package only from a `net10.0-windows` WPF application. It depends on the managed
-core and on `System.Drawing.Common`. The managed core has no NuGet dependencies at all, and neither does
+core and on `CodeBrix.Imaging.ApacheLicenseForever`. The managed core has no NuGet dependencies at all, and neither does
 any native runtime package - in particular a native package does not depend on the core, which is why
 both references are needed.
 
@@ -311,8 +311,8 @@ offer `Create`, `Load` and `LoadFromString`.
 
 ### The network module
 
-Load a network with `Cv2.Dnn.ReadNet`, `ReadNetFromONNX`, `ReadNetFromTFLite`, `ReadNetFromTensorflow`
-or `ReadNetFromModelOptimizer` - the ONNX and TFLite readers each take a path, a `byte[]`, a
+Load a network with `Cv2.Dnn.ReadNet`, `ReadNetFromONNX`, `ReadNetFromTFLite` or `ReadNetFromTensorflow`,
+or an OpenVINO model with `Net.ReadNetFromModelOptimizer` - the ONNX and TFLite readers each take a path, a `byte[]`, a
 `ReadOnlySpan<byte>` or a `Stream`, and the same factories are static members of `Net` itself. Prepare
 input with `Cv2.Dnn.BlobFromImage` or `BlobFromImages`, and post-process with `NMSBoxes`,
 `NMSBoxesBatched` or `SoftNMSBoxes`. The high-level wrappers - `ClassificationModel`, `DetectionModel`,

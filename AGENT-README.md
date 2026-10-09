@@ -10,7 +10,7 @@ This repository is documentation and nothing else. It holds no code, no project 
 
 The universe has two halves, and a task usually lives in one of them.
 
-- **CodeBrix.Platform** is a cross-platform desktop UI application framework. An application is written once against the WinUI XAML API surface and runs on six platform heads across Windows, Linux and macOS. Its curriculum is [Build a CodeBrix.Platform application](docs/platform/README.md).
+- **CodeBrix.Platform** is a cross-platform desktop UI application framework. An application is written once against the WinUI XAML API surface and runs on six platform heads across Windows, Linux and macOS. Its curriculum is [Build a CodeBrix.Platform application](docs/platform/README.md). The same application ships to Android - Googlebooks, docked phones, tablets and phones - through the CodeBrix.Android packages; see [15 - Android and Googlebooks](docs/platform/15-android.md).
 - **The standalone libraries** are ordinary .NET libraries - PDF, spreadsheets, audio, video, imaging, SVG, cryptography, SQLite, Redis, SSH, Docker, parsing, charts, testing and more. They are usable from a CodeBrix.Platform application, a console application, a service or a native WinUI, WPF or .NET MAUI application. Their catalog is [Libraries](docs/libraries/README.md).
 
 Everything requires .NET 10 or later.
@@ -32,7 +32,7 @@ Read in this order the first time. Each page is self-contained afterwards.
 
 If the task is narrow and the solution already exists, the three chapters that decide whether the result is correct are [03 - Your first application](docs/platform/03-your-first-application.md), [04 - Project architecture](docs/platform/04-project-architecture.md) and [05 - MVVM the right way](docs/platform/05-mvvm-the-right-way.md).
 
-Then, by task: [09 - Graphics, media and vision](docs/platform/09-graphics-media-and-vision.md), [10 - Testing your application](docs/platform/10-testing-your-application.md), [11 - Packaging and shipping](docs/platform/11-packaging-and-shipping.md), [13 - Reference applications](docs/platform/13-reference-applications.md), [14 - Sharing code with native frameworks](docs/platform/14-sharing-code-with-native-frameworks.md).
+Then, by task: [09 - Graphics, media and vision](docs/platform/09-graphics-media-and-vision.md), [10 - Testing your application](docs/platform/10-testing-your-application.md) and, for UI tests, [PlayTest](docs/platform/playtest/README.md), [11 - Packaging and shipping](docs/platform/11-packaging-and-shipping.md), [13 - Reference applications](docs/platform/13-reference-applications.md), [14 - Sharing code with native frameworks](docs/platform/14-sharing-code-with-native-frameworks.md), [15 - Android and Googlebooks](docs/platform/15-android.md).
 
 Two pages are worth loading before debugging anything. [12 - Troubleshooting](docs/platform/12-troubleshooting.md) lists the failures that have a known cause - blank windows, missing pickers, duplicate types, missing engines. [Blueprints](docs/samples/blueprints.md) maps a task ("show a file dialog from a view model", "run a long job with progress and cancel") onto a recipe mined from a working application, with the file it came from.
 
@@ -126,18 +126,23 @@ A CodeBrix.Platform solution is built from three kinds of project, and the packa
 
 ## Every library page
 
-One page per library. Each page carries the library's capabilities, its first working example, its key concepts, its pitfalls, and links to its repository, its `AGENT-README.txt`, its tests and its samples. A repository that produces an add-on package alongside its main one has a page for each, and a library with a large surface has sub-pages under its own folder - [CodeBrix.Audio](docs/libraries/CodeBrix.Audio.md) is the one that does.
+One page per library. Each page carries the library's capabilities, its first working example, its key concepts, its pitfalls, and links to its repository, its `AGENT-README.txt`, its tests and its samples. A repository that produces an add-on package alongside its main one has a page for each, and a library with a large surface has sub-pages under its own folder - [CodeBrix.Audio](docs/libraries/CodeBrix.Audio.md) and [CodeBrix.Platform.GameEngine](docs/libraries/CodeBrix.Platform.GameEngine.md) are the ones that do.
 
 | Page | What the library does |
 | --- | --- |
+| [CodeBrix.Android](docs/libraries/CodeBrix.Android.md) | Builds CodeBrix.Platform applications as native, desktop-first Android applications for Googlebooks, docked phones, tablets and phones, with an Android package for every add-in |
 | [CodeBrix.ArgumentParser](docs/libraries/CodeBrix.ArgumentParser.md) | Turns a `string[] args` into invocations of callbacks you register, generates the matching `--help` text, and models whole sub-command suites |
 | [CodeBrix.AssemblyTools](docs/libraries/CodeBrix.AssemblyTools.md) | Reads, writes and rewrites .NET assemblies: IL, metadata and debug symbols, in a single managed assembly |
 | [CodeBrix.Audio](docs/libraries/CodeBrix.Audio.md) | Reads WAV, MP3, Ogg Vorbis, FLAC and AIFF, reads and writes Standard MIDI Files, plays media and sound effects, plays SoundFont, SFZ and Decent Sampler instruments, and plays a multi-track song of recordings and MIDI performances |
+| [CodeBrix.Audio.Android](docs/libraries/CodeBrix.Audio.Android.md) | The Android platform package for CodeBrix.Audio: device playback and capture, native codecs, audio focus, MIDI 1.0 ports and extraction of packaged sample libraries from the APK, referenced in place of the desktop package |
 | [CodeBrix.Audio.ModestSynth](docs/libraries/CodeBrix.Audio.ModestSynth.md) | Adds synthesis to CodeBrix.Audio: ten oscillator waveforms, seven creative effects, a patch model and a polyphonic synthesizer that plays a patch from MIDI |
+| [CodeBrix.Audio.MusicGeneration](docs/libraries/CodeBrix.Audio.MusicGeneration.md) | Produces music as MIDI events that arrive while it is still being written - from a model such as SkyTNT or MuPT, or from a piece it carries - voices it through a CodeBrix.Audio instrument library, and plays it or renders it to a file |
 | [CodeBrix.Audio.Opus](docs/libraries/CodeBrix.Audio.Opus.md) | Adds Ogg Opus decoding and encoding to CodeBrix.Audio, in pure managed code with no native binaries |
+| [CodeBrix.Audio.Samples.FluidR3Gm](docs/libraries/CodeBrix.Audio.Samples.FluidR3Gm.md) | A recorded General MIDI instrument library for CodeBrix.Audio: the FluidR3_GM SoundFont, registered as `FluidR3Gm` in one line |
 | [CodeBrix.Compression](docs/libraries/CodeBrix.Compression.md) | Creates, reads and extracts Zip, GZip, Tar and BZip2 archives, with AES encryption and Zip64, and decompresses legacy DCL and `.Z` data |
 | [CodeBrix.Cryptography](docs/libraries/CodeBrix.Cryptography.md) | General-purpose cryptography: ciphers, digests, MACs, signatures, key agreement, post-quantum algorithms, TLS and DTLS, OpenPGP, CMS and X.509 |
 | [CodeBrix.Docker](docs/libraries/CodeBrix.Docker.md) | A typed, async client for the Docker Engine API over a Unix socket, a Windows named pipe, TCP or an SSH tunnel |
+| [CodeBrix.Graphics3D.Gltf2](docs/libraries/CodeBrix.Graphics3D.Gltf2.md) | Reads, writes and builds glTF 2.0 3D models (`.gltf` and `.glb`), with mesh, material and scene builders and runtime helpers for renderers |
 | [CodeBrix.Imaging](docs/libraries/CodeBrix.Imaging.md) | Loads, saves, converts, resizes, transforms, filters, quantizes, composites and annotates raster images, and rasterizes text onto them |
 | [CodeBrix.Imaging.Drawing](docs/libraries/CodeBrix.Imaging.Drawing.md) | Captures pointer input as calibrated strokes on named, colored layers and renders them with translucent highlighter compositing |
 | [CodeBrix.Json.Extensions](docs/libraries/CodeBrix.Json.Extensions.md) | Adds attribute-driven polymorphic deserialization and object-identity preservation to `System.Text.Json`, using only its public surface |
@@ -145,6 +150,8 @@ One page per library. Each page carries the library's capabilities, its first wo
 | [CodeBrix.LilyScheme](docs/libraries/CodeBrix.LilyScheme.md) | A managed Scheme implementation: `syntax-case` macro expansion, the module system, the numeric tower, ports and a modern exception API |
 | [CodeBrix.MarkupParse](docs/libraries/CodeBrix.MarkupParse.md) | Parses HTML into a navigable DOM tree you query with CSS selectors, traverse, modify and serialize back to HTML |
 | [CodeBrix.NotionApi](docs/libraries/CodeBrix.NotionApi.md) | A managed client for the Notion API: every endpoint group, the full object model, and high-level authoring helpers |
+| [CodeBrix.Ollama.ModelManager](docs/libraries/CodeBrix.Ollama.ModelManager.md) | Downloads large language models into a local store laid out exactly as Ollama's own, derives ONNX, converted-GGUF and quantized models from them, and resolves a model name to the files on disk |
+| [CodeBrix.Ollama.ModelRunner](docs/libraries/CodeBrix.Ollama.ModelRunner.md) | Runs a GGUF model in-process over a native engine it ships - chat, tools, embeddings, constrained output - and runs ONNX graphs, MIDI music generation and text generation on managed code with nothing installed |
 | [CodeBrix.PdfDocuments](docs/libraries/CodeBrix.PdfDocuments.md) | A PDF stack that runs from drawing a glyph at an exact coordinate to turning a finished page back into a PNG |
 | [CodeBrix.Platform](docs/libraries/CodeBrix.Platform.md) | The cross-platform desktop UI framework: write once against the WinUI XAML API surface, render natively on Windows, Linux and macOS |
 | [CodeBrix.Platform.Extensions](docs/libraries/CodeBrix.Platform.Extensions.md) | Functional helpers, a disposables toolkit, collection extensions, comparers, `ILogger` extensions and lock-free threading primitives |
@@ -154,7 +161,7 @@ One page per library. Each page carries the library's capabilities, its first wo
 | [CodeBrix.Platform.Fonts.OpenSans](docs/libraries/CodeBrix.Platform.Fonts.OpenSans.md) | The Open Sans variable font plus a curated set of static instances |
 | [CodeBrix.Platform.Fonts.Roboto](docs/libraries/CodeBrix.Platform.Fonts.Roboto.md) | The Roboto family, with matching sans companions for the scripts it does not cover |
 | [CodeBrix.Platform.Fonts.RobotoMono](docs/libraries/CodeBrix.Platform.Fonts.RobotoMono.md) | The Roboto Mono monospace family plus three companion families, for terminals and code editors |
-| [CodeBrix.Platform.GameEngine](docs/libraries/CodeBrix.Platform.GameEngine.md) | A managed 2D / 2.5D game engine: tile maps, sprites, layered scenes, cameras, animation, physics, input, audio and a save system |
+| [CodeBrix.Platform.GameEngine](docs/libraries/CodeBrix.Platform.GameEngine.md) | A managed 2D / 2.5D game engine: tile maps, sprites, layered scenes, cameras, animation, physics, input, audio and a save system, with optional add-ons for [gamepads](docs/libraries/gameengine/gamepads.md), [Kenney asset packs](docs/libraries/gameengine/kenney-assets.md), [generated music](docs/libraries/gameengine/generated-music.md) and [cards and dice](docs/libraries/gameengine/cards-and-dice.md) |
 | [CodeBrix.Platform.LinuxDBus](docs/libraries/CodeBrix.Platform.LinuxDBus.md) | Low-level D-Bus protocol library for Linux: connect to the session or system bus and send, receive and dispatch raw messages |
 | [CodeBrix.Platform.MediaPlayerCore](docs/libraries/CodeBrix.Platform.MediaPlayerCore.md) | Renders video, outputs audio, captures from a webcam and controls playback on Windows, Linux and macOS desktops |
 | [CodeBrix.Platform.OpenGL](docs/libraries/CodeBrix.Platform.OpenGL.md) | A managed OpenGL Core-profile binding, with native-library resolution and the vector, matrix and scalar math the signatures need |
@@ -162,18 +169,22 @@ One page per library. Each page carries the library's capabilities, its first wo
 | [CodeBrix.Platform.Unicode](docs/libraries/CodeBrix.Platform.Unicode.md) | Delivers the ICU native runtime and its data archive to a .NET application on Windows and on macOS |
 | [CodeBrix.Plotter](docs/libraries/CodeBrix.Plotter.md) | Draws charts from a `PlotModel` of axes, series, annotations and legends onto a SkiaSharp canvas, or exports them to PNG, JPEG, PDF or SVG |
 | [CodeBrix.PolygonTools](docs/libraries/CodeBrix.PolygonTools.md) | 2D polygon clipping and offsetting: the four boolean operations, and inflate or deflate with miter, round or square joins |
+| [CodeBrix.PostgresClient](docs/libraries/CodeBrix.PostgresClient.md) | A fully managed ADO.NET data provider for PostgreSQL - pooled data sources, batching, COPY, notifications, replication, multi-host failover and rich type mapping - with a built-in lightweight object mapper |
 | [CodeBrix.Python](docs/libraries/CodeBrix.Python.md) | Embeds a CPython interpreter in a .NET process, marshals values across the boundary, and lets Python code call .NET APIs |
 | [CodeBrix.Redis](docs/libraries/CodeBrix.Redis.md) | A managed Redis client: the RESP protocol, the connection multiplexer, the full command surface, and a distributed lock |
+| [CodeBrix.Sdl3](docs/libraries/CodeBrix.Sdl3.md) | C# bindings for SDL3 - windows, input, gamepads, audio, cameras, 2D rendering and the GPU API - with the SDL3 native library for Windows, macOS, Linux and Android inside the package |
 | [CodeBrix.ServiceLocator](docs/libraries/CodeBrix.ServiceLocator.md) | An abstraction over IoC containers: resolve services by type, or by type plus a string key, with no hard reference on a container |
 | [CodeBrix.SkiaSvg](docs/libraries/CodeBrix.SkiaSvg.md) | Loads SVG documents and Android VectorDrawable XML and renders them to SkiaSharp canvases, bitmaps and documents, with hit testing and animation |
 | [CodeBrix.Sqlite](docs/libraries/CodeBrix.Sqlite.md) | A managed SQLite library that adds selective encryption, a row mapper, blind-index search and safe live backup to an ordinary SQLite file |
 | [CodeBrix.SSH](docs/libraries/CodeBrix.SSH.md) | A managed SSH-2 client: remote command execution, an interactive shell, SFTP, SCP, port forwarding and NETCONF |
 | [CodeBrix.StyleSheetParse](docs/libraries/CodeBrix.StyleSheetParse.md) | Turns CSS text into a strongly typed object model you can query, manipulate and serialize back to CSS, with selector specificity |
 | [CodeBrix.SvgParse](docs/libraries/CodeBrix.SvgParse.md) | A renderer-agnostic SVG document object model: parse, query, style, modify and re-serialize SVG |
+| [CodeBrix.Swarm](docs/libraries/CodeBrix.Swarm.md) | Runs a swarm of worker processes across many hosts under one coordinator, as three role libraries: Queen, Hive and Worker |
 | [CodeBrix.Templating](docs/libraries/CodeBrix.Templating.md) | Parses templates, binds them to a .NET object model and renders them to text - code generation, HTML, e-mail bodies, reports, SQL |
 | [CodeBrix.Terminal](docs/libraries/CodeBrix.Terminal.md) | An in-memory VT100/VT220/xterm terminal engine: escape-sequence parsing, buffer and scrollback, mouse tracking and Unicode text tools |
 | [CodeBrix.TestMocks](docs/libraries/CodeBrix.TestMocks.md) | Mocking, dynamic proxies, auto-generated test data and xUnit v3 data attributes in one package |
 | [CodeBrix.Texinfo](docs/libraries/CodeBrix.Texinfo.md) | Turns GNU Texinfo documentation into a formatted PDF, in managed code, with nothing to install on any operating system |
+| [CodeBrix.TomlParse](docs/libraries/CodeBrix.TomlParse.md) | Reads, parses, validates, updates and creates TOML 1.1 files: an object serializer, an untyped document model, a lossless syntax tree, and a source generator for trimmed and NativeAOT applications |
 | [CodeBrix.VideoPlayback](docs/libraries/CodeBrix.VideoPlayback.md) | Plays AV1 video from WebM and Matroska and from the `.cbv` container, with Ogg Vorbis or Opus sound and text caption tracks |
 | [CodeBrix.VideoPlayback.Dav1d](docs/libraries/CodeBrix.VideoPlayback.Dav1d.md) | AV1 decoding for CodeBrix.VideoPlayback: it bundles the dav1d AV1 decoder and is wired in with one call at start-up |
 | [CodeBrix.VideoProcessing](docs/libraries/CodeBrix.VideoProcessing.md) | Analyzes, converts, transcodes and muxes media and pipes raw frames, by driving the external `ffmpeg` and `ffprobe` executables |
@@ -189,6 +200,6 @@ The add-in pages - the XAML elements and services these libraries appear as insi
 **Where to go next**
 
 - [Build a CodeBrix.Platform application](docs/platform/README.md) - the curriculum, in the order above
-- [Blueprints](docs/samples/blueprints.md) - a task-to-recipe index over the reference applications, with the file each recipe came from
+- [Blueprints](docs/samples/blueprints.md) - a task-to-recipe index over every BLUEPRINTS file - the per-topic files under CodeBrix.Samples' `BLUEPRINTS-Index.md`, the Gpl2 and Gpl3 `BLUEPRINTS.md`, and CodeBrix.Audio.MusicGeneration's `BLUEPRINTS-GeneratingMusic.md` - with the file each recipe came from
 - [Repository directory](docs/repo-directory.md) - every repository's `AGENT-README.txt`, tests and samples as direct links
 - [Licensing](docs/licensing.md) - what the package-ID suffix guarantees and what the copyleft packages require

@@ -170,8 +170,8 @@ when `Dispose()` is called.
 `LogExtensionPoint` exposes `AmbientLoggerFactory`, `Log(this Type forType)` and
 `Log<T>(this T instance)`. The factory resolves lazily on first use: an instance you assigned wins;
 otherwise, when a `CodeBrix.ServiceLocation` provider is set, the result of resolving `ILoggerFactory`
-through it - a resolved object of the wrong type raises `InvalidOperationException`; otherwise an
-empty `LoggerFactory`.
+through it - a resolved object of the wrong type falls back silently to an empty `LoggerFactory`,
+while any other exception from the locator propagates; otherwise an empty `LoggerFactory`.
 
 `LogExtensions`, in `CodeBrix.Platform.Extensions.Logging`, adds five families of extension methods
 on `ILogger`: level-generic entry points (`LogFormat`, `Log`), per-level trios for Trace, Debug,
@@ -200,6 +200,7 @@ the budget is exhausted.
 `ObservableCollectionExtensions` patches a bound collection in place, so bindings and selection
 survive: `Update`, `UpdateWithResults` and `UpdateAsync`, each
 `(this IList<T> collection, IEnumerable<T> updated, bool tryDispose = false, IEqualityComparer<T> comparer = null)`.
+(`UpdateAsync` takes a `CancellationToken ct` before `updated`).
 `ObservableCollectionUpdateResults<T>` reports `Added`, `Moved` and `Removed`. `UpdateAsync`
 additionally calls `IUpdatable<T>.UpdateAsync` on every kept item, letting an existing item absorb
 the newer instance's values.

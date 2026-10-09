@@ -119,7 +119,7 @@ A command that acts on one of several things takes a plain string parameter, and
 // From CodeBrix.Samples/PdfSideBySide/src/PdfSideBySide.Core/ViewModels/MainViewModel.cs
     public SimpleCommand PanCommand => field ??=
         new SimpleCommand(parameter => CanPan(parameter), parameter => DoPan(parameter));
-
+    // ...
     private static bool TryParsePan(object parameter, out DocumentSide side, out PanDirection direction)
     {
         side = default;
@@ -142,7 +142,7 @@ Beyond the WinUI control set, the core package folds in a small toolkit assembly
 
 | Namespace | What is in it |
 | --- | --- |
-| `CodeBrix.Platform.UI.Toolkit` | `ElevatedView`, a drop-shadow container with `Elevation`, `ShadowColor`, `ElevatedContent` and `Background`; `StorageFileHelper.ExistsInPackage(string)` |
+| `CodeBrix.Platform.UI.Toolkit` | `ElevatedView`, a drop-shadow container with `Elevation`, `ShadowColor`, `ElevatedContent` and `Background`; `TriPaneView`, the three-pane control described below; `StorageFileHelper.ExistsInPackage(string)` |
 | `CodeBrix.Platform.UI.Converters` | `BoolToVisibilityConverter`, `NullToVisibilityConverter`, `StringToVisibilityConverter`, `CollectionToVisibilityConverter`, `BoolNegationConverter`, `BoolToObjectConverter`, `StringFormatConverter` |
 | `CodeBrix.Platform.Diagnostics.UI` | `DiagnosticsOverlay.Get(XamlRoot).Show()`, an in-application diagnostics panel |
 | `CodeBrix.Platform.UI.Markup` | `FromJsonExtension`, a markup extension that turns inline JSON into an object |
@@ -321,6 +321,12 @@ Notice that both visuals live in the same grid cell and differ only in visibilit
 // From CodeBrix.Samples/CodeBrixVideoTool/src/CodeBrixVideoTool.Core/Converters/TimecodeConverter.cs
 public sealed class TimecodeConverter : IValueConverter
 {
+    /// <summary>Formats a <see cref="TimeSpan" /> as a timecode.</summary>
+    /// <param name="value">The position or duration.</param>
+    /// <param name="targetType">Ignored.</param>
+    /// <param name="parameter">Ignored.</param>
+    /// <param name="language">Ignored.</param>
+    /// <returns>The timecode, or "0:00" when the value is not a time.</returns>
     public object Convert(object value, Type targetType, object parameter, string language)
     {
         if (value is not TimeSpan time || time < TimeSpan.Zero)
@@ -334,6 +340,12 @@ public sealed class TimecodeConverter : IValueConverter
     }
 
     /// <summary>Not supported: a timecode is never typed back into the player.</summary>
+    /// <param name="value">Ignored.</param>
+    /// <param name="targetType">Ignored.</param>
+    /// <param name="parameter">Ignored.</param>
+    /// <param name="language">Ignored.</param>
+    /// <returns>Never returns.</returns>
+    /// <exception cref="NotSupportedException">Always.</exception>
     public object ConvertBack(object value, Type targetType, object parameter, string language) =>
         throw new NotSupportedException("A timecode is shown, never entered.");
 }
@@ -388,6 +400,7 @@ A converter can also return a `Style`, which turns a row of buttons into a radio
 // From CodeBrix.Samples/PolyHavenBrowser_viewer_only/src/PolyHavenBrowser.Core/Converters/BoolToAccentStyleConverter.cs
 public sealed class BoolToAccentStyleConverter : IValueConverter
 {
+    /// <inheritdoc />
     public object Convert(object value, Type targetType, object parameter, string language)
     {
         if (value is bool selected && selected
@@ -401,6 +414,7 @@ public sealed class BoolToAccentStyleConverter : IValueConverter
         return null;
     }
 
+    /// <inheritdoc />
     public object ConvertBack(object value, Type targetType, object parameter, string language) =>
         throw new NotSupportedException();
 }
@@ -485,27 +499,34 @@ Where the wrap point must be predictable rather than content-dependent, give the
 
 ### Flip the main axis when the window changes shape
 
-Turning a side-by-side split into a stack is one property on the panel, and it is layout plumbing rather than application logic:
+Turning a side-by-side split into a stack is one property on the panel. The page sets it from its `SizeChanged` handler; here the page first reports the size to the view model, which decides which way round the window is and what the pane's width, basis and margin should be:
 
 ```csharp
 // From CodeBrix.Samples/PolyHavenBrowser/src/PolyHavenBrowser.UI/Views/MainPage.xaml.cs
-//The Model View's content panes: side-by-side while the window is landscape. In
-//portrait the FlexPanel's main axis flips so the 3D viewer drops below the info
-//panes, and the info panes trade their fixed-width column (an explicit Width, so
-//their content measures - and wraps - against it) for half the height as a flex
-//basis, still scrolling internally.
+//The Model View's content panes: side-by-side while the window is landscape. When
+//the view model says the window is portrait the FlexPanel's main axis flips so the
+//3D viewer drops below the info panes, and the info panes trade their fixed-width
+//column (an explicit Width, so their content measures - and wraps - against it) for
+//a share of the height as a flex basis, still scrolling internally. Which way round
+//the window is, and the pane's width, basis and margin, are the view model's.
 SizeChanged += (_, args) =>
 {
-    var portrait = args.NewSize.Width < args.NewSize.Height;
-    ModelContentFlex.Direction = portrait ? FlexDirection.Column : FlexDirection.Row;
-    ModelInfoPane.Width = portrait ? double.NaN : 420;
-    FlexPanel.SetBasis(ModelInfoPane,
-        portrait ? new FlexBasis(0.5f, isRelative: true) : FlexBasis.Auto);
-    ModelInfoPane.Margin = portrait ? new Thickness(0, 0, 0, 20) : new Thickness(0, 0, 20, 0);
+    var viewModel = ViewModel;
+    if (viewModel == null) { return; }
+
+    viewModel.NotifyWindowSizeChanged(args.NewSize.Width, args.NewSize.Height);
+
+    var stacked = viewModel.IsModelViewStacked;
+    ModelContentFlex.Direction = stacked ? FlexDirection.Column : FlexDirection.Row;
+    ModelInfoPane.Width = viewModel.ModelInfoPaneWidth;
+    FlexPanel.SetBasis(ModelInfoPane, stacked
+        ? new FlexBasis(viewModel.ModelInfoPaneStackedHeightBasis, isRelative: true)
+        : FlexBasis.Auto);
+    ModelInfoPane.Margin = viewModel.ModelInfoPaneMargin;
 };
 ```
 
-Notice that an explicit `Width` and a `FlexPanel.Basis` are not interchangeable. Content is measured against a `Width`, so text wraps to the pane; a basis sizes the box without giving the content that constraint. The margin has to move with the axis too - a right margin in landscape, a bottom margin in portrait. If the orientation matters to anything beyond layout, put an `IsPortrait` property on the view model and set it from the same handler.
+Notice that an explicit `Width` and a `FlexPanel.Basis` are not interchangeable. Content is measured against a `Width`, so text wraps to the pane; a basis sizes the box without giving the content that constraint. The margin has to move with the axis too - a right margin in landscape, a bottom margin in portrait. When the orientation matters to anything beyond layout, as it does here, let the view model own the decision and have the handler apply what it computes; when nothing else depends on it, the handler can decide on its own.
 
 The full property set - `JustifyContent`, `AlignItems`, `AlignContent`, `AlignSelf`, `Order`, `Shrink`, percentage bases - is on the [FlexPanel add-in page](add-ins/FlexPanel.md).
 
@@ -521,11 +542,23 @@ Vector icons that ship inside the assembly, referenced from XAML by name, with n
 // From CodeBrix.Samples/JustBetweenUs/CodeBrixPlatform/JustBetweenUs.Core/Controls/EmbeddedImage.cs
 public sealed class EmbeddedImage : Image
 {
+    /// <summary>
+    /// Raised when the image named by <see cref="UriSource"/> could not be loaded - a misspelled
+    /// resource name, an assembly that is not loaded, or an image the decoder rejected. Without a
+    /// handler the control is left empty, so anything that cares about a missing image should
+    /// subscribe; the failure is written to the application log either way.
+    /// </summary>
+    public event EventHandler<EmbeddedImageFailedEventArgs> LoadFailed;
+
     public static readonly DependencyProperty UriSourceProperty =
         DependencyProperty.Register(
             nameof(UriSource), typeof(string), typeof(EmbeddedImage),
             new PropertyMetadata(null, OnUriSourceChanged));
 
+    /// <summary>
+    /// The URI of the image source. Supports embedded://AssemblyName/ResourceName
+    /// for embedded resources, or standard URIs (ms-appx:///, https://).
+    /// </summary>
     public string UriSource
     {
         get => (string)GetValue(UriSourceProperty);
@@ -559,6 +592,13 @@ public sealed class EmbeddedImage : Image
 
             // Copy embedded resource into an IRandomAccessStream.
             // Note: ras and writeStream are intentionally not disposed here.
+            // - Disposing writeStream closes the underlying ras (Platform behavior).
+            // - Disposing ras is unsafe because SetSourceAsync may retain a reference
+            //   to the stream rather than copying its contents, and that contract is
+            //   not guaranteed across CodeBrix Platform targets.
+            // - InMemoryRandomAccessStream is backed entirely by managed memory (no
+            //   file handles or unmanaged resources), so the GC will reclaim it once
+            //   the image source releases its reference.
             var ras = new InMemoryRandomAccessStream();
             var writeStream = ras.AsStreamForWrite();
             await resourceStream.CopyToAsync(writeStream);
@@ -625,6 +665,8 @@ public sealed class EmbeddedImageButton : Button
         }
     }
 
+    private bool _isUpdatingContent;
+
     private void UpdateContent()
     {
         _isUpdatingContent = true;
@@ -633,7 +675,11 @@ public sealed class EmbeddedImageButton : Button
             var hasImage = !string.IsNullOrWhiteSpace(ImageUriSource);
             var hasText = !string.IsNullOrWhiteSpace(Text);
 
-            if (!hasImage && !hasText) { Content = null; return; }
+            if (!hasImage && !hasText)
+            {
+                Content = null;
+                return;
+            }
 
             if (hasImage && hasText)
             {
@@ -651,14 +697,21 @@ public sealed class EmbeddedImageButton : Button
 
                 Content = panel;
             }
-            else if (hasImage) { Content = CreateImage(); }
-            else { Content = CreateTextBlock(); }
+            else if (hasImage)
+            {
+                Content = CreateImage();
+            }
+            else
+            {
+                Content = CreateTextBlock();
+            }
         }
         finally
         {
             _isUpdatingContent = false;
         }
     }
+    // ...
 }
 ```
 
@@ -691,17 +744,19 @@ A small control whose geometry is fixed and pixel-exact - a color swatch strip, 
 public sealed class PaletteWidget : SKXamlCanvas
 {
     private const int WidgetHeight = 42;
+    // ...
     private static readonly SKRect PrimaryRect = SKRect.Create (4, 3, SwatchSize, SwatchSize);
     private static readonly SKRect SecondaryRect = SKRect.Create (17, 16, SwatchSize, SwatchSize);
     private static readonly SKRect SwapRect = SKRect.Create (27, 2, 15, 15);
     private static readonly SKRect ResetRect = SKRect.Create (2, 27, 15, 15);
-
+    // ...
     /// <summary>
     /// Raised when the user asks to edit a colour - a click on either swatch,
     /// or a modifier-click on a palette entry.
     /// </summary>
     public event EventHandler<PaletteColorEditEventArgs>? ColorEditRequested;
 
+    /// <summary>Creates the widget.</summary>
     public PaletteWidget ()
     {
         Height = WidgetHeight;
@@ -717,7 +772,7 @@ public sealed class PaletteWidget : SKXamlCanvas
     }
 
     private void OnPaletteChanged (object? sender, EventArgs e) => Invalidate ();
-
+    // ...
     private void OnPointerPressedHandler (object sender, PointerRoutedEventArgs e)
     {
         PointerPoint point = e.GetCurrentPoint (this);
@@ -730,6 +785,7 @@ public sealed class PaletteWidget : SKXamlCanvas
         }
         // ...
     }
+    // ...
 }
 ```
 
@@ -753,6 +809,9 @@ The framework ships no splitter control. A tiny `Border` subclass that captures 
 // From CodeBrix.Samples/Pinta.Brix/src/libs/Pinta.Brix.Controls/ThumbSplitter.cs
 public sealed class ThumbSplitter : Border
 {
+    private bool dragging;
+    private Windows.Foundation.Point last_position;
+
     /// <summary>
     /// Raised while dragging with the movement since the last report, in the
     /// axis the splitter resizes: X for a vertical bar, Y for a horizontal one.
@@ -762,6 +821,7 @@ public sealed class ThumbSplitter : Border
     public ThumbSplitter (Orientation orientation)
     {
         Orientation = orientation;
+
         Background = new SolidColorBrush (Windows.UI.Color.FromArgb (0x30, 0x80, 0x80, 0x80));
 
         if (orientation == Orientation.Vertical)
@@ -778,6 +838,7 @@ public sealed class ThumbSplitter : Border
         PointerMoved += OnPointerMovedHandler;
         PointerReleased += OnPointerReleasedHandler;
     }
+    // ...
 }
 ```
 
@@ -858,13 +919,22 @@ public sealed class ToolBarRenderer : IDisposable
         this.panel = panel;
         model.ItemsChanged += OnItemsChanged;
         Rebuild ();
+        // ...
     }
 
     private UIElement? CreateElement (ToolBarItem item)
     {
         UIElement? element = item switch {
-            ToolBarLabel label => new TextBlock { Text = label.Text, /* ... */ },
-            ToolBarSeparator => new Border { Width = 1, /* ... */ },
+            ToolBarLabel label => new TextBlock {
+                Text = label.Text,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness (4, 0, 4, 0),
+            },
+            ToolBarSeparator => new Border {
+                Width = 1,
+                Margin = new Thickness (6, 4, 6, 4),
+                Background = new SolidColorBrush (Windows.UI.Color.FromArgb (0x40, 0x80, 0x80, 0x80)),
+            },
             ToolBarImage image => CreateImage (image),
             ToolBarToggleButton toggle => CreateToggle (toggle),
             ToolBarDropDownButton dropDown => CreateDropDown (dropDown),
@@ -877,6 +947,7 @@ public sealed class ToolBarRenderer : IDisposable
         // ... tooltip, then a Visible->Visibility binding with a detacher
         return element;
     }
+    // ...
 }
 ```
 
@@ -959,6 +1030,8 @@ private static MenuBarItem BuildMenu(string title, params Command[] commands)
 
     foreach (Command command in commands)
     {
+        //A null entry is a separator - it keeps the call sites readable
+        //next to upstream's menu-model code.
         menu.Items.Add(command is null
             ? CommandMenuBuilder.CreateSeparator()
             : CommandMenuBuilder.Create(command));
@@ -974,7 +1047,7 @@ Toolbars come from the same command objects. The [CommandBar add-in](add-ins/Com
 
 ### Keyboard shortcuts
 
-XAML keyboard-accelerator objects do not invoke on the Skia heads. Dispatch from one page-level `KeyDown` handler against a table the model owns:
+A `KeyboardAccelerator` on a menu item fires app-wide on the Skia heads, wherever keyboard focus is. An editor whose command model lives in a headless library, rather than in menu items, dispatches from one page-level `KeyDown` handler against a table the model owns instead:
 
 ```csharp
 // From CodeBrix.Samples/Pinta.Brix/src/libs/Pinta.Brix.Controls/Input/CommandAcceleratorTable.cs
@@ -1000,6 +1073,7 @@ acceleratorTable = new CommandAcceleratorTable();
 foreach (Command command in actions.AllCommands())
 {
     acceleratorTable.Register(command);
+    // ...
 }
 
 //Handled keys have to be seen too: the canvas marks most key events
@@ -1008,7 +1082,7 @@ AddHandler(UIElement.KeyDownEvent, new KeyEventHandler(OnGlobalKeyDown), handled
 AddHandler(UIElement.KeyUpEvent, new KeyEventHandler(OnGlobalKeyUp), handledEventsToo: true);
 ```
 
-Notice `handledEventsToo: true`. A canvas marks most key events handled, so a plain `KeyDown` subscription never sees them. The menu items still show their shortcut text through the text-override property, which does work, and the builder deliberately attaches no real accelerator so there is never a second dispatch path. Modifier state is tracked from the modifier keys' own down and up transitions, because the key-state API returns nothing on the Skia heads - and a reset on focus loss keeps a modifier released elsewhere from staying stuck down. Duplicate accelerators resolve first-registration-wins, deliberately. Because the table holds model commands and no UI type, it is testable with no window at all.
+Notice `handledEventsToo: true`. A canvas marks most key events handled, so a plain `KeyDown` subscription never sees them. The menu items still show their shortcut text through the text-override property, which does work, and the builder deliberately attaches no real accelerator so there is never a second dispatch path. Modifier state is tracked from the modifier keys' own down and up transitions - and a reset on focus loss keeps a modifier released elsewhere from staying stuck down. Duplicate accelerators resolve first-registration-wins, deliberately. Because the table holds model commands and no UI type, it is testable with no window at all.
 
 For a single key on a single control, prefer the declarative form where the stack has one, and keep a handler to one forwarding line where it does not:
 
@@ -1017,17 +1091,25 @@ For a single key on a single control, prefer the declarative form where the stac
 //Pressing Enter in the search box runs Search, just like clicking the button.
 private void SearchBox_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
 {
-    if (e.Key == Windows.System.VirtualKey.Enter
-        && DataContext is MainViewModel { SearchCommand: var search }
-        && search.CanExecute(null))
+    if (e.Key == Windows.System.VirtualKey.Enter && DataContext is MainViewModel viewModel)
     {
-        search.Execute(null);
-        e.Handled = true;
+        e.Handled = viewModel.SubmitSearch();
     }
 }
 ```
 
-Notice the `CanExecute` check: a key handler bypasses the disabled state a button would have honored.
+```csharp
+// From CodeBrix.Samples/WikipediaPublisher/Shared/ViewModels/MainViewModel.cs
+public bool SubmitSearch()
+{
+    if (!SearchCommand.CanExecute(null)) { return false; }
+
+    SearchCommand.Execute(null);
+    return true;
+}
+```
+
+Notice the `CanExecute` check, which lives in the view model: a key handler bypasses the disabled state a button would have honored.
 
 ### The window shape of an editor
 
@@ -1079,43 +1161,43 @@ One more shell detail worth copying: status text sourced from a model can be man
 Four handlers, a few lines each, and the model holds the state:
 
 ```csharp
-// From CodeBrix.Samples/PainDiagram/CodeBrixPlatform/PainDiagram.UI/Views/MainPage.xaml.cs
-DrawCanvas.PointerPressed += (_, e) =>
+// From CodeBrix.Samples/PainDiagram/Shared/Drawing/DrawingCanvasBinder.cs (the CodeBrix.Platform branch)
+canvas.PointerPressed += (_, e) =>
 {
-    var session = ViewModel?.Session;
+    var session = sessionGetter();
     if (session == null) { return; }
 
-    var pointerPoint = e.GetCurrentPoint(DrawCanvas);
+    var pointerPoint = e.GetCurrentPoint(canvas);
     if (!pointerPoint.Properties.IsLeftButtonPressed) { return; }
 
-    if (session.PointerPressed(DrawCanvasHelper.GetPointFromPosition(pointerPoint.Position), DrawCanvas.GetViewSize()))
+    if (session.PointerPressed(DrawCanvasHelper.GetPointFromPosition(pointerPoint.Position), canvas.GetViewSize()))
     {
-        DrawCanvas.CapturePointer(e.Pointer);
+        canvas.CapturePointer(e.Pointer);
         e.Handled = true;
     }
 };
 
-DrawCanvas.PointerMoved += (_, e) =>
+canvas.PointerMoved += (_, e) =>
 {
-    var session = ViewModel?.Session;
+    var session = sessionGetter();
     if (session is not { IsPointerActive: true }) { return; }
 
-    session.PointerMoved(DrawCanvasHelper.GetPointFromPosition(e.GetCurrentPoint(DrawCanvas).Position), DrawCanvas.GetViewSize());
+    session.PointerMoved(DrawCanvasHelper.GetPointFromPosition(e.GetCurrentPoint(canvas).Position), canvas.GetViewSize());
     e.Handled = true;
 };
 
-DrawCanvas.PointerReleased += (_, e) =>
+canvas.PointerReleased += (_, e) =>
 {
-    var session = ViewModel?.Session;
+    var session = sessionGetter();
     if (session is not { IsPointerActive: true }) { return; }
 
     session.PointerReleased();
-    DrawCanvas.ReleasePointerCapture(e.Pointer);
+    canvas.ReleasePointerCapture(e.Pointer);
     e.Handled = true;
 };
 
 //If capture is lost mid-stroke (e.g. the window deactivates), discard the stroke
-DrawCanvas.PointerCaptureLost += (_, _) => ViewModel?.Session?.PointerCanceled();
+canvas.PointerCaptureLost += (_, _) => sessionGetter()?.PointerCanceled();
 ```
 
 Notice four rules that all matter. Set `e.Handled = true` on moves - an unhandled move bubbles to the window manager, which then drags the window instead of driving your scene. Capture on press and release on release, or a drag that leaves the element stops delivering moves. Handle capture-lost as well as release, or a stroke stays half open when the window deactivates. And pass the current view size with every point where the model works in its own logical space, so a resize does not shift the geometry.
@@ -1141,6 +1223,13 @@ private void OnPointerMoved(object sender, PointerRoutedEventArgs e)
     e.Handled = true;
 }
 
+private void OnPointerReleased(object sender, PointerRoutedEventArgs e)
+{
+    _dragging = false;
+    ReleasePointerCapture(e.Pointer);
+    e.Handled = true;
+}
+
 private void OnPointerCaptureLost(object sender, PointerRoutedEventArgs e) => _dragging = false;
 
 private void OnPointerWheelChanged(object sender, PointerRoutedEventArgs e)
@@ -1161,7 +1250,8 @@ Pointer positions arrive in device-independent units while a canvas may render i
 ```csharp
 // From CodeBrix.Samples/PolyHavenBrowser_viewer_only/src/PolyHavenBrowser.UI/Views/MainPage.xaml.cs
 // Maps a pointer position (in view/DIP units) to the canvas's pixel space, so pointer
-// input stays aligned with the rendered pixels at any DPI and after any window resize
+// input stays aligned with the rendered pixels at any DPI and after any window resize -
+// the coordinate robustness the PainDiagram sample demonstrates.
 private (double X, double Y) ToCanvasPixels(Point position)
 {
     var canvasSize = DisplayCanvas.CanvasSize;
@@ -1203,6 +1293,7 @@ private ToolMouseEventArgs BuildMouseArgs (PointerRoutedEventArgs e)
         WindowPoint = viewPoint,
         RootPoint = viewPoint,
     };
+    // ...
 }
 
 private void OnCanvasPointerReleased (object sender, PointerRoutedEventArgs e)
@@ -1308,7 +1399,7 @@ A companion family is a file inside the same package, not a second package to re
 <StackPanel>
 
     <!-- Polytonic (ancient) Greek. Roboto has no glyph for any of these
-         codepoints, so naming NotoSans is not an optimisation — it is
+         codepoints, so naming NotoSans is not an optimisation - it is
          the difference between text and a row of tofu boxes. -->
     <TextBlock Text="μῆνιν ἄειδε θεὰ Πηληϊάδεω Ἀχιλῆος"
                FontFamily="ms-appx:///CodeBrix.Platform.Fonts.Roboto/Fonts/NotoSans.ttf" />
@@ -1378,15 +1469,15 @@ Prefer one family URI plus the three properties over a different file URI per fa
 
 ### What a missing glyph looks like
 
-A character no font in the chain can supply renders as that font's own `.notdef` glyph, and what that looks like is a property of the font. The framework never substitutes the host machine's fonts unless `FallbackFontFamilies` is left empty and the application's own fonts have no glyph:
+By default, a character the requested font has no glyph for is taken from the framework's symbols font (`FeatureConfiguration.Font.SymbolsFont`) if that has it, then from the first `FallbackFontFamilies` entry that has it and, failing that, from the host machine's installed fonts. Only a character none of them can supply renders as the requested font's own `.notdef` glyph, and what that looks like is a property of the font. Because host fonts can fill gaps on a development desktop that a device with only the application's fonts cannot, the shapes below are what you see under the restriction described after the list, and wherever no installed font has the glyph:
 
 - Open Sans has an **empty** `.notdef`, so an uncovered codepoint is an invisible blank gap. Plan for silent gaps rather than boxes when auditing coverage.
 - Roboto and its three companions draw a `.notdef` **box**, so coverage gaps are obvious on screen.
 - Merriweather and its companions draw a `.notdef` **box**, so missing text shows as boxes rather than disappearing.
 - Noto Music draws a `.notdef` **box**.
-- The Fluent symbols font does not fall back to a system icon font: a codepoint that is not in it renders as that font's missing-glyph mark, by design.
+- The Fluent symbols font has no icon-font substitute of its own: a codepoint that is not in it goes through the same lookup as any other missing character, so do not count on a host font to supply it; under the restriction it renders as that font's missing-glyph mark.
 
-`FeatureConfiguration.Font.RestrictToEmbeddedFonts` confines resolution to the fonts the application ships, which is the setting to reach for when you want the rendering to be identical everywhere.
+`FeatureConfiguration.Font.RestrictToEmbeddedFonts` is off by default. Set to `true` before the first text is measured, it confines resolution to the fonts the application ships - the `FallbackFontFamilies` entries are still consulted, the host's installed fonts are not - so a missing character renders as `.notdef` on every machine. Resolved fonts are cached, so setting it later leaves already-resolved text as it was. The PlayTest head turns it on itself, and the frame-buffer emulated head turns it on when its launch contract asks for font isolation, so tests and the emulator show what a device carrying only the application's fonts would show. Turn it on yourself to audit coverage on a desktop. Shipping every font the text needs, rather than relying on host fonts, is the recommended practice and the only way to get identical rendering everywhere; the framework enforces it only under the restriction.
 
 ### Icons
 
@@ -1478,11 +1569,12 @@ An editor or a drawing tool needs caret rectangles, selection rectangles, cluste
 // From CodeBrix.Samples/Pinta.Brix/src/libs/Pinta.Brix.Engine/Classes/Re-editable/Text/TextLayout.cs
 private TextLayoutResult BuildResult ()
 {
-    string text = engine.ToString ();
+    string text = LayoutText;
     is_empty = text.Length == 0;
 
     FontDescription font = engine.Font;
 
+    // G8: clamp the weight onto the add-in's 100..900 scale.
     TextFontWeight weight = (TextFontWeight) Math.Clamp (font.Weight / 100 * 100, 100, 900);
 
     TextRunDescriptor run = new (
@@ -1492,6 +1584,9 @@ private TextLayoutResult BuildResult ()
         weight,
         font.Italic ? TextFontStyle.Italic : TextFontStyle.Normal);
 
+    // G1: alignment has no effect without a width, and Pinta aligns
+    // without wrapping - so measure the natural width first, then lay out
+    // again at that width with the wanted alignment.
     TextAlign alignment = engine.Alignment switch {
         TextAlignment.Center => TextAlign.Center,
         TextAlignment.Right => TextAlign.Right,
@@ -1570,7 +1665,7 @@ Notice `DependentUpon`, which nests the partials under the page in a solution vi
 | Keyboard shortcuts from one handler | [Pinta.Brix CommandAcceleratorTable](https://github.com/ellisnet/CodeBrix.Samples/blob/main/Pinta.Brix/src/libs/Pinta.Brix.Controls/Input/CommandAcceleratorTable.cs) |
 | Run a command on Enter in a text box | [WikipediaPublisher MainPage code-behind](https://github.com/ellisnet/CodeBrix.Samples/blob/main/WikipediaPublisher/CodeBrixPlatform/WikipediaPublisher.UI/Views/MainPage.xaml.cs) |
 | The editor shell: tabs, toolbox, pads, status bar | [Pinta.Brix MainPage](https://github.com/ellisnet/CodeBrix.Samples/blob/main/Pinta.Brix/src/Pinta.Brix.UI/Views/MainPage.xaml) |
-| Forward pointer input into a model | [PainDiagram MainPage code-behind](https://github.com/ellisnet/CodeBrix.Samples/blob/main/PainDiagram/CodeBrixPlatform/PainDiagram.UI/Views/MainPage.xaml.cs) |
+| Forward pointer input into a model | [PainDiagram DrawingCanvasBinder](https://github.com/ellisnet/CodeBrix.Samples/blob/main/PainDiagram/Shared/Drawing/DrawingCanvasBinder.cs) |
 | Orbit and zoom a 3D scene | [PolyHavenBrowser ModelSceneGlCanvas](https://github.com/ellisnet/CodeBrix.Samples/blob/main/PolyHavenBrowser/src/libs/PolyHavenBrowser.Rendering/GL/ModelSceneGlCanvas.cs) |
 | Translate pointer events into a headless input model | [Pinta.Brix PintaCanvas](https://github.com/ellisnet/CodeBrix.Samples/blob/main/Pinta.Brix/src/libs/Pinta.Brix.Controls/PintaCanvas.cs) |
 | A default font and script fallbacks | [PdfSideBySide App.xaml.cs](https://github.com/ellisnet/CodeBrix.Samples/blob/main/PdfSideBySide/src/PdfSideBySide.UI/App.xaml.cs) |

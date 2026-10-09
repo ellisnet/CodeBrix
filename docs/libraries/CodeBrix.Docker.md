@@ -275,7 +275,9 @@ public sealed class DockerClientOptions
 
 The endpoint is resolved once, when the client is created: `DockerClientOptions.Endpoint` first, then
 the `DOCKER_HOST` environment variable, then the platform default - `npipe://./pipe/docker_engine` on
-Windows and `unix:///var/run/docker.sock` everywhere else. `DockerClient.Endpoint` reports what was
+Windows and `unix:///var/run/docker.sock` everywhere else. On Linux and macOS, when
+`/var/run/docker.sock` does not exist, the socket named by the Docker CLI's current context and then
+Docker Desktop's per-user `~/.docker/run/docker.sock` are tried before falling back to it. `DockerClient.Endpoint` reports what was
 resolved, exactly as written, and reading it back is the cheapest way to confirm which daemon a client
 is talking to. When `Endpoint` is set it is also handed to the CLI-backed operations as `DOCKER_HOST`,
 so an image build acts on the same daemon as the rest of the client.
@@ -371,6 +373,7 @@ public sealed class ContainerSpec
     public IList<PortBinding>          ExposedPorts { get; set; } = [];  // expose only
     public IList<MountSpec>            Mounts       { get; set; } = [];
     public string                      NetworkName  { get; set; }
+    public string                      NetworkMode  { get; set; }
     public IList<string>               NetworkAliases { get; set; } = [];
     public RestartPolicy               RestartPolicy { get; set; }
     public bool                        AutoRemove   { get; set; }
@@ -571,10 +574,10 @@ public sealed record AdvisorFinding(
 public enum AdvisorSeverity { Info = 0, Warning = 1, Critical = 2 }
 ```
 
-A rule that does not fire contributes nothing, so an empty list is a clean bill of health. The rules
+A rule that does not match contributes nothing, so an empty list is a clean bill of health. The rules
 are internal and the set is fixed; you cannot register your own.
 
-| Id | Severity | Fires when |
+| Id | Severity | Raised when |
 | --- | --- | --- |
 | `CB001` | Warning | No memory limit set |
 | `CB002` | Warning | Memory limit set but swap is not disabled |

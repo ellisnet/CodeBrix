@@ -16,7 +16,7 @@
 ## What it does
 
 - Handles Zip archives end to end: create, read, extract, and update in place - adding, replacing and deleting entries in an existing archive without rewriting it by hand.
-- Encrypts Zip entries with AES-256, AES-128, or the legacy ZipCrypto for compatibility with old readers.
+- Encrypts Zip entries with AES-256 or AES-128, and reads entries protected with the legacy ZipCrypto.
 - Writes and reads Zip64 extensions, for files larger than four gigabytes.
 - Creates, reads and extracts GZip, Tar and BZip2.
 - Decompresses raw PKWARE Data Compression Library "imploded" streams - the format used by many MS-DOS-era installers, and the compression used inside MPQ game archives.
@@ -98,7 +98,7 @@ Notice the two calls that are most often forgotten: `CloseEntry()` after each en
 
 | Format | Create | Read | Extract | Update | Encrypt |
 | --- | --- | --- | --- | --- | --- |
-| Zip | Yes | Yes | Yes | Yes | Yes (AES-128, AES-256, ZipCrypto) |
+| Zip | Yes | Yes | Yes | Yes | Yes (AES-128, AES-256; ZipCrypto read only) |
 | GZip | Yes | Yes | Yes | No | No |
 | Tar | Yes | Yes | Yes | No | No |
 | BZip2 | Yes | Yes | Yes | No | No |
@@ -141,7 +141,7 @@ foreach (ZipEntry entry in zipFile)
 }
 ```
 
-Beyond the enumerator, `ZipFile` exposes `Count`, an integer indexer, `Password`, `UseZip64` and `UpdateMode`, and it can verify an archive:
+Beyond the enumerator, `ZipFile` exposes `Count`, an integer indexer, `Password` and `UseZip64`, and it can verify an archive:
 
 ```csharp
 bool ok = zipFile.TestArchive(testData: true);
@@ -229,14 +229,14 @@ Do all adds and deletes between one `BeginUpdate()` and one `CommitUpdate()`. Co
 
 ### Update staging and Zip64
 
-An update is staged through an `IArchiveStorage`. `DiskArchiveStorage(ZipFile file)` and `MemoryArchiveStorage()` both default to safe mode, and both take an explicit `FileUpdateMode` overload.
+An update is staged through an `IArchiveStorage`. `DiskArchiveStorage(ZipFile file)` defaults to safe mode and `MemoryArchiveStorage()` to direct mode, and both take an explicit `FileUpdateMode` overload.
 
 | Mode | Behavior |
 | --- | --- |
-| `FileUpdateMode.Safe` | All updates go through temporary files, so the original archive survives a failure. This is the default |
+| `FileUpdateMode.Safe` | All updates go through temporary files, so the original archive survives a failure. The default for disk storage |
 | `FileUpdateMode.Direct` | The archive is updated in place: faster, but a failure can leave it damaged |
 
-The no-argument `BeginUpdate()` uses disk storage in safe mode for a file-backed `ZipFile`; pass a `MemoryArchiveStorage` explicitly when the archive lives in a `MemoryStream`. Keep the default safe mode unless you have measured a problem.
+The no-argument `BeginUpdate()` uses disk storage in safe mode for a file-backed `ZipFile`, and memory storage in direct mode for a stream-backed one. An update cannot add AES-encrypted entries: `Add` throws when `AESKeySize` is greater than zero. Keep the default safe mode unless you have measured a problem.
 
 Zip64 behavior during an update is controlled by `ZipFile.UseZip64`, whose values are `UseZip64.Off`, `UseZip64.On` and `UseZip64.Dynamic`.
 
@@ -253,11 +253,11 @@ Set `Password` on the `ZipOutputStream`, `ZipInputStream` or `ZipFile` - or on `
 | `ZipEncryptionMethod` | Notes |
 | --- | --- |
 | `None` | No encryption; the default |
-| `ZipCrypto` | Traditional PKZIP encryption: legacy and weak, marked `[Obsolete]`, so referencing it produces a compiler warning. Use it only for compatibility |
+| `ZipCrypto` | Traditional PKZIP encryption: legacy and weak, marked `[Obsolete]`, so referencing it produces a compiler warning. Entries protected with it are read; writing it throws `NotSupportedException` |
 | `AES128` | AES 128-bit; the salt is handled internally |
 | `AES256` | AES 256-bit; the most secure option, and the recommended one |
 
-On the stream API the choice is per entry: set `entry.AESKeySize` to `256` or `128`. When `Password` is set and `AESKeySize` is not, ZipCrypto is used.
+On the stream API the choice is per entry: set `entry.AESKeySize` to `256` or `128` on every file entry. When `Password` is set and `AESKeySize` is not, `PutNextEntry` throws `NotSupportedException` for a file entry with content.
 
 `CodeBrix.Compression.Encryption` exposes the machinery behind this - `ZipAESTransform`, which handles the AES transforms and whose `PwdVerifier` returns a two-byte verification array, and `ZipAESStream`. Most consuming code never touches either type. `ZipAESStream` supports `CryptoStreamMode.Read` only, and constructing it in write mode throws.
 
@@ -278,7 +278,7 @@ The defaults are a buffer size of 512 and level 6; pass level 9 for maximum comp
 
 `TarArchive` is the high-level API: `TarArchive.CreateOutputTarArchive(stream)` and `TarArchive.CreateInputTarArchive(stream, nameEncoding)`, with `WriteEntry(entry, recurse)`, `ExtractContents(path)`, `RootPath` (the base path for entries), `IsStreamOwner` and `Close()`.
 
-`TarOutputStream` and `TarInputStream` are the low-level API. `TarOutputStream(stream, nameEncoding)` and `TarOutputStream(stream, blockFactor, nameEncoding)` carry `PutNextEntry(entry)` and `CloseEntry()`; `TarInputStream(stream, nameEncoding)` carries `GetNextEntry()` and `GetNextEntryAsync(ct)`. The block factor controls the record size and accepts values from 1 to 64.
+`TarOutputStream` and `TarInputStream` are the low-level API. `TarOutputStream(stream, nameEncoding)` and `TarOutputStream(stream, blockFactor, nameEncoding)` carry `PutNextEntry(entry)` and `CloseEntry()`; `TarInputStream(stream, nameEncoding)` carries `GetNextEntry()` and `GetNextEntryAsync(ct)`. The block factor controls the record size and must be greater than zero.
 
 ```csharp
 using CodeBrix.Compression.Tar;
@@ -347,7 +347,7 @@ using DclHelper = CodeBrix.Compression.Dcl.Dcl;
 
 LZW here means the LZC variant of Lempel-Ziv-Welch written by the classic Unix `compress` utility, whose output normally carries the `.Z` extension. Like DCL it is a raw compressed stream and not an archive: one `.Z` stream holds a single file's worth of data and carries no file name, timestamp or directory structure. Archives of that era pair the two formats - `archive.tar.Z` is a Tar archive wrapped in a single `.Z` stream, so you wrap one stream in the other.
 
-Decompression is supported and compression is not: there is no `LzwOutputStream` and no static `Lzw` helper class, and `LzwInputStream` is the entire public surface. The header is three bytes: bytes 0 and 1 are the magic marker `0x1f 0x9d`, and byte 2 is a flags byte whose low five bits hold `max_bits` (16 at most), whose high bit is the block-mode flag, and whose reserved bits must be clear. `LzwConstants` exposes those header constants - `MAGIC`, `MAX_BITS`, `BIT_MASK`, `BLOCK_MODE_MASK`, `HDR_SIZE`, `INIT_BITS` - if you want to sniff a stream before opening it.
+Decompression is supported and compression is not: there is no `LzwOutputStream` and no static `Lzw` helper class, and `LzwInputStream` is the only stream type. The header is three bytes: bytes 0 and 1 are the magic marker `0x1f 0x9d`, and byte 2 is a flags byte whose low five bits hold `max_bits` (16 at most), whose high bit is the block-mode flag, and whose reserved bits must be clear. `LzwConstants` exposes those header constants - `MAGIC`, `MAX_BITS`, `BIT_MASK`, `BLOCK_MODE_MASK`, `HDR_SIZE`, `INIT_BITS` - if you want to sniff a stream before opening it.
 
 A bad header or a corrupt code sequence throws `LzwException`, as does an empty or truncated stream. The format carries no checksum.
 

@@ -373,7 +373,7 @@ Node equality is by value, so two scalar nodes holding the same text are `Equals
     }
 ```
 
-`ParserExtensions` supplies the reading vocabulary: `Consume<T>` advances and throws if the next event is not a `T`, `TryConsume<T>` and `Accept<T>` test without throwing, `Require<T>` and `Peek<T>` look ahead, `SkipThisAndNestedEvents` jumps over a whole subtree, and `TryFindMappingEntry` pulls a single key out of a large mapping without materializing the rest. Events live in `CodeBrix.YamlParse.Core.Events`: `StreamStart`, `StreamEnd`, `DocumentStart`, `DocumentEnd`, `MappingStart`, `MappingEnd`, `SequenceStart`, `SequenceEnd`, `Scalar`, `AnchorAlias` and `Comment`, with the styles
+`ParserExtensions` supplies the reading vocabulary: `Consume<T>` advances and throws if the next event is not a `T`, `TryConsume<T>` and `Accept<T>` test without throwing, `Require<T>` and `Peek<T>` look ahead, `SkipThisAndNestedEvents` jumps over a whole subtree, and `TryFindMappingEntry` pulls a single key out of a large mapping without materializing the rest. Events live in `CodeBrix.YamlParse.Core.Events`: `StreamStart`, `StreamEnd`, `DocumentStart`, `DocumentEnd`, `MappingStart`, `MappingEnd`, `SequenceStart`, `SequenceEnd`, `Scalar`, `AnchorAlias` and `Comment`, with the styles (`ScalarStyle` is in `CodeBrix.YamlParse.Core`; `SequenceStyle` and `MappingStyle` are in `CodeBrix.YamlParse.Core.Events`)
 
 ```csharp
     public enum ScalarStyle

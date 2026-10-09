@@ -40,7 +40,7 @@ pixels have to be produced, measured or changed.
   `BinaryDither`, `AdaptiveThreshold`).
 - Composites one image onto another with `DrawImage` - blending mode, alpha composition mode,
   location and opacity - and flattens transparency with `BackgroundColor`.
-- Rasterizes text onto an image with the `DrawText` and `MeasureText` extension methods and the
+- Rasterizes text onto an image with the `DrawText` extension methods, the static `TextRenderingExtensions.MeasureText` helper and the
   `TextMeasurer` API, with wrapping, alignment, justification, kerning, hinting, line spacing,
   text direction, OpenType feature tags and per-range `TextRun` formatting.
 - Handles fonts through `SystemFonts`, `FontCollection`, `FontFamily`, `Font` and `FontStyle`,
@@ -208,7 +208,7 @@ Both have `(Action<IImageProcessingContext>)`, `(Configuration, Action<...>)` an
 
 ### Resize and ResizeOptions
 
-There are eight `Resize` overloads, and passing 0 for one dimension preserves the aspect ratio for
+There are several `Resize` overloads, and passing 0 for one dimension preserves the aspect ratio for
 that axis. `ResizeOptions` carries `Mode` (default `ResizeMode.Crop`), `Position` (default
 `AnchorPositionMode.Center`), `CenterCoordinates`, `Size`, `Sampler` (default
 `KnownResamplers.Bicubic`), `Compand` (default false), `TargetRectangle`, `PremultiplyAlpha`
@@ -232,7 +232,7 @@ Text rendering needs `using CodeBrix.Imaging.Fonts;` plus `using CodeBrix.Imagin
 
 ```csharp
 image.DrawText("hello", font, Color.White, 10f, 10f);      // CORRECT
-image.Mutate(x => x.DrawText(...));                        // WRONG —
+image.Mutate(x => x.DrawText(...));                        // WRONG -
                                                            // does not compile
 ```
 
@@ -501,7 +501,7 @@ export type.
   `DrawPolygon` / `FillPath` / `Brush` / `Pen` here. That surface ships in the separate
   [CodeBrix.Imaging.Drawing](CodeBrix.Imaging.Drawing.md) packages: the entry point is
   `DrawingSession`, the model types live in `CodeBrix.Imaging.Drawing.Models`, and the bridge back
-  is `using CodeBrix.Imaging.Drawing.Extensions;` plus `session.ExportImagingImage()`, which returns
+  is `using CodeBrix.Imaging.Drawing.Extensions;` plus `session.ExportImagingImage(session.DefaultExportSize)`, which returns
   an `Image<Rgba32>`.
 - Do not call `.Saturation(...)`. The method is `.Saturate(float amount)`.
 - Do not confuse the package ID with the namespace. Package:

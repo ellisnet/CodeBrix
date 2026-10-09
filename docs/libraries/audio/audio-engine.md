@@ -18,7 +18,7 @@ shows.
 | **License** | MIT; see [License](#license) |
 | **Requires** | .NET 10 or later. No system audio package and no system-wide codec is required on Windows, macOS or Linux |
 | **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application |
-| **Platforms** | Windows, macOS and Linux. The bundled native backend ships for `win-x64`, `win-arm64`, `linux-x64`, `linux-arm64`, `linux-riscv64`, `osx-x64` and `osx-arm64` |
+| **Platforms** | Windows, macOS and Linux. The bundled native backend ships for `win-x64`, `win-arm64`, `linux-x64`, `linux-arm64`, `linux-riscv64`, `osx-x64` and `osx-arm64`. Android uses the separate `CodeBrix.Audio.Android.ApacheLicenseForever` package in place of the desktop package |
 
 ## What it does
 
@@ -129,7 +129,8 @@ Unlike `CodeBrix.Audio`, the Engine calls into a bundled native library, shipped
 `osx-x64` and `osx-arm64`. The right one loads at run time with no configuration on your part, and an
 Ogg Vorbis decoder is compiled into it. Those runtime identifiers are the supported set: an
 application published for any other one will start, but will throw as soon as it opens an audio
-device. The `linux-riscv64` binary is there for the experimental .NET builds for RISC-V.
+device. Android is the exception: there, the separate `CodeBrix.Audio.Android.ApacheLicenseForever`
+package replaces this backend with its own `AndroidAudioEngine`. The `linux-riscv64` binary is there for the experimental .NET builds for RISC-V.
 
 > [!IMPORTANT]
 > The native payload must travel with your application. A normal framework-dependent or self-contained

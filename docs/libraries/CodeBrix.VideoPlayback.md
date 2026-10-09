@@ -58,7 +58,9 @@ customer.
 Coded video needs a decoder package beside the core. Add
 [CodeBrix.VideoPlayback.Dav1d](CodeBrix.VideoPlayback.Dav1d.md) to play AV1, and
 [CodeBrix.Audio.Opus](CodeBrix.Audio.Opus.md) to play Opus audio; Vorbis audio is built into
-[CodeBrix.Audio](CodeBrix.Audio.md), which the core package brings with it.
+CodeBrix.Audio's Core package, which the core package brings with it. Core has no audio output, so to
+hear sound on the desktop also reference [CodeBrix.Audio](CodeBrix.Audio.md)
+(`CodeBrix.Audio.MitLicenseForever`); the `.Skia` package already brings it.
 
 What the playback core deliberately does not do:
 
@@ -90,7 +92,7 @@ dotnet add package CodeBrix.VideoPlayback.Authoring.MitLicenseForever
 The three are published together and are taken at matching versions. Most applications need only the
 first; the second goes in the project that draws, and the third only in a developer-machine tool.
 
-These are the namespaces the core package offers. Playing a file needs the first three; everything else
+These are the namespaces the core package offers. Playing a file needs the first four; everything else
 is there when you want it.
 
 ```csharp
@@ -660,8 +662,8 @@ There is exactly one filter chain, always, built in this order:
 ```
 
 Sound is described the same way, and the default resolves per flavor: Opus for a WebM-profile file and
-Vorbis for a bespoke one, which is the flavor an application ships inside itself - a Vorbis file plays
-with the core package alone.
+Vorbis for a bespoke one, which is the flavor an application ships inside itself - a Vorbis file needs no
+codec package beyond the core (sound output on the desktop still needs the `CodeBrix.Audio` package).
 
 ```csharp
 AuthoringAudioCodec Codec                Default | LibOpus | LibVorbis
@@ -810,6 +812,7 @@ Draw over the video with an overlay layer. The context carries the video rectang
 display sizes, the timestamp, the frame number, the running backend and whether effects are active.
 
 ```csharp
+using SkiaSharp;
 using CodeBrix.VideoPlayback.Skia.Composition;
 using CodeBrix.VideoPlayback.Rendering;
 

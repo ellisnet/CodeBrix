@@ -253,7 +253,12 @@ one. An unsupported codepoint therefore renders as a visible box, "tofu", which 
 obvious on screen.
 
 > [!WARNING]
-> Never rely on a system font to fill a gap: CodeBrix.Platform does not fall back to system fonts.
+> Never rely on a system font to fill a gap. By default CodeBrix.Platform tries the symbols font, then the fonts listed in
+> `FeatureConfiguration.Font.FallbackFontFamilies` and then the host machine's installed fonts, so a
+> gap can look filled on a development desktop and still show this box on a device that has only the
+> application's fonts. With `FeatureConfiguration.Font.RestrictToEmbeddedFonts = true` - which the
+> PlayTest head and the font-isolated frame-buffer emulator set for you - host fonts are never
+> consulted and the box is what you see.
 
 ## Examples
 
@@ -418,11 +423,7 @@ ID is lower-cased in that path, and the fonts sit under
 ## Pitfalls
 
 - **Never append `#FamilyName` to a font URI.** CodeBrix.Platform strips the fragment during
-  resolution, so it never helps - and on the value assigned to
-  `FeatureConfiguration.Font.DefaultTextFontFamily` it silently disables the startup manifest
-  preload, because the `.manifest` suffix the preload appends lands inside the fragment and is
-  dropped by `Uri.PathAndQuery`. The symptom is subtle: text still renders, but weight, style and
-  stretch requests stop resolving to the right static instance.
+  resolution, so it never helps.
 - **There is no italic axis in any of the four variable fonts.** On a head where the statics are
   pruned, `FontStyle="Italic"` has no italic face to resolve to and the platform will synthesize or
   ignore it.
@@ -459,9 +460,9 @@ Five habits keep the font cost down: prefer one family URI plus `FontWeight` / `
 resource and bind with `{StaticResource}`; set `DefaultTextFontFamily` rather than `FontFamily` on
 every element, which also lets the startup font-manifest preload warm the manifest once; name a
 companion family directly on Armenian and Georgian text, which avoids per-codepoint fallback work at
-layout time on top of being more predictable; and remember that the variable font covers weights
-100-900 continuously, so on a manifest-capable head you can request Thin, ExtraLight, Black and every
-intermediate weight without shipping more files.
+layout time on top of being more predictable; and remember that every CodeBrix.Platform head resolves
+through the manifest, so a requested weight snaps to the nearest static instance and the variable font's
+weight axis is not applied at run time.
 
 ## Samples and tools in the repository
 

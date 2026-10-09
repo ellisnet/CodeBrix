@@ -39,12 +39,13 @@ and, at most, one MSBuild property.
 Reference it from any CodeBrix.Platform application that renders `SymbolIcon`, `FontIcon`, or any
 built-in control whose template draws an icon - those templates resolve the `SymbolThemeFontFamily`
 theme resource, and this package is what fills it. Reference it, too, when you want Fluent
-iconography inside ordinary text by naming the font explicitly. Applications generated from the
-CodeBrix.Platform application template already reference it; referencing it a second time is harmless
-but unnecessary.
+iconography inside ordinary text by naming the font explicitly. The framework package,
+`CodeBrix.Platform.ApacheLicenseForever`, already depends on it, so every CodeBrix.Platform application
+gets it transitively; an explicit reference is harmless but unnecessary.
 
 It is not a text face. There are no letters, digits or punctuation in it beyond a space, it cannot be
-an application's `DefaultTextFontFamily`, and it is not a fallback for text. For text, reach for one
+an application's `DefaultTextFontFamily`, and although it is the first font consulted for a character a
+text run's font lacks, it can only ever supply an icon there, never a letter. For text, reach for one
 of the sibling font packages: [CodeBrix.Platform.Fonts.OpenSans](CodeBrix.Platform.Fonts.OpenSans.md),
 [CodeBrix.Platform.Fonts.Roboto](CodeBrix.Platform.Fonts.Roboto.md),
 [CodeBrix.Platform.Fonts.RobotoMono](CodeBrix.Platform.Fonts.RobotoMono.md) or
@@ -213,8 +214,16 @@ their manifest rules apply here.
 
 Three of the mapped codepoints are not icons: the control slots U+0000 and U+0001, and U+0020 space.
 Everything else lives in the Private Use Area, spread from U+E001 to U+F8AE. Because they are PUA,
-these codepoints mean nothing in any other font: text carrying them renders as missing-glyph boxes,
-or as unrelated icons, unless the run is drawn in this font.
+these codepoints carry no agreed meaning in any other font. When a `TextBlock` (or a control built on
+one) meets a character its run's font has no glyph for, CodeBrix.Platform looks in the framework's
+symbols font (`FeatureConfiguration.Font.SymbolsFont`, which is this font by default) before any other
+fallback, and that check applies even when `FeatureConfiguration.Font.RestrictToEmbeddedFonts` is on.
+So a codepoint this font maps draws its icon even in a run set in the text font, at the run's font
+size, unless the run's own font maps that codepoint itself (none of the family's text-font packages
+maps any of this font's codepoints). A PUA codepoint this font does not map goes on to
+`FeatureConfiguration.Font.FallbackFontFamilies` and then, unless `RestrictToEmbeddedFonts` is on, the
+host's installed fonts, where it may pick up an unrelated glyph; when nothing supplies it, the run's
+own font draws its missing-glyph (.notdef), which is blank in some fonts and a box in others.
 
 Coverage is dense but not contiguous - the mapped codepoints form many separate runs, so a codepoint
 inside a covered block is not guaranteed to exist. Do not compute a glyph by adding an offset to a
@@ -470,9 +479,13 @@ lookup yourself; the package offers no helper.
 - **The opt-out must be set early.** `CodeBrixFontsFluentDisableImport` is read as a condition on the
   package's imported `.props`. Setting it inside a target, or after that import has been evaluated,
   is too late.
-- **PUA codepoints are meaningless in a text font.** A raw PUA codepoint in a `TextBlock` that uses
-  the application's text font gives you a missing-glyph box, not an icon. The run carrying the glyph
-  must carry the symbols font too.
+- **A PUA codepoint in a text run falls back to this font, not to a box.** A raw PUA codepoint in a
+  `TextBlock` that uses the application's text font draws this font's icon when the font maps it,
+  because the symbols font is the first fallback for a character the run's font lacks. A codepoint
+  this font does not map continues through the ordinary fallback chain and ends as the run's own
+  missing-glyph (or a host font's unrelated glyph). Set the symbols font on the run anyway
+  (`FontIcon`, or `FontFamily="{ThemeResource SymbolThemeFontFamily}"`) when the icon matters: the
+  fallback depends on the run's own font not mapping that codepoint.
 - **`Glyph` is a string.** `new FontIcon { Glyph = "\uE713" }` compiles; a `char` does not.
 - **Weight and style do nothing.** The file has one face. `FontWeight="Bold"` or `FontStyle="Italic"`
   on a `FontIcon` will not produce a bold or slanted icon; the same outline is drawn.

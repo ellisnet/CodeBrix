@@ -70,7 +70,7 @@ The package ID carries the `.MitLicenseForever` suffix; the assembly and the nam
 no package named plain `CodeBrix.NotionApi`.
 
 ```csharp
-using CodeBrix.NotionApi;   // the ENTIRE client and model surface —
+using CodeBrix.NotionApi;   // the ENTIRE client and model surface -
                             // one large, flat namespace
 
 using CodeBrix.Json.Extensions.Polymorphism;  // only if you declare your
@@ -206,7 +206,7 @@ registration must not be disposed by your code. Logging is opt-in and static:
 
 ### Pagination
 
-Every listing endpoint returns a `PaginatedList<T>` with `Results`, `HasMore`, `NextCursor` and `Type`,
+Every listing endpoint except `ListDataSourceTemplatesAsync` returns a `PaginatedList<T>` with `Results`, `HasMore`, `NextCursor` and `Type`,
 and `IPaginationParameters` supplies `StartCursor` and `PageSize`, whose Notion maximum is 100. The loop
 is the same everywhere.
 
@@ -313,8 +313,8 @@ the database: `Databases.RetrieveAsync(databaseId)`, then `database.DataSources.
 `Filter` is the abstract base. `SinglePropertyFilter` adds a `Property`; `CompoundFilter` nests groups
 through `CompoundFilter(List<Filter> or = null, List<Filter> and = null)`. Each concrete filter takes the
 property name first, then named optional condition arguments: `TitleFilter`, `RichTextFilter`,
-`URLFilter`, `EmailFilter` and `PhoneNumberFilter` share the text conditions; `SelectFilter`,
-`StatusFilter`, `MultiSelectFilter`, `RelationFilter` and `PeopleFilter` share theirs; `NumberFilter`,
+`URLFilter`, `EmailFilter` and `PhoneNumberFilter` share the text conditions; `SelectFilter` and
+`StatusFilter` share `equal` and `doesNotEqual`; `MultiSelectFilter`, `RelationFilter` and `PeopleFilter` share `contains` and `doesNotContain`; `NumberFilter`,
 `CheckboxFilter`, `FilesFilter` and `DateFilter` complete the set. `DateFilter`'s comparison arguments
 take `RelativeDateValue`, an extensible string-enum struct with implicit conversions from `DateTime`,
 `DateTimeOffset` and `string` and the keywords `Today`, `Tomorrow`, `Yesterday`, `OneWeekAgo`,
@@ -339,8 +339,8 @@ covers `paragraph`, `heading_1` through `heading_4`, `bulleted_list_item`, `numb
 `link_preview`, `equation`, `child_page`, `child_database`, `link_to_page`, `synced_block`, `template`,
 `tab`, `meeting_notes` and `unsupported`. Heading payload property names really are `Heading_1` through
 `Heading_4`, with an underscore. A `column_list` may contain only columns, a column may contain any
-`IColumnChildrenBlock`, and `ColumnBlock.Column.Info.WidthRatio` is that column's share of the available
-width. `SyncedBlock` with a null `SyncedFrom` is the original; set `SyncedFrom` to create a duplicate
+`IColumnChildrenBlock`, and `ColumnBlock.Column.WidthRatio` is that column's share of the available
+width. A `SyncedBlockBlock` whose `SyncedBlock.SyncedFrom` is null is the original; set `SyncedFrom` to create a duplicate
 view of another block.
 
 Appending goes through
@@ -422,7 +422,7 @@ of work.
 services.AddNotionClientFactory();
 // optional: services.AddNotionClientFactory(http => http.Timeout = ...);
 
-// Consuming class — inject INotionClientFactory:
+// Consuming class - inject INotionClientFactory:
 public sealed class MyNotionWorker(INotionClientFactory notionFactory)
 {
     public async Task DoWorkAsync(string authToken)
@@ -627,7 +627,7 @@ logging, container and `HttpClient`-pooling seams.
 - Do not mix the request and response families: `RichTextBase` against `RichTextBaseInput`, `IPageIcon`
   against `IPageIconRequest`, `IParentOfPage` against `IParentOfPageRequest`,
   `DataSourcePropertyConfig` against `DataSourcePropertyConfigRequest`, and `Block` against
-  `BlockRequest` against `UpdateBlock`. The compiler catches most of these; the parent families are the
+  `BlockObjectRequest` against `UpdateBlock`. The compiler catches most of these; the parent families are the
   ones people get wrong.
 - Do not send a full block to `Blocks.UpdateAsync`. It takes an `IUpdateBlock` carrying only the changed
   payload, not the `...BlockRequest` type. Update blocks take `RichTextBaseInput` for their rich text,

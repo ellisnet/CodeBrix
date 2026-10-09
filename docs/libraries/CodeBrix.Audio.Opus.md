@@ -37,7 +37,8 @@ application, whenever Opus has to be one of the formats your audio handles.
 After `Register()`, `.opus` plays through `AudioFilePlayer`, `SoundEffectClip`, `WaveOutEvent`, the
 [CodeBrix.Platform AudioPlayer add-in](../platform/add-ins/AudioPlayer.md) and the
 [CodeBrix.Platform GameEngine](CodeBrix.Platform.GameEngine.md); opens by file name through
-`AudioFileReader`; and can be written by the engine's `Recorder`.
+`AudioFileReader`; is written by file name through `AudioFileWriterRegistry`; and can be written by the
+engine's `Recorder`.
 
 ## When to use it
 
@@ -103,7 +104,9 @@ CodeBrixAudioOpus.Register();
 
 `Register()` registers both codec factories with `SharedAudioOutput` - the stream one, which opens
 `.opus` files, and the packet one, which decodes the bare Opus packets a media container carries - and
-registers `".opus"` with [`AudioFileReaderRegistry`](audio/reading-and-writing-files.md). It is
+registers `".opus"` with [`AudioFileReaderRegistry`](audio/reading-and-writing-files.md) and an
+`OpusAudioFileWriterFactory` with `AudioFileWriterRegistry`, so a `.opus` is written by file name as
+well as read by it. It is
 idempotent and thread-safe; calling it twice does nothing. There is deliberately no module initializer doing this for you: a module initializer only
 runs once something in the assembly is touched, so under trimming or lazy assembly loading the package
 would work in a debug build and silently fail to register in a trimmed publish.
@@ -139,7 +142,7 @@ no platform-specific payload.
 ### A small, fully enumerated public surface
 
 Every public type is listed in the package's own guide: `CodeBrixAudioOpus`, `OpusFileReader`,
-`OpusFileWriter`, `OpusFileWriterOptions`, `OpusEncodingProfile`, `OpusCodecFactory` and
+`OpusFileWriter`, `OpusFileWriterOptions`, `OpusEncodingProfile`, `OpusAudioFileWriterFactory`, `OpusCodecFactory` and
 `OpusPacketCodecFactory`. The sub-namespaces `CodeBrix.Audio.Opus.Codec` and `CodeBrix.Audio.Opus.Ogg`
 are entirely internal, and in `CodeBrix.Audio.Opus.Codecs` only the two factories are public.
 
@@ -461,8 +464,9 @@ to. A `.opus` file preloads exactly like a `.ogg` rather than decoding on the au
   constructed factory per call would register the codec repeatedly. If you register a factory by hand,
   hold your own single instance of each for the same reason.
 - **`Register(AudioEngine)` is not `Register()`.** The overload registers both codec factories on the
-  engine you pass, but does not register the `".opus"` file extension with `AudioFileReaderRegistry`, so
-  `AudioFileReader` still will not open a `.opus` after it. Call the parameterless `Register()` for the
+  engine you pass, but does not register the `".opus"` file extension with `AudioFileReaderRegistry` or
+  `AudioFileWriterRegistry`, so `AudioFileReader` still will not open a `.opus` after it, and nothing
+  writes one by file name. Call the parameterless `Register()` for the
   shared-output path.
 - **`Position` and `Length` are bytes,** not samples and not seconds. Divide by
   `Channels * sizeof(float)` for frames, or use `TotalTime`.

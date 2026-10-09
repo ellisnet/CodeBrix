@@ -15,7 +15,10 @@
 | Linux (frame buffer) | [CodeBrix.Platform.Runtime.Skia.FrameBuffer.ApacheLicenseForever](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.FrameBuffer.ApacheLicenseForever) | `.UseLinuxFrameBuffer()` | OpenGL ES over DRM and GBM, software otherwise | Linux with no desktop; embedded and kiosk devices |
 | macOS | [CodeBrix.Platform.Runtime.Skia.MacOS.ApacheLicenseForever](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.MacOS.ApacheLicenseForever) | `.UseMacOS()` | Metal, software otherwise | macOS on Apple Silicon and Intel |
 
-Every `.Use...()` method is an extension method in the `CodeBrix.Platform.UI.Hosting` namespace, surfaced by the corresponding head package. A head sees only the one that matches its package, so you cannot select the wrong platform by accident. Every one except `UseMacOS()` also has an overload taking a configuration lambda.
+> [!NOTE]
+> There is a seventh, test-only head: [`CodeBrix.Platform.PlayTest.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.PlayTest.ApacheLicenseForever). It is never shipped. A `.PlayTests` test project references it in place of a head package and runs the application offscreen on a fixed virtual screen, with no display server, for UI tests - see [PlayTest](playtest/README.md).
+
+Every `.Use...()` method is an extension method in the `CodeBrix.Platform.UI.Hosting` namespace, surfaced by the corresponding head package. A head sees only the one that matches its package, so you cannot select the wrong platform by accident. Every one also accepts a configuration lambda.
 
 `Build()` returns the concrete host for the selected head - `Win32Host`, `WpfHost`, `X11ApplicationHost`, `WaylandApplicationHost`, `FrameBufferHost` or `MacSkiaHost`, all deriving from `SkiaHost`, which derives from `CodeBrixPlatformHost`. Pattern-match on it to set host properties between `Build()` and `Run()`:
 
@@ -349,7 +352,17 @@ Everything in that lambda is opt-in on purpose, and each piece behaves in a spec
 The macOS head package contains a small native library shipped as a universal binary, so it runs on Apple Silicon and Intel Macs. Rendering is Metal by default with a software fallback.
 
 ```csharp
-ICodeBrixPlatformHostBuilder UseMacOS()          // no configuration overload
+ICodeBrixPlatformHostBuilder UseMacOS()
+ICodeBrixPlatformHostBuilder UseMacOS(Action<MacOSHostBuilder> configure)
+
+// builder (namespace CodeBrix.Platform.UI.Runtime.Skia)
+public class MacOSHostBuilder
+{
+    public MacOSHostBuilder UseSystemAppName(string name);
+        // the application name in the application menu and the Dock
+    public MacOSHostBuilder UseSystemMenuBar(bool enabled = true);
+        // present the window's MenuBar in the macOS system menu bar
+}
 
 // host (namespace CodeBrix.Platform.UI.Runtime.Skia.MacOS)
 public class MacSkiaHost : SkiaHost
@@ -359,7 +372,7 @@ public class MacSkiaHost : SkiaHost
 public enum RenderSurfaceType { Auto, Metal, Software }
 ```
 
-`UseMacOS()` is the one bootstrap call with no configuration overload; configure through `FeatureConfiguration` and through the host after `Build()`. The framework-wide flag is `FeatureConfiguration.Rendering.UseMetalOnMacOS`, a `bool?` whose default of null uses Metal if available and software otherwise.
+The builder carries the two macOS-only options, `.UseMacOS(mac => mac.UseSystemAppName("My App").UseSystemMenuBar())`; both default to off, which keeps the in-window `MenuBar` every other head uses. Rendering is configured through `FeatureConfiguration` and through the host after `Build()`. The framework-wide flag is `FeatureConfiguration.Rendering.UseMetalOnMacOS`, a `bool?` whose default of null uses Metal if available and software otherwise.
 
 **Known limits:** IME text input and initiating drag-and-drop are not implemented, as on every Skia head. Accepting drops works.
 
@@ -373,6 +386,8 @@ Desktop Linux is the interesting decision, and the answer is usually both Linux 
 > Do not expect the Wayland head to run in an X11-only session. It requires a Wayland compositor and fails fast by design when none is present. For an application that must run everywhere on desktop Linux, ship the X11 head - alone, or alongside a Wayland head. Prefer the X11 head where the application depends on touch input or native-view hosting.
 
 The frame-buffer head is a separate decision entirely: add it when you are shipping to an embedded or kiosk device that has no desktop at all.
+
+Android is not one of the six heads, and it is not a Skia head: the same application reaches Googlebooks, phones docked in desktop mode, tablets and phones through [CodeBrix.Android](../libraries/CodeBrix.Android.md), which shows every element with a real Android or Material Components view. Add it when the application should also ship on Android; [15 - Android and Googlebooks](15-android.md) covers the head, the package changes and the build.
 
 Whichever heads you ship, pick the render backend deliberately. GPU paths win for large windows and animation; software Skia is perfectly adequate for form-style UIs and is the ONLY option over SSH, in virtual machines without 3D, and on GPU-less boards. Use `WaylandRenderingBackend.VulkanForced` when you need proof that the GPU path is really in use.
 

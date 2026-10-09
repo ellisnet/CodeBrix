@@ -38,6 +38,7 @@ before it completes. That is expected, not an error.
 | `.BsdLicenseForever` | A BSD license - 2-Clause or 3-Clause, as the library's own page and its packaged `LICENSE` state | Permissive |
 | `.MsplLicenseForever` | Microsoft Public License (Ms-PL) | Permissive |
 | `.ZlibLicenseForever` | zlib License | Permissive |
+| `.PostgreSqlLicenseForever` | PostgreSQL License | Permissive |
 | `.OflLicenseForever` | SIL Open Font License 1.1 | Font license |
 | `.LgplLicenseForever` | GNU Lesser General Public License - version 2.1 or later, or version 3 or later, as stated per library below | Copyleft |
 | `.GplLicenseForever` | GNU General Public License, version 3 only | Copyleft |
@@ -53,15 +54,20 @@ named in the same cell.
 
 | Library | License |
 | --- | --- |
+| [CodeBrix.Android](libraries/CodeBrix.Android.md) | Apache 2.0, for the framework package and every add-in package - including `CodeBrix.Android.SkiaSharp.Views.ApacheLicenseForever` and `CodeBrix.Android.MediaPlayer.ApacheLicenseForever`, whose CodeBrix.Platform counterparts are MIT and LGPL |
 | [CodeBrix.ArgumentParser](libraries/CodeBrix.ArgumentParser.md) | MIT |
 | [CodeBrix.AssemblyTools](libraries/CodeBrix.AssemblyTools.md) | MIT |
 | [CodeBrix.Audio](libraries/CodeBrix.Audio.md) | MIT |
+| [CodeBrix.Audio.Android](libraries/CodeBrix.Audio.Android.md) | Apache 2.0; the CodeBrix.Audio Core package it depends on is MIT |
 | [CodeBrix.Audio.ModestSynth](libraries/CodeBrix.Audio.ModestSynth.md) | MIT, like the CodeBrix.Audio Core package it depends on; the two are published together at the same version |
 | [CodeBrix.Audio.MusicGeneration](libraries/CodeBrix.Audio.MusicGeneration.md) | MIT |
+| [CodeBrix.Audio.MusicGeneration](libraries/CodeBrix.Audio.MusicGeneration.md#the-model-adapters-and-the-model-packages) model packages | Apache 2.0, for `CodeBrix.Audio.MusicGeneration.SkyTNT.ApacheLicenseForever` and `CodeBrix.Audio.MusicGeneration.MuPT.ApacheLicenseForever` - wrapper code and model alike; the CodeBrix.Audio.MusicGeneration package they depend on is MIT |
 | [CodeBrix.Audio.Opus](libraries/CodeBrix.Audio.Opus.md) | BSD 3-Clause; the CodeBrix.Audio Core package it depends on is MIT |
+| [CodeBrix.Audio.Samples.FluidR3Gm](libraries/CodeBrix.Audio.Samples.FluidR3Gm.md) | MIT, for the library and for the FluidR3_GM SoundFont it redistributes, which its author released under the MIT License |
 | [CodeBrix.Compression](libraries/CodeBrix.Compression.md) | MIT |
 | [CodeBrix.Cryptography](libraries/CodeBrix.Cryptography.md) | MIT |
 | [CodeBrix.Docker](libraries/CodeBrix.Docker.md) | MIT |
+| [CodeBrix.Graphics3D.Gltf2](libraries/CodeBrix.Graphics3D.Gltf2.md) | MIT |
 | [CodeBrix.Imaging](libraries/CodeBrix.Imaging.md) | Apache 2.0 |
 | [CodeBrix.Imaging.Drawing](libraries/CodeBrix.Imaging.Drawing.md) | Apache 2.0, for both the Skia-backed and the managed package |
 | [CodeBrix.Json.Extensions](libraries/CodeBrix.Json.Extensions.md) | MIT |
@@ -69,6 +75,8 @@ named in the same cell.
 | [CodeBrix.LilyScheme](libraries/CodeBrix.LilyScheme.md) | LGPL-3.0-or-later - see [Copyleft packages](#copyleft-packages) |
 | [CodeBrix.MarkupParse](libraries/CodeBrix.MarkupParse.md) | MIT |
 | [CodeBrix.NotionApi](libraries/CodeBrix.NotionApi.md) | MIT |
+| [CodeBrix.Ollama.ModelManager](libraries/CodeBrix.Ollama.ModelManager.md) | MIT |
+| [CodeBrix.Ollama.ModelRunner](libraries/CodeBrix.Ollama.ModelRunner.md) | MIT |
 | [CodeBrix.PdfDocuments](libraries/CodeBrix.PdfDocuments.md) | MIT, for all five packages |
 | [CodeBrix.Platform](libraries/CodeBrix.Platform.md) | Apache 2.0, except `CodeBrix.Platform.SkiaSharp.Views.MitLicenseForever` (MIT) and `CodeBrix.Platform.MediaPlayer.LgplLicenseForever` (LGPL-2.1-or-later) |
 | [CodeBrix.Platform.Extensions](libraries/CodeBrix.Platform.Extensions.md) | Apache 2.0 |
@@ -86,18 +94,22 @@ named in the same cell.
 | [CodeBrix.Platform.Unicode](libraries/CodeBrix.Platform.Unicode.md) | Apache 2.0 and Unicode 3.0 - the packaging and wrapper assemblies are Apache 2.0, the bundled ICU binaries and data archive are Unicode 3.0 |
 | [CodeBrix.Plotter](libraries/CodeBrix.Plotter.md) | MIT |
 | [CodeBrix.PolygonTools](libraries/CodeBrix.PolygonTools.md) | MIT and BSL-1.0 - the CodeBrix additions and the combined work are MIT, and the derived geometry code remains under the Boost Software License 1.0 |
+| [CodeBrix.PostgresClient](libraries/CodeBrix.PostgresClient.md) | PostgreSQL License |
 | [CodeBrix.Python](libraries/CodeBrix.Python.md) | MIT |
 | [CodeBrix.Redis](libraries/CodeBrix.Redis.md) | MIT |
+| [CodeBrix.Sdl3](libraries/CodeBrix.Sdl3.md) | MIT and zlib - the managed bindings are MIT, and SDL3, its native binaries and the binding code generated from its headers are zlib; the package ID names zlib |
 | [CodeBrix.ServiceLocator](libraries/CodeBrix.ServiceLocator.md) | Ms-PL |
 | [CodeBrix.SkiaSvg](libraries/CodeBrix.SkiaSvg.md) | MIT |
 | [CodeBrix.Sqlite](libraries/CodeBrix.Sqlite.md) | Apache 2.0 |
 | [CodeBrix.SSH](libraries/CodeBrix.SSH.md) | MIT |
 | [CodeBrix.StyleSheetParse](libraries/CodeBrix.StyleSheetParse.md) | MIT |
 | [CodeBrix.SvgParse](libraries/CodeBrix.SvgParse.md) | Ms-PL |
+| [CodeBrix.Swarm](libraries/CodeBrix.Swarm.md) | MIT, for all three packages |
 | [CodeBrix.Templating](libraries/CodeBrix.Templating.md) | BSD 2-Clause |
 | [CodeBrix.Terminal](libraries/CodeBrix.Terminal.md) | MIT |
 | [CodeBrix.TestMocks](libraries/CodeBrix.TestMocks.md) | Apache 2.0 |
 | [CodeBrix.Texinfo](libraries/CodeBrix.Texinfo.md) | MIT, for both packages |
+| [CodeBrix.TomlParse](libraries/CodeBrix.TomlParse.md) | BSD 2-Clause |
 | [CodeBrix.VideoPlayback](libraries/CodeBrix.VideoPlayback.md) | MIT, for all three packages |
 | [CodeBrix.VideoPlayback.Dav1d](libraries/CodeBrix.VideoPlayback.Dav1d.md) | BSD 2-Clause |
 | [CodeBrix.VideoProcessing](libraries/CodeBrix.VideoProcessing.md) | MIT |

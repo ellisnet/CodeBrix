@@ -6,7 +6,7 @@
 templates, binds them to a .NET object model, and renders them to text.** Templates are written in the
 Scriban template language or in the Liquid template language, and the output is whatever you need
 produced from a model - code generation, HTML pages, e-mail bodies, reports, configuration files, SQL.
-It has no NuGet dependencies and no native code at all, so you use it from any .NET 10 application or
+On .NET 10 it has no NuGet dependencies, and it has no native code at all, so you use it from any .NET 10 application or
 from a CodeBrix.Platform application.
 
 | | |
@@ -14,7 +14,7 @@ from a CodeBrix.Platform application.
 | **Repository** | [ellisnet/CodeBrix.Templating](https://github.com/ellisnet/CodeBrix.Templating) |
 | **Packages** | [`CodeBrix.Templating.BsdLicenseForever`](https://www.nuget.org/packages/CodeBrix.Templating.BsdLicenseForever) |
 | **License** | BSD 2-Clause; see [License](#license) |
-| **Requires** | .NET 10 or later. No NuGet dependencies, no native libraries, no operating-system setup |
+| **Requires** | .NET 10 or later. No NuGet dependencies on .NET 10, no native libraries, no operating-system setup |
 | **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application |
 | **Platforms** | Every platform .NET 10 supports, including trimmed and NativeAOT builds |
 
@@ -192,7 +192,7 @@ invariant default. A fresh `TemplateContext` starts with a `StringBuilderOutput`
 ### Safety limits
 
 ```csharp
-int      LoopLimit            { get; set; }   // 1000 iterations per loop
+int      LoopLimit            { get; set; }   // 1000 iterations, cumulative across nested loops
 int?     LoopLimitQueryable   { get; set; }   // null = use LoopLimit
 int      RecursiveLimit       { get; set; }   // 100 nested evaluations
 int      ObjectRecursionLimit { get; set; }   // 20
@@ -202,7 +202,8 @@ CancellationToken CancellationToken { get; set; }
 void     CheckAbort()                         // throws ScriptAbortException
 ```
 
-Exceeding any of the four limits raises `ScriptRuntimeException`; setting the cancellation token makes
+Exceeding the loop, recursion or object-recursion limit raises `ScriptRuntimeException`, while reaching
+`LimitToString` truncates by default (`OnStringLimit` set to `ScriptLimitBehavior.Throw` raises instead); setting the cancellation token makes
 the engine raise `ScriptAbortException` at the next `CheckAbort` point. Alongside them sit the behavior
 switches - `StrictVariables` (false), `EnableRelaxedMemberAccess` (true), `EnableRelaxedTargetAccess`
 (false), `EnableRelaxedFunctionAccess` (false), `EnableRelaxedIndexerAccess` (true), `EnableNullIndexer`
@@ -298,7 +299,7 @@ A new `TemplateContext` installs `BuiltinFunctions` as its bottom-most global sc
 | --- | --- |
 | `array` | add, add_range, any, compact, concat, contains, cycle, each, filter, first, insert_at, join, last, limit, map, offset, remove_at, reverse, size, sort, uniq |
 | `string` | append, base64_decode/encode, capitalize, capitalizewords, contains, downcase, empty, ends_with, equals_ignore_case, escape, handleize, hmac_sha1/256/512, index_of, literal, lstrip, md5, pad_left, pad_right, pluralize, prepend, remove, remove_first, remove_last, replace, replace_first, rstrip, sha1/256/512, size, slice, slice1, split, starts_with, strip, strip_newlines, to_int, to_long, to_float, to_double, truncate, truncatewords, upcase, whitespace |
-| `math` | abs, ceil, divided_by, floor, format, is_number, minus, modulo, plus, power-free arithmetic helpers, product, random, round, times, uuid |
+| `math` | abs, ceil, divided_by, floor, format, is_number, minus, modulo, plus, random, round, times, uuid |
 | `date` | now, utc_now, the add_* family, parse, parse_to_string, to_string, `date.format` and the read-only `date.default_format` |
 | `timespan` | zero, from_days, from_hours, from_minutes, from_seconds, from_milliseconds, parse |
 | `object` | default, eval, eval_template, format, from_json, to_json, has_key, has_value, keys, values, size, typeof, kind |
@@ -655,7 +656,7 @@ string text = formatted.ToString();         // "x + 2"
 
 CodeBrix.Templating is not a CodeBrix.Platform add-in and has no UI surface: it is a runtime library
 that produces text. A CodeBrix.Platform application references it from its `.Core` library exactly as
-any other .NET project would, and the deployment story is as short as it gets - no NuGet dependencies,
+any other .NET project would, and the deployment story is as short as it gets - no NuGet dependencies on .NET 10,
 no native libraries, no operating-system restrictions, and it runs on every platform .NET 10 supports.
 
 The engine needs no runtime code generation, so it works under trimming and NativeAOT. Avoid the

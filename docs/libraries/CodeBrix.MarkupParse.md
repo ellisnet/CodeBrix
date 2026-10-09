@@ -212,11 +212,11 @@ IElement element = document.QuerySelector("div.content");
 IHtmlCollection<IElement> elements = document.QuerySelectorAll("li.blue");
 ```
 
-`IDocument` and `IElement` both implement `IParentNode`, which declares `QuerySelector(string)` and `QuerySelectorAll(string)` directly. The typed generic forms, the `INodeList` forms and the pre-compiled `ISelector` forms come from `QueryExtensions` in `CodeBrix.MarkupParse.Dom`, which also supplies `GetElementsByClassName`, `GetElementsByTagName` and a scope-node parameter.
+`IDocument` and `IElement` both implement `IParentNode`, which declares `QuerySelector(string)` and `QuerySelectorAll(string)` directly. The typed generic forms come from `ParentNodeExtensions`, and the `INodeList` forms and the pre-compiled `ISelector` forms from `QueryExtensions`, both in `CodeBrix.MarkupParse.Dom`; `QueryExtensions` also supplies `GetElementsByClassName`, `GetElementsByTagName` and a scope-node parameter.
 
 The selector engine supports type, class and ID selectors; attribute selectors (`[href]`, `[type="text"]`, `[class~="foo"]`, `[lang|="en"]`, `[href^="https"]`, `[src$=".png"]`, `[title*="hello"]`); pseudo-classes (`:first-child`, `:last-child`, `:nth-child(2n+1)`, `:nth-of-type(odd)`, `:not(.excluded)`, `:empty`, `:checked`, `:enabled`, `:disabled`, `:scope` and more); pseudo-elements (`::before`, `::after`, `::first-line`, `::first-letter`); the combinators (descendant, child `>`, adjacent sibling `+`, general sibling `~`); compound selectors; selector lists; the universal selector `*`; and namespace selectors. Interaction-state pseudo-classes such as `:hover` need a rendering engine, so they never match here.
 
-`SelectorExtensions` adds helper methods over any `IEnumerable<T>` of nodes: `Eq`, `Gt`, `Lt`, `Even`, `Odd`, `Filter`, `Not`, `Children`, `Siblings`, `Parent`, `Next` and `Previous`. Each of `Filter`, `Not`, `Children`, `Siblings`, `Parent`, `Next` and `Previous` also has an overload taking a pre-parsed `ISelector`, plus `Is<T>(ISelector)`.
+`SelectorExtensions` adds helper methods over any `IEnumerable<T>` of nodes: `Eq`, `Gt`, `Lt`, `Even`, `Odd`, `Filter`, `Not`, `Children`, `Siblings`, `Parent`, `Next` and `Previous`. Each of `Not`, `Children`, `Siblings`, `Parent`, `Next` and `Previous` also has an overload taking a pre-parsed `ISelector`, plus `Is<T>(ISelector)`.
 
 ### Traversing and editing the tree
 
@@ -264,7 +264,7 @@ var form = document.QuerySelector<IHtmlFormElement>("form");
 var anchors = document.QuerySelectorAll<IHtmlAnchorElement>("a");
 ```
 
-Watch the non-obvious names: `<br>` is `IHtmlBreakRowElement`, `<iframe>` is `IHtmlInlineFrameElement`, `<optgroup>` is `IHtmlOptionsGroupElement`, `<ol>` and `<ul>` are `IHtmlOrderedListElement` and `IHtmlUnorderedListElement`, `<li>` is `IHtmlListItemElement`, `<blockquote>` and `<q>` are `IHtmlQuoteElement`, `<ins>` and `<del>` are `IHtmlModElement`, `<hr>` is `IHtmlHrElement`, and an unrecognized tag is `IHtmlUnknownElement`. Alongside the `IHtml*` set there are typed SVG interfaces in `CodeBrix.MarkupParse.Svg.Dom` and MathML interfaces in `CodeBrix.MarkupParse.Mathml.Dom`, reached the same way.
+Watch the non-obvious names: `<br>` is `IHtmlBreakRowElement`, `<iframe>` is `IHtmlInlineFrameElement`, `<optgroup>` is `IHtmlOptionsGroupElement`, `<ol>` and `<ul>` are `IHtmlOrderedListElement` and `IHtmlUnorderedListElement`, `<li>` is `IHtmlListItemElement`, `<blockquote>` and `<q>` are `IHtmlQuoteElement`, `<ins>` and `<del>` are `IHtmlModElement`, `<hr>` is `IHtmlHrElement`, and an unrecognized tag is `IHtmlUnknownElement`. Alongside the `IHtml*` set there are typed SVG interfaces in `CodeBrix.MarkupParse.Svg.Dom`, reached the same way; MathML elements surface only as the public `MathElement` class, with no typed interfaces.
 
 <details>
 <summary>The complete set of typed element interfaces</summary>

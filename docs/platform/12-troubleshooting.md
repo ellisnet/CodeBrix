@@ -70,9 +70,9 @@ LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libfreetype.so.6 dotnet run ...
 
 This is a SkiaSharp native-asset packaging issue, not a CodeBrix.Platform issue.
 
-### The host builder throws before the window exists
+### The framework's startup messages are missing from the log
 
-`App.InitializeLogging()` must be called from `Main` before `CodeBrixPlatformHostBuilder.Create()`, in every head. Calling the builder first is the one ordering mistake in `Program.Main` that the framework cannot recover from.
+`App.InitializeLogging()` must be called from `Main` before `CodeBrixPlatformHostBuilder.Create()`, in every head. Logging wired after the host is built misses the framework's own startup messages.
 
 ## The window is blank, black or undecorated
 
@@ -145,7 +145,7 @@ What to do, in order: read the member name out of the message; look for an imple
 
 Some absences are architectural rather than incomplete, and no amount of configuration reaches them:
 
-- There is no mobile target and no WebAssembly or browser target, ever.
+- There is no mobile head in CodeBrix.Platform itself - Android is served by [CodeBrix.Android](15-android.md) - and no WebAssembly or browser target, ever.
 - Vulkan on X11 is not available to consumers: the renderer sits behind an internal flag with no public API, and `X11RenderingBackend` has no Vulkan member.
 - 2D and 3D canvases, Lottie, SVG, media, audio, video, an embedded browser, a code editor, a terminal, charts, flex layout and a settings store are not in the core packages at all. They are separate add-in packages, listed in [08 - Add-ins](08-add-ins.md).
 
@@ -198,10 +198,10 @@ The related settings have different timing rules, and getting them the wrong way
 
 - `Font.DefaultTextFontFamily` must be set before the first text is measured - the `App` constructor is the place.
 - `Font.SymbolsFont`, the font behind `SymbolIcon` glyphs, must be set AFTER `App.InitializeComponent()`.
-- `Font.FallbackFontFamilies` lists the fonts tried, in order, for a character the requested font lacks - before the host machine's fonts.
-- `Font.RestrictToEmbeddedFonts` confines resolution to the fonts the application ships.
+- `Font.FallbackFontFamilies` lists application-shipped fonts tried, in order, for a character the requested font lacks - before the host machine's fonts. Set it before the first text is measured.
+- `Font.RestrictToEmbeddedFonts` confines resolution to the fonts the application ships. Set it before the first text is measured; resolved fonts are cached, so a later change leaves already-resolved text as it was.
 
-A character no font can supply renders as the font's `.notdef` glyph - blank or a box, depending on the font. The framework never substitutes the host system's fonts unless `FallbackFontFamilies` is left empty and the application's own fonts have no glyph. If the first screen re-lays-out as the font arrives, preload it:
+By default, a character the requested font has no glyph for comes from the framework's symbols font (`FeatureConfiguration.Font.SymbolsFont`) if that has it, then from the first `FallbackFontFamilies` entry that has it, then from the host machine's installed fonts; only a character none of them has renders as the font's `.notdef` glyph - blank or a box, depending on the font. So text that looks right on a development desktop can still show gaps on a device that has only the application's fonts. With `FeatureConfiguration.Font.RestrictToEmbeddedFonts = true` the host's fonts are never consulted, and anything the application's own fonts lack renders as `.notdef`; the PlayTest head always runs that way, and the frame-buffer emulated head does when its launch contract asks for font isolation. Turn the restriction on locally to see the gaps a device would show, and fix them by shipping the fonts the text needs. If the first screen re-lays-out as the font arrives, preload it:
 
 ```csharp
 await FontFamilyHelper.PreloadAsync(

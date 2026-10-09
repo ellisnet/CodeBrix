@@ -306,8 +306,9 @@ follows it, which is usually right and is always visible through `AlignmentIsFal
 > part as trustworthy and anything else as advisory. The value is exposed and overridable per stem and
 > per track, and `MeasureAlignment = false` turns the whole thing off.
 
-The estimator is public on its own: `MidiAudioAlignment.Estimate(...)` takes note-on times and mono or
-interleaved audio and returns a `MidiAudioAlignmentResult` carrying `OffsetSeconds`, `Confidence`,
+The estimator is public on its own: `MidiAudioAlignment.Estimate(...)` takes note-on times (or a
+`MidiSequence`) and mono audio, `MidiAudioAlignment.EstimateInterleaved(...)` takes interleaved audio
+and a channel count, and both return a `MidiAudioAlignmentResult` carrying `OffsetSeconds`, `Confidence`,
 `IsReliable` and `CandidatePeakCount`, and `MidiAudioAlignment.GetNoteOnTimesSeconds(MidiSequence)`
 supplies the first argument. Call it on a worker: it is far too slow for a render callback.
 
@@ -328,8 +329,12 @@ becomes a MIDI-only track; a stem with MIDI, no recording and no instrument is n
 
 | `SunoPlayerOptions` member | What it does |
 | --- | --- |
+| `InstrumentLibraryName` | The registered instrument library every MIDI stem plays through, by name - for example `"ModestSynthGm"` or `"FluidR3Gm"`. Resolved when the player is built, so an unknown name fails on that line. The one-line way to change what the whole song sounds like |
+| `InstrumentLibrary` | The same, as an instance - a library that was never registered. Wins over `InstrumentLibraryName` |
+| `StemInstruments` | An instrument for one named stem, overriding the library for that stem alone; keyed by stem name |
+| `MidiStems` | Which stems start on their transcription instead of their recording - `SunoStemSelection.EverythingBut("Vocals", "Backing Vocals")` is the usual answer. Null leaves every track on its recording |
 | `InstrumentFactory` | `Func<SunoStem, int, IMidiSynthesizer>`: build the instrument for one stem at one sample rate. It may be called more than once and from a worker, so never hand out the same synthesizer twice - share the SoundFont or the SFZ instrument behind them instead |
-| `GeneralMidiSoundFontPath` | Used when there is no factory. Falls back to the path on `SunoLoadOptions`, so a song loaded with one needs no player options at all. The SoundFont is loaded once through a `SoundFontCache` and shared by every track |
+| `GeneralMidiSoundFontPath` | Used when there is no instrument library and no factory. Falls back to the path on `SunoLoadOptions`, so a song loaded with one needs no player options at all. The SoundFont is loaded once through a `SoundFontCache` and shared by every track |
 | `SoundFontCache` | Which cache to load it through; null uses `SunoPlayerOptions.SharedSoundFonts`, a process-wide one you can `Clear()` |
 | `IncludeMidiSources` | Attach the MIDI at all. True by default. A track holding two sources renders both on every block, which is what makes a switch seamless and is also the main cost; turn it off for a player that will only ever play the recordings |
 | `ApplyAlignmentOffsets` | True by default |
@@ -344,7 +349,10 @@ licensed, may be redistributed with your application, and covers all 128 program
 drum kit that a stems export's program numbers refer to. TimGM6mb is smaller and is what many Linux
 distributions install, but it is GPL - nothing in this family ships it, no fixture references it, and
 you should not put it in a package either. Point the loader or the player at whichever file **your**
-application is licensed to distribute.
+application is licensed to distribute. The
+[CodeBrix.Audio.Samples.FluidR3Gm](../CodeBrix.Audio.Samples.FluidR3Gm.md) package carries FluidR3_GM,
+lands it in the output folder at build time, and reports its location in
+`FluidR3GmInstrumentLibrary.SoundFontPath`.
 
 Percussion goes to channel 10 - a stems export writes its drum and percussion parts there already -
 and those parts get the percussion rule, because their notes are written with no length at all.

@@ -61,7 +61,7 @@ A bounded star cell is the recommended host: the grid - columns by rows - follow
 
 ### The three wires
 
-Everything a transport needs is three members. `InputEmitted` carries VT-encoded keyboard input, and pasted text, as the string a PTY master would receive - encode it as UTF-8 before writing to a byte transport. `GridResized` reports `(columns, rows)` whenever the grid changes with the control size or the font, and fires only when the numbers actually change. `Feed` pushes host output back onto the screen from any thread.
+Everything a transport needs is three members. `InputEmitted` carries VT-encoded keyboard input, and pasted text, as the string a PTY master would receive - encode it as UTF-8 before writing to a byte transport. `GridResized` reports `(columns, rows)` whenever the grid changes with the control size or the font, and fires only when the numbers actually change. It also fires the first time content scrolls, because the scrollbar appears and takes a column or two from the grid. `Feed` pushes host output back onto the screen from any thread.
 
 ```mermaid
 flowchart LR
@@ -300,6 +300,8 @@ TerminalControl : Control
             Feed(byte[] data, int length)  any thread; copies; bytes
             Reset()                    RIS
             GrabFocus()                keyboard focus
+            GetVisibleLines()          UI thread; the shown rows' text
+            GetText()                  UI thread; scrollback + screen
 ```
 
 </details>

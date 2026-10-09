@@ -5,22 +5,26 @@
 **CodeBrix.Platform.GameEngine is a fully managed, cross-platform 2D and 2.5D game engine for .NET:
 tile maps, tilesheets, sprites, layered scenes, cameras and views, animation, physics and collision,
 input, audio, a music system, save and load, and a global pause that parks the whole engine at
-near-zero CPU.** The repository publishes four packages with distinct jobs. The engine package is the
-game engine itself, and one reference brings both of its assemblies: the platform-agnostic engine core
-and the host layer that runs it on CodeBrix.Platform across all six heads. The other three are optional
-add-ons, each kept separate so that a game that does not use it does not inherit its dependencies: the
-gamepad package adds game controllers through SDL2, the Kenney assets package reads Kenney asset packs
-straight from their downloaded zips, and the generated music package plays endless generated music
-through [CodeBrix.Audio.MusicGeneration](CodeBrix.Audio.MusicGeneration.md).
+near-zero CPU.** The repository publishes the engine package and a set of optional add-on
+packages. The engine package is the game engine itself, and one reference brings both of its
+assemblies: the platform-agnostic engine core and the host layer that runs it on CodeBrix.Platform
+across all six heads.
+Each add-on is kept separate so that a game that does not use it does not inherit its dependencies, and
+each has a page of its own in this section: [gamepads](gameengine/gamepads.md) through SDL2,
+[Kenney assets](gameengine/kenney-assets.md) read straight from the zips downloaded from kenney.nl,
+[generated music](gameengine/generated-music.md) that an AI model writes while the game runs, through
+[CodeBrix.Audio.MusicGeneration](CodeBrix.Audio.MusicGeneration.md), and
+[cards and dice](gameengine/cards-and-dice.md) - decks, piles, dice and an animated tabletop, with the
+artwork built in - for card, dice and board-style games.
 
 | | |
 | --- | --- |
 | **Repository** | [ellisnet/CodeBrix.Platform.GameEngine](https://github.com/ellisnet/CodeBrix.Platform.GameEngine) |
-| **Packages** | [`CodeBrix.Platform.GameEngine.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.MitLicenseForever) - the engine<br>[`CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever) - optional gamepad support<br>[`CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever) - optional Kenney asset pack support<br>[`CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever) - optional generated music |
-| **License** | MIT for the engine, Kenney assets and generated music packages; `MIT AND Zlib` for the gamepad package; see [License](#license) |
+| **Packages** | [`CodeBrix.Platform.GameEngine.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.MitLicenseForever) - the engine<br>[`CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever) - optional gamepad support<br>[`CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever) - optional Kenney asset pack support<br>[`CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever) - optional generated music<br>[`CodeBrix.Platform.GameEngine.CardsAndDice.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.CardsAndDice.MitLicenseForever) - optional cards, dice and tabletop |
+| **License** | MIT for the engine, Kenney assets, generated music and cards and dice packages; `MIT AND Zlib` for the gamepad package; see [License](#license) |
 | **Requires** | .NET 10 or later, and a CodeBrix.Platform application with exactly one head package per executable project. Gamepads on Linux need the system SDL2 runtime |
 | **Use it from** | A CodeBrix.Platform application. The engine core has no UI-framework dependency, so it also runs headless in tests |
-| **Platforms** | All six CodeBrix.Platform heads: Windows Win32-Skia, Windows WPF-Skia, Linux X11, Linux Wayland, Linux frame buffer and macOS |
+| **Platforms** | All six CodeBrix.Platform heads: Windows Win32-Skia, Windows WPF-Skia, Linux X11, Linux Wayland, Linux frame buffer and macOS. Not Android: CodeBrix.Android does not support the GameEngine canvas; see [Android - Games](../platform/15-android.md#games) |
 
 ## What it does
 
@@ -58,64 +62,31 @@ through [CodeBrix.Audio.MusicGeneration](CodeBrix.Audio.MusicGeneration.md).
   (OpenGL or OpenGL ES on the Windows, X11, Wayland and frame-buffer heads, Metal on macOS).
 - A UI-agnostic core with a render-surface-adapter seam, so a scene can be exercised headless.
 
-### The gamepad package
+### The add-on packages
 
-- Buttons, sticks, triggers, device identity and hotplug, from one implementation that covers all six
-  heads.
-- One call attaches it - `Engine.Instance.InitializeSdlGamepadManager()` - and from then on the engine
-  refreshes controller state every cycle or every tic and raises its own gamepad events. A game never
-  calls `Update()` itself.
-- SDL2 is initialized with the game controller subsystem only, which starts no video subsystem: it
-  never creates a window, never opens an X11 or Wayland display, and never touches Win32 or AppKit. It
-  is a headless joystick backend, which is why the frame-buffer head gets controllers on the same terms
-  as the desktop heads.
-- Nothing in it throws when SDL2 or a controller is missing. Absence is reported through inspectable
-  properties and one log line, because gamepad support is an enhancement to a game that is already
-  playable with keyboard and mouse.
-- The package carries SDL2 native binaries for Windows and macOS. On Linux it uses the system SDL2.
+Each add-on below has a page of its own.
 
-### The Kenney assets package
-
-- Kenney asset packs read where they lie, from the downloaded zips or from extracted folders: nothing
-  is unpacked, renamed or repacked, and the package carries no art of its own.
-- One call attaches it - `Engine.Instance.UseKenneyAssets(paths)` - and from then on every asset in
-  those packs has a key, such as `kenney:pixel-platformer/Tiles/tile_0001`, that the engine's asset
-  provider registry turns into an engine object.
-- Images, sprite atlases, audio, fonts, SVG, Tiled maps and glTF models all arrive as ordinary engine
-  objects: tilesheets, audio resources, typefaces, scene layers imported from a tile map, and models
-  either as data or as sprite frames pre-rendered at load time.
-- `RegisterKenneyAssets` is the form for registration that can run more than once: it skips a pack
-  already registered and reports per path whether it was read, already registered, missing or
-  unreadable.
-- Every pack carries a ready-made credit line for a credits screen (`CreditLine`, and `CreditLines` for
-  all of them).
-- `CheckKeys` checks a game's hand-written keys against the catalog without loading anything and
-  reports the missing ones, `GetKeyCatalog` writes a readable listing of every key by pack with the
-  frame names inside each sprite atlas, and a key that fails to load through the engine's registry
-  names its closest real keys in a "Did you mean" message.
-- No native prerequisite: zip reading, decoding and the model renderer are managed code, so a
-  pre-rendered model sheet needs no GPU and works headless.
-
-### The generated music package
-
-- Endless in-game music generated while the game runs, through
-  [CodeBrix.Audio.MusicGeneration](CodeBrix.Audio.MusicGeneration.md): a model writes MIDI and an
-  instrument library plays it.
-- One call starts it - `Engine.Instance.UseGeneratedMusic(options)` - and the music fades in and never
-  ends. Every `GeneratedMusicOptions` property is optional; among them are the generator, the
-  instrument library, a preset or character words, a tempo, a seed, the seam crossfade and the fade-in.
-- It plays on the engine's music bus, so fades, crossfades, ducking, stingers, the music volume slider
-  and the global engine pause work on it exactly as on a music file. It opens no audio device of its
-  own.
-- `FollowUp` changes the music for a new level or a boss at a bar line without stopping it; calling
-  `UseGeneratedMusic` again switches the model, the instrument library or any session setting.
-- It registers no model and no instrument library: those are the game's choices, one `Register()` line
-  each. With no model registered a recorded piece plays in its place and the engine log says so; with
-  no instrument library there is no sound, the provider reports a fault naming the fix, and the game
-  runs on.
-- Test interfaces for the music stack: the provider is an `IGeneratedMusicSession`, starting one goes
-  through `IGeneratedMusicStarter`, and the engine's `MusicManager` is an `IMusicManager`, so a game's
-  music policy is unit-tested with scripted fakes and no model or audio device.
+- **[Gamepads](gameengine/gamepads.md)** - buttons, sticks, triggers, device identity and hotplug through
+  SDL2 on all six heads, frame buffer included, attached with one call -
+  `Engine.Instance.InitializeSdlGamepadManager()` - and refreshed by the engine every cycle or tic.
+  Nothing in it throws when SDL2 or a controller is missing.
+- **[Kenney assets](gameengine/kenney-assets.md)** - the asset bundles downloaded from kenney.nl, read
+  where they lie: one call - `Engine.Instance.UseKenneyAssets(paths)` - gives every image, sprite atlas,
+  sound, font, SVG, Tiled map and glTF model in them a key, such as
+  `kenney:pixel-platformer/Tiles/tile_0001`, that the engine's asset-provider registry turns into a
+  tilesheet, an audio resource, a typeface, scene layers or a model. Credit lines, a key checker and a key
+  catalog come with it.
+- **[Generated music](gameengine/generated-music.md)** - endless music that an AI model writes while the
+  game runs, through [CodeBrix.Audio.MusicGeneration](CodeBrix.Audio.MusicGeneration.md): one call -
+  `Engine.Instance.UseGeneratedMusic(options)` - starts it on the engine's music bus, where fades, ducking,
+  stingers, the music slider and the global pause apply as on any track, and `FollowUp` changes it for a
+  new level or a boss at a bar line without stopping it.
+- **[Cards and dice](gameengine/cards-and-dice.md)** - cards, decks, piles and dice on an animated
+  tabletop, for card, dice and board-style games: one call -
+  `Engine.Instance.UseCardsAndDice(host, view, bounds)` - puts a table on a view, and shuffling, dealing,
+  flipping, rolling, selection and drag-and-drop all animate while every outcome is decided once, up
+  front, by the logic. Playing cards, historical tarot cards, card backs, dice and symbols are embedded
+  in the package.
 
 ```mermaid
 flowchart LR
@@ -127,12 +98,15 @@ flowchart LR
   Pads[Gamepad package] --> Engine
   Kenney[Kenney assets package] --> Engine
   Music[Generated music package] --> Engine
+  Cards[Cards and dice package] --> Engine
 ```
 
 Both the engine core and the host assembly ship in the engine package; there is no separate host
-package. Each add-on plugs into a seam the core defines: the gamepad package fills the gamepad seam and
-takes the engine package as its only automatic dependency, the Kenney assets package fills the
-asset-provider seam, and the generated music package fills the streaming-music-provider seam.
+package. Three of the add-ons plug into a seam the core defines: the gamepad package fills the gamepad
+seam and takes the engine package as its only automatic dependency, the Kenney assets package fills the
+asset-provider seam, and the generated music package fills the streaming-music-provider seam. The cards
+and dice package builds its table on the engine's draw lists, mouse input and pause-safe time, and
+carries a second assembly that embeds its artwork.
 
 ## When to use it
 
@@ -150,10 +124,18 @@ and the [Graphics3DGL add-in](../platform/add-ins/Graphics3DGL.md) gives you a G
 or raw OpenGL. [09 - Graphics, media and vision](../platform/09-graphics-media-and-vision.md) compares
 all of them side by side.
 
+Some games get most of the way from an add-on. A card game, a dice game or a board game whose turns are
+a roll and a choice of cards starts from [cards and dice](gameengine/cards-and-dice.md), which owns the
+table, its motion and its artwork and leaves the game its rules. A game built on downloaded Kenney art,
+sound and fonts starts from [Kenney assets](gameengine/kenney-assets.md). A game that wants music from the
+first screen to the last, with no soundtrack to compose or ship, adds
+[generated music](gameengine/generated-music.md). And a game that should also answer a controller adds
+[gamepads](gameengine/gamepads.md).
+
 What the engine package deliberately does not do:
 
 - No gamepad backend. It defines `IGamepadManager<T>`, `IGamepadAdapter` and the `GamepadEventPoller`;
-  the SDL2 implementation is the separate gamepad package.
+  the SDL2 implementation is the separate [gamepad package](gameengine/gamepads.md).
 - No 3D rendering. GPU rendering rasterizes the same 2D and 2.5D scene on the GPU and reads it back; it
   is not a 3D pipeline.
 - The software-rendered mode is CPU-only. There is no GPU presentation path for it.
@@ -176,13 +158,7 @@ What the engine package deliberately does not do:
 - No Windows OpenGL driver. GPU rendering on a machine without one falls back to CPU rendering and logs
   a warning.
 
-What the gamepad package deliberately does not do: no rumble, haptics, LED, gyro, touchpad, battery
-level or audio routing - the bound surface is buttons, sticks, triggers, identity and hotplug. No raw
-joystick mode, so devices SDL2 does not recognize as game controllers are not surfaced and there is no
-API for custom mapping strings. No rebinding or profile UI; button identity is reported, and mapping a
-game action to a button is the game's job. No windowing, rendering, audio, keyboard or mouse, because
-CodeBrix.Platform owns all of that. It does not pump the SDL2 event queue, so no second event loop runs
-alongside the CodeBrix.Platform one. And it neither drives itself nor disposes itself with the engine.
+Each add-on page says what that add-on deliberately leaves out.
 
 ## Getting started
 
@@ -192,10 +168,14 @@ The engine package goes in the shared game library, once:
 dotnet add package CodeBrix.Platform.GameEngine.MitLicenseForever
 ```
 
-Add the gamepad package to the same library only when the game wants controllers:
+Add an add-on package to the same library only when the game uses it; each add-on page has a getting
+started section of its own:
 
 ```bash
-dotnet add package CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever
+dotnet add package CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever          # gamepads
+dotnet add package CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever    # Kenney asset packs
+dotnet add package CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever  # generated music
+dotnet add package CodeBrix.Platform.GameEngine.CardsAndDice.MitLicenseForever    # cards and dice
 ```
 
 On Linux, gamepads have exactly one prerequisite, and it is the runtime package rather than the
@@ -203,14 +183,6 @@ development one:
 
 ```bash
 sudo apt install libsdl2-2.0-0
-```
-
-Add the Kenney assets package when the game loads Kenney asset packs, and the generated music package
-when it plays generated music:
-
-```bash
-dotnet add package CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever
-dotnet add package CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever
 ```
 
 The shared library that holds the game looks like this. Every executable head project references it and
@@ -249,7 +221,8 @@ No version pinning is needed in the consuming project for any of these.
 - `Microsoft.Extensions.Configuration` (plus `.Binder` and `.Json`), and
   `Microsoft.Extensions.Logging.Console` and `.Debug`
 
-The gamepad package's only automatic dependency is the engine package.
+Each add-on package takes the engine package as an automatic dependency; its own page names anything
+else it brings.
 
 </details>
 
@@ -303,18 +276,7 @@ using CodeBrix.Platform.GameEngine.Host.Input.Touch;    // CodeBrixTouchInputAda
 using CodeBrix.Platform.GameEngine.Host.Threading;      // CodeBrixPlatformUiDispatcher
 ```
 
-The gamepad package adds three, of which application code uses one:
-
-```csharp
-using CodeBrix.Platform.GameEngine.Sdl2;           // the ONE entry point:
-                                                   // InitializeSdlGamepadManager
-using CodeBrix.Platform.GameEngine.Sdl2.Gamepad;   // SdlGamepadManager,
-                                                   // SdlGamepadAdapter,
-                                                   // SdlGamepadButtons,
-                                                   // SdlGamepadUnavailableCause
-using CodeBrix.Platform.GameEngine.Sdl2.Native;    // raw SDL2 P/Invoke;
-                                                   // NOT for app code
-```
+Each add-on page lists the namespaces that add-on adds.
 
 The one control a game renders into is `GameSurfaceCanvas`, placed in a XAML page:
 
@@ -364,7 +326,7 @@ one.
 
 ## Key concepts
 
-### The four packages and the two assemblies
+### The engine package, its assemblies and the add-ons
 
 The engine package ships two assemblies. `CodeBrix.Platform.GameEngine.dll` is the engine core: it has
 no UI-framework dependency, its rendering seam is a SkiaSharp `SKImage` plus the
@@ -374,10 +336,14 @@ input adapters, the UI dispatcher, and the game-host base classes, and it runs t
 CodeBrix.Platform across all six heads. One `PackageReference` brings both; there is no separate host
 package.
 
-Each of the three add-on packages takes an ordinary reference on the engine package, not a lock-step
-pairing: each is versioned and published independently of the engine. As a consumer you take the
-latest of each; there is no matching-versions rule to observe. The Kenney assets package also brings a
-managed glTF model reader, and the generated music package brings the music generation stack.
+Each add-on package takes an ordinary reference on the engine package, not a lock-step pairing: each is
+versioned and published independently of the engine. As a consumer you take the latest of each; there is
+no matching-versions rule to observe. The Kenney assets package also brings a managed glTF model reader,
+and the generated music package brings the music generation stack. The cards and dice package carries
+two assemblies of its own: `CodeBrix.Platform.GameEngine.CardsAndDice.dll`, the API, and
+`CodeBrix.Platform.GameEngine.CardsAndDice.Assets.dll`, which embeds the artwork, the optional sounds and
+the asset catalog as resources. The second assembly is packed inside the cards and dice package and is
+never published on its own, so one package reference brings both.
 
 ### The two hosting modes
 
@@ -429,12 +395,12 @@ before the engine is disposed.
 `StartTimerDriven(uiContext)` plus a platform timer calling `Engine.Instance.Tick()` replaces the
 background thread. `Initialize` also accepts the keyboard, mouse, touch and gamepad adapters directly.
 
-The instance exposes `IsInitialized`, `IsRunning`, `IsPaused`, `IsDisposed`, `CyclesPerSecond`,
+The instance exposes `IsInitialized`, `IsInitializing`, `IsRunning`, `IsPaused`, `IsDisposing`, `IsDisposed`, `CyclesPerSecond`,
 `FramesPerSecond`, `TotalTicksEngineRunning`, `TotalSecondsEngineRunning`, `Configuration`, `State`,
 `Managers`, `Input`, `UiDispatcher`, `EngineDispatcher` and `LastFrameBeforePause`, plus the static
 `Engine.Logger`. Its events are `PreInitialization`, `PostInitialization`, `InitializationComplete`,
 `BeforeBackgroundTasksExecute`, `AfterBackgroundTasksExecute`, `BeforeFrameRender`, `AfterFrameRender`,
-`CPSCalculated`, `Paused`, `Resumed`, `Disposing` and `Disposed`.
+`FixedUpdate`, `AfterFixedUpdates`, `CPSCalculated`, `Paused`, `Resumed`, `Disposing` and `Disposed`.
 
 ### The cycle, and what runs how often
 
@@ -645,8 +611,7 @@ heavy blending, scaling and rotation, or full-surface shader effects, since SkSL
 plain tile blit may not benefit.
 
 Under GPU rendering the full surface is re-rendered every frame - there is no dirty-rectangle path, and
-`DirectDrawing.ForceRefresh()` is a no-op. `Scene.UsesDirtyRegionRendering` reports which regime a scene
-is in. `EngineConfiguration.MsaaSampleCount` applies, and `CPSCalculated` reports the rendered GPU frame
+`DirectDrawingBase.ForceRefresh()` is a no-op. `EngineConfiguration.MsaaSampleCount` applies, and `CPSCalculated` reports the rendered GPU frame
 rate through `GpuFps`. `RenderBackbufferPostScene` and a custom `DirectDrawingBase.OnDraw` run on the UI
 thread with the `GRContext` current, so never marshal that canvas elsewhere and keep `OnDraw` a pure
 function of engine time and game state.
@@ -991,8 +956,8 @@ and `Cancel()`.
 There is one effect per target per channel, and the channels are transform (slides and earthquake),
 opacity (fades), reveal (fill and erase) and zoom. Running a second effect on the same target and
 channel replaces the first without restoring its state, whereas canceling or disposing the host does
-restore it. An effect instance runs once. Every constructor in the hierarchy is `private protected`, so
-the set of effect types is closed: use the `FadeEffect`, `SlideEffect`, `WipeEffect` and `ZoomEffect`
+restore it. An effect instance runs once. The base classes' constructors are `private protected` - the
+sealed effects such as `FadeInEffect` have public ones - so the set of effect types is closed: use the `FadeEffect`, `SlideEffect`, `WipeEffect` and `ZoomEffect`
 bases for type tests and pattern matching, not for subclassing.
 
 ```csharp
@@ -1094,7 +1059,7 @@ the application. A game that only polls `IsDown` declares its keys by claiming t
 
 ```csharp
 // Adapted from AGENT-README.txt
-if (KeyboardEventPoller.Adapter is CodeBrixKeyboardAdapter kbd)
+if (Engine.Instance.Input.KeyboardEventPoller?.Adapter is CodeBrixKeyboardAdapter kbd)
     kbd.ClaimKeys([(int)VirtualKey.Left, (int)VirtualKey.Right,
                    (int)VirtualKey.Space]);
 ```
@@ -1212,7 +1177,7 @@ overlapping sounds are cheap.
 The resource path is typical for the scene-pipeline mode. `AudioResourceManager.Instance` loads clips
 with `LoadFromFile`, `LoadFromStream`, `LoadFromPcm` and `LoadFromEngineAssetsFile`, and each
 `AudioResource` owns a voice with `Play`, `Pause`, `Resume`, `Stop`, `Seek`, `IsLooping`, `Volume`,
-`Pan`, `Duration` and `PlaybackCompleted`. `Clone()` gives an independent voice of the same clip.
+`Pan`, `Duration` and `PlaybackCompleted`. `AudioResourceManager.Instance.Clone(key, newKey)` gives an independent voice of the same clip.
 Container-format sounds no longer than `AudioResourceManager.PreloadShortSoundEffectMaxSeconds`
 (default 10 seconds; 0 disables) are decoded once to raw float PCM at load time, and every play, clone,
 channel clip and pool voice over that resource shares the single decoded buffer, so no decode or file
@@ -1318,7 +1283,7 @@ streaming music provider: an `IStreamingMusicProvider` registered at
 The result is an ordinary `StreamingMusicTrack`, so fades, ducks, stingers, the music slider and the
 global pause all apply, and `PlayStreaming` is idempotent while that provider streams, so it is safe to
 call on every screen change. Silence while a provider starts or falls behind is part of the contract,
-never an error. The [generated music package](#the-generated-music-package) is the provider in this
+never an error. The [generated music](gameengine/generated-music.md) add-on is the provider in this
 repository.
 
 Adaptive layers come three ways. For MIDI, `track.SetLayerVolume(channel, 0f)` and
@@ -1444,13 +1409,14 @@ into memory at load and the file handle closes immediately.
 ```csharp
 var pack = AssetsFile.LoadOrCreate("assets.pack");
 using Stream? img = pack.Get(AssetTypes.Image, "hero.png");
-// or pack[AssetTypes.Image, "hero"] — extension optional, case-insensitive
+// or pack[AssetTypes.Image, "hero"] - extension optional, case-insensitive
 pack.Add(AssetTypes.Font, "/path/SomeFont.ttf");
 pack.Save();                                    // rewrites the zip
 ```
 
 `AssetTypes` covers `Image`, `Audio`, `Video`, `Cursor`, `Font`, `Misc`, `Svg` and
-`TilesheetDefinition`. `Get` returns a fresh read-only `MemoryStream` per call, matching the exact name
+`TilesheetDefinition`, plus the reserved `SceneDefinition`, `AnimationDefinition`, `AudioDefinition` and
+`SpriteDefinition`. `Get` returns a fresh read-only `MemoryStream` per call, matching the exact name
 first and then the base name ignoring extension. `AssetsFileIdentifier(pack, type, name)` is a
 serializable pointer to one entry, with `IsValid` guarding a missing one.
 `AudioResourceManager.LoadFromEngineAssetsFile(pack)` bulk-loads every audio entry,
@@ -1468,7 +1434,7 @@ through an asset provider registered with `Engine.Managers.AssetProviders`. Keys
 `<providerId>:<identifier>`, and the registry's `LoadTilesheet`, `LoadAudio`, `LoadFont`,
 `ImportTiledMap`, `LoadModel` and `LoadModelAnimation` return the engine's own types. A key no provider
 holds throws `KeyNotFoundException` with a "Did you mean" list of up to three of the closest real keys.
-The [Kenney assets package](#the-kenney-assets-package) is the provider in this repository and the
+The [Kenney assets](gameengine/kenney-assets.md) add-on is the provider in this repository and the
 worked example for writing your own.
 
 ### Configuration
@@ -1478,7 +1444,10 @@ file yields defaults. The settings are `TargetFPS` (60; 0 uncapped), `VSync`, `M
 `SamplingTimeForCPS` (1.5 seconds between `CPSCalculated` events), the four `TimeBetween*Events`
 throttle floors (0.03 seconds each), `TimeBetweenGamepadStateUpdates` (0.008 seconds; 0 re-reads device
 state every poll), `LoggingMode`, `LoggingQueueCapacity` (8192), `FlushAsyncLogsOnShutdown`,
-`PauseSuspendsAudio`, `PauseShortSoundEffectSeconds` (1.0), `StateFiles`, and `ConfigurationSections` -
+`PauseSuspendsAudio`, `PauseShortSoundEffectSeconds` (1.0), `RenderScale` (1) and `RenderScalingFilter`,
+`StartInitializationWaitTimeout` (30), `TimerDrivenSimulationRate` (120) and
+`MaxTimerDrivenSimulationSteps` (8), `FixedUpdateRate` (0) and `MaxFixedUpdateSteps` (5), `StateFiles`,
+and `ConfigurationSections` -
 free-form string sections for the game's own settings, with `Get`, `Set`, `Has` and `Remove` helpers and
 `config[section, key]` indexers.
 
@@ -1554,107 +1523,16 @@ Two more keyed stores round the set out. `FontManager.Instance` caches `SKTypefa
 keyed store for the vector art `DirectSvg` draws, and `SvgResource` adds `IntrinsicSize` and the two
 `Rasterize` overloads.
 
-### Gamepads: the seam and its SDL2 implementation
+### The add-ons and what they attach to
 
-The engine core defines the seam - `IGamepadManager<T>`, `IGamepadAdapter`, `GamepadStickState` and
-`GamepadEventPoller` - and the gamepad package fills it. One extension method is the whole entry point:
+Each add-on attaches with one call on `Engine.Instance` and has a page of its own.
 
-```csharp
-public static class EngineGamepadExtensions
-{
-    public static SdlGamepadManager InitializeSdlGamepadManager(
-        this Engine engine, bool logStatus = true);
-}
-```
-
-It starts SDL2 gamepad support and assigns the resulting manager to `engine.Input.GamepadManager`;
-nothing else has to be plumbed. Call it once, after the engine has been started. It always returns a
-usable manager and never returns null, including when SDL2 or a controller is missing - in that case
-`IsAvailable` is false and `UnavailableReason` explains why. With `logStatus` left at true it writes the
-outcome to the engine log once: a warning carrying `UnavailableCause` and `UnavailableReason` when
-support is unavailable, an information line carrying `GetNoControllersHint()` when support is available
-with nothing connected, or one line per connected pad carrying its `Name`, `GamepadId` and mapping
-string.
-
-```csharp
-public sealed class SdlGamepadManager
-    : IGamepadManager<SdlGamepadAdapter>, IDisposable
-{
-    public static bool TryStart(out SdlGamepadManager manager);
-
-    public bool IsAvailable { get; }
-    public string? UnavailableReason { get; }
-    public SdlGamepadUnavailableCause UnavailableCause { get; }
-    public IReadOnlyCollection<SdlGamepadAdapter> ConnectedAdapters { get; }
-
-    public void Update();
-    public string? GetNoControllersHint();
-    public void Dispose();
-}
-```
-
-There is no public constructor. `IsAvailable` says gamepad support is functional, not that a controller
-is plugged in - check `ConnectedAdapters.Count` for that. `ConnectedAdapters` is a live view: the same
-collection instance every time, with contents changing as controllers come and go, which is what lets
-the engine's `GamepadEventPoller` see controllers that appear later. Do not copy it and expect the copy
-to track hotplug. `Update()` refreshes the device list and every connected controller's state, and the
-engine calls it; calling it yourself defeats the engine's `TimeBetweenGamepadStateUpdates` throttle.
-`SdlGamepadUnavailableCause` is the machine-readable counterpart to `UnavailableReason`, with
-`NativeLibraryMissing` and `SubsystemInitializationFailed` alongside `None`; on Linux the first normally
-means the SDL2 runtime package is not installed, something the player can fix, while on Windows and
-macOS - where SDL2 ships inside the application - it indicates a packaging problem worth reporting.
-
-```csharp
-public sealed class SdlGamepadAdapter : IGamepadAdapter, IDisposable
-{
-    public string GamepadId { get; }                       // "sdl:<instanceId>"
-    public int InstanceId { get; }
-    public string Name { get; }            // e.g. "Xbox One S Controller"
-    public IReadOnlyCollection<string> PressedButtons { get; }
-    public GamepadStickState? LeftStick { get; }
-    public GamepadStickState? RightStick { get; }
-    public float LeftTrigger { get; }                      // 0.0 .. 1.0
-    public float RightTrigger { get; }                     // 0.0 .. 1.0
-    public bool IsConnected { get; }
-    public string GetMappingString();
-    public void Dispose();
-}
-```
-
-Every property is a snapshot of the most recent refresh rather than a live native query, so reading
-several within one frame gives a consistent view of the controller. `PressedButtons` holds values from
-`SdlGamepadButtons` and is a live view refreshed in place each frame, so read it within the frame and
-never cache the collection. `GetMappingString()` returns the mapping string for the device, or an empty
-string when unavailable; the mapping reconciles the device's raw button and axis numbering with the
-standard layout and differs by transport, so it is the first thing to log when a controller behaves
-oddly.
-
-`SdlGamepadButtons` is a set of `public const string` names - `A`, `B`, `X`, `Y`, `Back`, `Guide`,
-`Start`, `LeftStick`, `RightStick`, `LeftShoulder`, `RightShoulder`, `DPadUp`, `DPadDown`, `DPadLeft`
-and `DPadRight` - plus `All`. Use the constants rather than string literals: the seam identifies buttons
-by string, so a misspelled name registers happily with the event poller and then never fires. The names
-follow the standard layout, and physical positions map through the controller database, so `A` is always
-the bottom face button whatever is printed on it.
-
-`GamepadStickState` is a readonly struct with `X` (-1 full left, +1 full right), `Y` (-1 full down, +1
-full up), `RawX`, `RawY`, `Magnitude`, `Angle` in radians, `IsEngaged(float threshold = 0.15f)`,
-`Direction(float threshold = 0.15f)` and `WithDeadzone(float threshold = 0.15f)`. `WithDeadzone` returns
-the state unchanged when engaged and a zeroed state - raw values preserved - otherwise. `Direction`
-returns `StickDirection.None` below the threshold and otherwise ORs together every axis past it, so a
-diagonal reads as `Up | Right`.
-
-For edge-triggered button events, `Engine.Instance.Input.GamepadEventPoller` is nullable - use `?.` -
-and assigning a manager to `Engine.Instance.Input.GamepadManager`, which
-`InitializeSdlGamepadManager` does, calls `GamepadEventPoller.Initialize` for you. Its surface is
-`StartMonitoringButton(gamepadId, button, timeBetweenEvents, isPaused)`, `StopMonitoringButton`,
-`StopMonitoringAllButtons`, `AllButtonConfigsByGamepadId`, `PauseAllInput` and the `ButtonDown` event,
-whose args carry the `Config` and the `Adapter`.
-
-The `CodeBrix.Platform.GameEngine.Sdl2.Native` namespace - `Sdl2Library`, `Sdl2Native`,
-`SDL_GameController`, `SDL_Joystick` and the enums - is public for interop, not for application code. It
-is raw P/Invoke, mostly unsafe, it returns sentinel values instead of throwing when SDL2 is absent, and
-calling it behind the manager's back can desynchronize the device list or shut the subsystem down under
-it. Use `SdlGamepadManager`.
+| Add-on | The call | What it attaches to |
+| --- | --- | --- |
+| [Gamepads](gameengine/gamepads.md) | `InitializeSdlGamepadManager()` | The gamepad seam - `IGamepadManager<T>`, `IGamepadAdapter`, `GamepadStickState` and `GamepadEventPoller` - which the core defines and has no backend for. The engine refreshes controller state every cycle or tic in both hosting modes |
+| [Kenney assets](gameengine/kenney-assets.md) | `UseKenneyAssets(paths)` or `RegisterKenneyAssets(paths)` | The asset-provider registry at `Engine.Managers.AssetProviders`, under the `kenney:` key prefix |
+| [Generated music](gameengine/generated-music.md) | `UseGeneratedMusic(options)` | The streaming music provider at `Engine.Managers.StreamingMusic`, played by `MusicManager` on the music bus |
+| [Cards and dice](gameengine/cards-and-dice.md) | `UseCardsAndDice(host, view, bounds)` | A draw-list drawing on a view or a scene layer, the mouse poller, and the engine's pause-safe time; the table disposes itself with the engine |
 
 ## Examples
 
@@ -1674,6 +1552,7 @@ using CodeBrix.Platform.GameEngine.Host.Rendering;
 using CodeBrix.Platform.GameEngine.Input.Keyboard;
 using CodeBrix.Platform.GameEngine.Physics.Movement.Easing;
 using CodeBrix.Platform.GameEngine.Scenes;
+using Microsoft.Extensions.Logging;
 using Windows.System;
 
 public sealed class TinyGameHost : CodeBrixGameHost
@@ -1835,47 +1714,8 @@ presenter is reconfigurable at any time from the game thread, takes exactly `wid
 per `PresentFrame`, does one full-frame copy with no per-frame managed allocations, and offers a
 `Rotate90` orientation that displays column-major buffers with no CPU transpose.
 
-Gamepads are one override in either mode, and reading them is a loop over the live adapter collection.
-
-```csharp
-// Mode A
-public sealed class MyGameHost : CodeBrixGameHost
-{
-    private SdlGamepadManager? _gamepads;
-
-    public MyGameHost(GameSurfaceCanvas renderSurface) : base(renderSurface) { }
-
-    protected override void OnConfigureGamepads()
-        => _gamepads = Engine.Instance.InitializeSdlGamepadManager();
-}
-
-// Mode B
-protected override void ConfigureGamepads()
-    => _gamepads = Engine.Instance.InitializeSdlGamepadManager();
-```
-
-```csharp
-private void ReadGamepads(SdlGamepadManager gamepads)
-{
-    foreach (SdlGamepadAdapter pad in gamepads.ConnectedAdapters)
-    {
-        GamepadStickState move = pad.LeftStick?.WithDeadzone() ?? default;
-
-        // Clamp before using Magnitude as a speed scalar -- see PITFALLS.
-        float speed = MathF.Min(move.Magnitude, 1f) * MaxSpeed;
-        _playerX += move.X * speed * deltaSeconds;
-        _playerY += move.Y * speed * deltaSeconds;   // +Y is UP
-
-        bool firing = pad.PressedButtons.Contains(SdlGamepadButtons.A)
-                      || pad.RightTrigger > 0.5f;
-
-        if (move.Direction().HasFlag(StickDirection.Up)) { AimUp(); }
-    }
-}
-```
-
-The clamp on the first line of arithmetic is not decoration: `Magnitude` can exceed 1 on a diagonal, and
-using it unclamped as a speed scalar is the classic diagonal-speed-boost bug.
+Gamepads are one override in either mode, `OnConfigureGamepads` or `ConfigureGamepads`;
+[Gamepads](gameengine/gamepads.md#examples) shows both, and a per-frame read of every connected pad.
 
 A torchlit room is a light layer plus a darkness overlay that tracks it, so glow and reveal move
 together.
@@ -1946,7 +1786,7 @@ internal class Program
     {
         var host = CodeBrixPlatformHostBuilder.Create()
             .App(() => new App())
-            .UseLinuxX11()          // .UseWin32Skia() / .UseMacOS() on the other heads
+            .UseLinuxX11()          // .UseWindowsWin32() / .UseMacOS() on the other heads
             .Build();
         host.Run();
     }
@@ -1963,6 +1803,12 @@ Gamepads work on all six heads, frame buffer included, with the system SDL2 runt
 prerequisite. And resuming from the global pause belongs at the application's UI layer -
 minimize maps to `Pause()`, restore maps to `Resume()` - which `GameWindowLifecycle.Attach(window)` wires
 in one call where the application creates its window.
+
+To test a game with [PlayTest](../platform/playtest/README.md), launch the application once and reset
+the live page before each test rather than building a fresh page per test, because the engine is
+process-wide and starts exactly once:
+[Launch once for a process-wide engine](../platform/playtest/patterns-from-the-samples.md#launch-once-for-a-process-wide-engine)
+shows the pattern, taken from the BrixInvaders suite.
 
 ## Pitfalls
 
@@ -2018,19 +1864,8 @@ in one call where the application creates its window.
   own.
 - Scenes self-register globally: dispose them, or call `Scene.ClearAllScenes()`, or they linger. Never
   call `Animator.Dispose` directly.
-- `Engine.Dispose()` does not dispose the gamepad manager. A game whose process ends with the engine can
-  let the process exit; a game that tears the engine down and keeps running must call
-  `gamepads.Dispose()` itself, after `Engine.Dispose()`, and must call `InitializeSdlGamepadManager`
-  again on the next engine.
-
-```csharp
-public void ShutDown()
-{
-    Engine.Instance.Dispose();
-    _gamepads?.Dispose();
-    _gamepads = null;
-}
-```
+- `Engine.Dispose()` does not dispose the gamepad manager. A game that tears the engine down and keeps
+  running disposes it itself; [Gamepads](gameengine/gamepads.md#pitfalls) shows the order.
 
 ### API traps
 
@@ -2119,40 +1954,12 @@ public void ShutDown()
 - `SoundChannel` stopped-state detection lags slightly behind the clip actually ending, because the
   shared output sweeps on a timer.
 
-### Gamepads
+### Add-ons
 
-- A controller that reconnects gets a new `GamepadId`, because it derives from the joystick instance ID.
-  Anything registered against the old id - button monitoring in particular - must be registered again.
-  Bluetooth controllers sleep aggressively, so this happens in normal use.
-- `GamepadStickState.Magnitude` can exceed 1, up to the square root of 2 on a diagonal, because `X` and
-  `Y` are each clamped to the range -1 to 1 independently. Clamp the magnitude, or normalize the vector,
-  before using it as a speed scalar.
-- A resting stick does not read zero. Use `WithDeadzone()` or `IsEngaged()` rather than testing against
-  `!= 0`.
-- Stick `Y` is inverted relative to the native API: the native side reports up as negative, while
-  `GamepadStickState` defines +1 as up. The adapter handles it; raw values read through the native layer
-  do not.
-- The first poll after a controller connects is discarded on purpose, because a freshly connected
-  Bluetooth pad can report full deflection on every axis until its first report arrives. Sticks and
-  triggers read neutral for one frame after connect; buttons are trustworthy immediately.
-- Do not call `Math.Abs()` on a raw axis value as a `short`. -32768 is a real reading and negating it
-  overflows a signed 16-bit type; widen to `int` first.
-- Button and axis numbering is device- and transport-specific - the same pad reports a different raw
-  layout over Bluetooth than over USB - so always go through `SdlGamepadButtons` and the adapter, never
-  raw joystick indices.
-- Use the `SdlGamepadButtons` constants rather than string literals, because the seam is string-keyed and
-  a misspelled name registers happily and then never fires.
-- Do not cache `ConnectedAdapters` or `PressedButtons`; both are live views reused across refreshes, and
-  a copy stops tracking hotplug. Enumerate them rather than materializing a list each frame.
-- Never call `IGamepadManager.Update()` yourself, and do not add throttling of your own: the engine
-  refreshes gamepad state in both modes and the throttle is part of the seam's contract.
-- A kiosk or frame-buffer deployment has a second failure mode: the evdev backend needs read access to
-  `/dev/input/event*`, which a desktop login session grants through a per-device ACL but a bare service
-  account may not have. That looks identical to "no controller plugged in", and
-  `GetNoControllersHint()` tests for it specifically and says to add the account to the `input` group.
-- `Engine.Instance.Input.GamepadEventPoller` is nullable; use `?.` rather than assuming it exists.
-- Verify any gamepad change in both hosting modes. A check that supplies its own driver cannot detect a
-  missing driver.
+Each add-on page carries its own pitfalls: [gamepads](gameengine/gamepads.md#pitfalls),
+[Kenney assets](gameengine/kenney-assets.md#pitfalls),
+[generated music](gameengine/generated-music.md#pitfalls) and
+[cards and dice](gameengine/cards-and-dice.md#pitfalls).
 
 ## Samples and tools in the repository
 
@@ -2166,6 +1973,7 @@ Win32-Skia and macOS heads, and is built and run on its own.
 | Platformer.Brix | The reference consumer for fixed layer-tile colliders: collision profiles, `CollisionAdjust` insets, a foot probe through `ColliderRegistry.QueryAabb`, gravity, camera follow with a dead zone, and a procedural tilesheet painted in code | [`samples/Platformer.Brix`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/Platformer.Brix) |
 | SpaceDuel.Brix | The GPU tier: `Sprite.Rotation`, a wrap-around world, parallax star layers, particle explosions, health bars, and a HUD fed by `CPSCalculated` | [`samples/SpaceDuel.Brix`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/SpaceDuel.Brix) |
 | KenneyAssetsDemo | The reference consumer for the Kenney assets package: packs registered with one `UseKenneyAssets` call, a Tiled map imported into scene layers, a glTF character pre-rendered into eight-direction sprite frames and walked with the keyboard, atlas sprites as collectible gems, a pick-up sound, HUD text in Kenney fonts, a rasterized SVG badge, and a start-up report of what each pack delivered | [`samples/KenneyAssetsDemo`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/KenneyAssetsDemo) |
+| CardsAndDiceDemo | The reference consumer for the cards and dice package: a playable score game across traditional and simple playing cards, historical tarot, custom elemental decks, dice sets and a three-player dealer table, plus a paged gallery of the embedded artwork - shuffle-then-deal, background artwork preparation, selection, dragging and click-to-hold dice, with no asset folder of its own | [`samples/CardsAndDiceDemo`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/CardsAndDiceDemo) |
 | Slider | Driving `Engine` directly with no host base: sprites built on the engine thread, and rebuilding the board while the engine keeps running | [`samples/Slider`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/Slider) |
 | CoordinateTest | Coordinate systems - orthogonal, isometric and hex - plus cameras and views | [`samples/CoordinateTest`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/CoordinateTest) |
 | ParticleTest | `ParticleSurface` and emitters, composites and text, movement easing, and a click that toggles the global pause through UI-level pointer input with letterbox mapping | [`samples/ParticleTest`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/ParticleTest) |
@@ -2174,6 +1982,7 @@ Win32-Skia and macOS heads, and is built and run on its own.
 | MusicDemo | The music system reference: buses, fades and crossfades, both ducking forms, stingers, playlists, stem sets, the MIDI per-channel route, MIDI rendered through both an SFZ and a Decent Sampler instrument, a bar-quantized crossfade across a tempo change, a stems export loaded with `MusicStemSet.FromSunoStems`, and marker jumps - generating every asset it plays on first run, down to the instruments, the MIDI files and the whole export | [`samples/MusicDemo`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/MusicDemo) |
 | padcheck | An interactive hardware check for gamepads that drives the real `SdlGamepadManager`, so what it prints is what a game would see | [`tools/padcheck`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tools/padcheck) |
 | sdl2_library_building | The hand-run script that builds the Windows-on-ARM64 SDL2 binary the gamepad package ships, verifying the source against a pinned hash and writing a provenance file beside the output | [`tools/sdl2_library_building`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tools/sdl2_library_building) |
+| cards-and-dice | Maintainer scripts that import and generate the cards and dice package's embedded artwork and regenerate its provenance notices; no build, test or consumer runs them | [`tools/cards-and-dice`](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tools/cards-and-dice) |
 
 The reference application in [CodeBrix.Samples](https://github.com/ellisnet/CodeBrix.Samples) for the music system is
 [GameEngineMusicDemo](https://github.com/ellisnet/CodeBrix.Samples/tree/main/GameEngineMusicDemo), a standalone six-head
@@ -2187,6 +1996,15 @@ deterministic library stepped from the fixed-step hook, frames built as engine d
 where they lie, gamepads through the SDL2 package and endless generated music. Its recipes are in the
 [game-engine blueprints](../samples/blueprints.md#hosting-a-game-engine).
 
+The showcase for the cards and dice package is
+[GoddessTempleDiscovery](https://github.com/ellisnet/CodeBrix.Samples/tree/main/GoddessTempleDiscovery), an
+educational cards-and-dice board game in the same repository built against the published packages: a
+package-free rules engine with seeded, golden-tested determinism, a cards and dice table hosted from the
+fixed-step hook with its card faces composed as SVG at run time, computer opponents paced at animation
+speed, a XAML newspaper inspector over the game canvas, and a Field Journal drawn as a vector PDF.
+[Cards and dice](gameengine/cards-and-dice.md#the-showcase-goddesstemplediscovery) walks through how it
+uses the package.
+
 Run any sample from the repository root, swapping the head project for `<Name>.Win32Skia` or
 `<Name>.MacOS`:
 
@@ -2195,16 +2013,8 @@ dotnet run --project samples/<Name>/src/<Name>.LinuxX11/<Name>.LinuxX11.csproj
 ```
 
 No sample wires up gamepads, because the thing that has to be checked is physical hardware rather than
-an on-screen result. `padcheck` covers what unit tests cannot: whether each physical button reports
-under the correct name, whether pushing a stick up reports `Up`, whether the left trigger reports as
-left, and whether a controller that sleeps and wakes is picked back up. Run both of its drive modes
-every time - the direct one and the `InputPump` path that the software-rendered mode uses.
-
-```bash
-cd tools/padcheck
-dotnet run -- 45           # direct mode; seconds to poll, default 30
-dotnet run -- 45 --pump    # the InputPump path
-```
+an on-screen result; [Gamepads](gameengine/gamepads.md#samples-and-tools-in-the-repository) covers the
+`padcheck` hardware check and how to run it.
 
 ## Documentation and source
 
@@ -2215,6 +2025,7 @@ dotnet run -- 45 --pump    # the InputPump path
 | Complete API guide for the gamepad package (ships inside that package too) | [src/CodeBrix.Platform.GameEngine.Sdl2/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/src/CodeBrix.Platform.GameEngine.Sdl2/AGENT-README.txt) |
 | Complete API guide for the Kenney assets package (ships inside that package too) | [src/CodeBrix.Platform.GameEngine.KenneyAssets/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/src/CodeBrix.Platform.GameEngine.KenneyAssets/AGENT-README.txt) |
 | Complete API guide for the generated music package (ships inside that package too) | [src/CodeBrix.Platform.GameEngine.GeneratedMusic/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/src/CodeBrix.Platform.GameEngine.GeneratedMusic/AGENT-README.txt) |
+| Complete API guide for the cards and dice package (ships inside that package too) | [src/CodeBrix.Platform.GameEngine.CardsAndDice/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/src/CodeBrix.Platform.GameEngine.CardsAndDice/AGENT-README.txt) |
 | Samples, tools and other non-package content | [EXTRAS-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/EXTRAS-README.txt) |
 | Map of every document in the repository | [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/README-INDEX.txt) |
 | Engine tests (headless worked examples) | [tests/CodeBrix.Platform.GameEngine.Tests](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tests/CodeBrix.Platform.GameEngine.Tests) |
@@ -2222,6 +2033,7 @@ dotnet run -- 45 --pump    # the InputPump path
 | Gamepad tests | [tests/CodeBrix.Platform.GameEngine.Sdl2.Tests](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tests/CodeBrix.Platform.GameEngine.Sdl2.Tests) |
 | Kenney assets tests | [tests/CodeBrix.Platform.GameEngine.KenneyAssets.Tests](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tests/CodeBrix.Platform.GameEngine.KenneyAssets.Tests) |
 | Generated music tests | [tests/CodeBrix.Platform.GameEngine.GeneratedMusic.Tests](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tests/CodeBrix.Platform.GameEngine.GeneratedMusic.Tests) |
+| Cards and dice tests | [tests/CodeBrix.Platform.GameEngine.CardsAndDice.Tests](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tests/CodeBrix.Platform.GameEngine.CardsAndDice.Tests) |
 | Samples | [samples](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples) |
 
 XML documentation ships alongside every assembly, and each package carries the `AGENT-README.txt` that
@@ -2234,9 +2046,12 @@ package ID (`CodeBrix.Platform.GameEngine.MitLicenseForever`). The optional game
 (`CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever`) is licensed `MIT AND Zlib`, because it
 redistributes the SDL2 native libraries: the managed binding code is MIT and the SDL2 native binaries
 are zlib, and the suffix names the more notice-demanding of the two. The Kenney assets package
-(`CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever`) and the generated music package
-(`CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever`) are MIT; the Kenney packs a game reads
-are CC0 and are the game's own content, not part of the package. For the provenance and licensing of
+(`CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever`), the generated music package
+(`CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever`) and the cards and dice package
+(`CodeBrix.Platform.GameEngine.CardsAndDice.MitLicenseForever`) are MIT. The Kenney packs a game reads are
+CC0 and are the game's own content, not part of the package. The artwork and sounds embedded in the cards
+and dice package are CC0, public domain, or original artwork under its MIT license, so it needs no
+artist-credit screen. For the provenance and licensing of
 open source code included in this library, see
 [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/THIRD-PARTY-NOTICES.txt)
 in the repository.
@@ -2245,6 +2060,10 @@ in the repository.
 
 **Where to go next**
 
+- [Cards and dice](gameengine/cards-and-dice.md) - decks, piles, dice and an animated tabletop for card, dice and board-style games
+- [Kenney assets](gameengine/kenney-assets.md) - art, sound, fonts, maps and models straight from downloaded Kenney zips
+- [Generated music](gameengine/generated-music.md) - endless music an AI model writes while the game runs
+- [Gamepads](gameengine/gamepads.md) - SDL2 game controllers on all six heads
 - [09 - Graphics, media and vision](../platform/09-graphics-media-and-vision.md) - where the game surface fits among the other drawing surfaces
 - [CodeBrix.Audio](CodeBrix.Audio.md) - the sibling library every engine voice mixes through
 - [Library catalog](README.md) - every CodeBrix library by topic

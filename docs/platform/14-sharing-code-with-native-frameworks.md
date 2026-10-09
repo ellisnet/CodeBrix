@@ -6,6 +6,9 @@
 
 This is the chapter behind the extra heads in [JustBetweenUs](https://github.com/ellisnet/CodeBrix.Samples/tree/main/JustBetweenUs): the same encrypt-and-decrypt view model driving the six CodeBrix.Platform heads plus native WinUI and WPF heads and a .NET MAUI head, from one file set.
 
+> [!NOTE]
+> To put a CodeBrix.Platform application itself on Android - its XAML pages and code-behind as well as its view models - you do not need a .NET MAUI head. [CodeBrix.Android](../libraries/CodeBrix.Android.md) compiles the pages unchanged for Android, with Googlebooks and docked phones as first-class targets alongside tablets and phones; see [15 - Android and Googlebooks](15-android.md). This chapter is for applications that already have, or want, a native WinUI, WPF or .NET MAUI user interface of their own.
+
 ## What the toolkits are
 
 The CodeBrix "Simple" MVVM foundation - `SimpleViewModel`, `SimpleCommand`, `SimpleDialog`, `SimpleMessaging`, `SimpleServiceResolver`, `SimpleEnum` and `SimpleOsInfo`, all in the namespace `CodeBrix.Platform.Simple` - is compiled once per Microsoft UI framework and published as one package each. The API is identical across them, so a view model written against `SimpleViewModel` compiles unchanged for WinUI, WPF and .NET MAUI. Only the platform-facing edges differ.
@@ -601,7 +604,7 @@ These are small, deliberate toolkits, and they say what they are not.
 
 **Where to go next**
 
-- [Samples index](../samples/README.md) - JustBetweenUs runs this chapter's code on eight heads at once
+- [Samples index](../samples/README.md) - JustBetweenUs runs this chapter's code on its Skia and native heads at once
 - [05 - MVVM the right way](05-mvvm-the-right-way.md) - the same view-model API, on the CodeBrix.Platform heads
 - [11 - Packaging and shipping](11-packaging-and-shipping.md) - the head project properties and solution mapping a native WinUI head needs
 - [CodeBrix.Platform on GitHub](https://github.com/ellisnet/CodeBrix.Platform) - source, tests and samples

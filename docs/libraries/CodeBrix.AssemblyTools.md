@@ -139,7 +139,7 @@ using CodeBrix.AssemblyTools.Mdb.SymbolWriter;    // low-level MDB file model
 every collection property in the model.
 
 > [!NOTE]
-> The namespaces `CodeBrix.AssemblyTools.PE`, `.Security.Cryptography`, `.Internal` and `.Pdb.Cci`
+> The namespaces `CodeBrix.AssemblyTools.PE`, `.Security.Cryptography` and `.Pdb.Cci`
 > exist in the assembly but contain no public types; do not add usings for them. The native-PDB
 > providers consumers use live in `CodeBrix.AssemblyTools.Pdb`.
 
@@ -483,8 +483,8 @@ public static string GetDocCommentId (IMemberDefinition member)
     // "T:Ns.Type", "M:Ns.Type.Method(System.Int32)" -- the XML-doc id
 ```
 
-`MethodBodyRocks` is where `SimplifyMacros`, `OptimizeMacros`, `Optimize` and
-`Parse(MethodDefinition, IILVisitor)` live.
+`MethodBodyRocks` is where `SimplifyMacros`, `OptimizeMacros` and `Optimize` live;
+`Parse(MethodDefinition, IILVisitor)` is on `ILParser`, in the same namespace.
 
 ### Collections
 
@@ -550,10 +550,10 @@ static void Instrument (string inputPath, string outputPath)
 }
 ```
 
-Notice what `InsertBefore` preserves: existing exception handlers and sequence points that referenced
-`first` now start at the injected `Ldstr`, because the target instruction stays in place and the new
-one is linked before it, while branches to `first` still land on `first` - branch operands are
-instruction references, not offsets.
+Notice what `InsertBefore` preserves: the target instruction stays in place and the new one is linked
+before it, so branches to `first` still land on `first` - branch operands are instruction references,
+not offsets - and exception handlers that referenced `first` still start at `first`, not at the
+injected `Ldstr`.
 
 Walking an entire assembly without holding the file open, by reading immediately and in memory:
 
@@ -639,10 +639,10 @@ var endFinally = il.Create (OpCodes.Endfinally);
 il.Append (endFinally);
 il.Append (ret);
 foreach (var r in rets)
-    il.Replace (r, il.Create (OpCodes.Leave, ret));   // Replace keeps branch
-                                                      //   targets pointing at
-                                                      //   the new instruction
-var cleanup = module.ImportReference (typeof (Console).GetMethod ("Out").GetGetMethod ());
+    il.Replace (r, il.Create (OpCodes.Leave, ret));   // Replace does NOT retarget
+                                                      //   branches or handlers that
+                                                      //   pointed at r; fix them up
+var cleanup = module.ImportReference (typeof (Console).GetProperty ("Out").GetGetMethod ());
 var flush = module.ImportReference (typeof (TextWriter).GetMethod ("Flush"));
 il.InsertBefore (endFinally, il.Create (OpCodes.Call, cleanup));
 il.InsertBefore (endFinally, il.Create (OpCodes.Callvirt, flush));
@@ -866,8 +866,8 @@ are looking for how to do something with this library, the test file named for i
 fixtures split into `Resources/assemblies/` (pre-built images with their `.pdb` and `.mdb` sidecars),
 `Resources/cs/` (C# sources compiled at test time) and `Resources/il/` (IL sources used as reader
 inputs). The whole suite runs unconditionally on a headless host with no opt-in environment variables;
-the only coverage that is naturally skipped is native-PDB writing, which the format supports on
-Windows only.
+coverage that is naturally skipped is native-PDB writing, which the format supports on Windows only,
+the IL-fixture tests when `ilasm` is not on the `PATH`, and a few tests specific to one runtime.
 
 <details>
 <summary>Which test file demonstrates which feature</summary>

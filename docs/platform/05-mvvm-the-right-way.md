@@ -66,13 +66,6 @@ State is `field`-keyword auto-properties whose setters call `SetProperty(ref fie
 
 ```csharp
 // From CodeBrix.Samples/WebcamPainter/src/WebcamPainter.Core/ViewModels/MainViewModel.cs
-[AffectsCommands(nameof(TakePhotoCommand))]
-public bool HasFrame
-{
-    get;
-    private set => SetProperty(ref field, value);
-}
-
 public CameraDevice SelectedCamera
 {
     get;
@@ -85,7 +78,14 @@ public CameraDevice SelectedCamera
         }
     }
 }
-
+// ...
+[AffectsCommands(nameof(TakePhotoCommand))]
+public bool HasFrame
+{
+    get;
+    private set => SetProperty(ref field, value);
+}
+// ...
 public string StatusText
 {
     get;
@@ -114,7 +114,7 @@ public QualityLevel SelectedQuality
         NotifyPropertyChanged(nameof(SelectedQuality));
     }
 } = QualityLevel.Good;
-
+// ...
 public double ProgressPercent
 {
     get;
@@ -152,9 +152,15 @@ private async Task DoTakePhoto()
     // ...
 }
 
+#endregion
+
+#region SelectColorCommand
+
 private SimpleCommand _selectColorCommand;
 public SimpleCommand SelectColorCommand =>
     (_selectColorCommand ??= new SimpleCommand(CanSelectColor, (Action<object>)DoSelectColor));
+
+private bool CanSelectColor() => (!IsBusy) && IsPaintMode;
 
 private void DoSelectColor(object parameter)
 {
@@ -230,11 +236,20 @@ Some buttons are gated by facts that live in a model object, where an attribute 
         private set => SetProperty(ref field, value);
     }
 
+    #endregion
+
+    #region | Commands and their implementations |
+
+    /// <summary>Main Up: both documents to their previous page.</summary>
+    public SimpleCommand PreviousPageCommand => field ??=
+        new SimpleCommand(() => !IsBusy && _comparison.CanMoveBothPrevious,
+            (Func<Task>)(() => StepAsync(_comparison.MoveBothPrevious, renderLeft: true)));
+
     /// <summary>Main Down: both documents to their next page.</summary>
     public SimpleCommand NextPageCommand => field ??=
         new SimpleCommand(() => !IsBusy && _comparison.CanMoveBothNext,
             (Func<Task>)(() => StepAsync(_comparison.MoveBothNext, renderLeft: true)));
-
+    // ...
     //Tell the page the view (zoom/pan/page) moved and refresh every button that depends on it
     private void ViewChanged()
     {
@@ -271,7 +286,6 @@ private void OnDocumentStateChanged()
     RefreshLayersPad();
     RefreshHistoryPad();
     UpdateActionSensitivity();
-    UpdateSelectionSizeText();
 }
 ```
 
@@ -286,11 +300,19 @@ The page declares its view model in XAML, so the XAML designer constructs it too
 [Microsoft.UI.Xaml.Data.Bindable]
 public class MainViewModel : SimpleViewModel
 {
+    private const string DefaultMediaAddress =
+        "https://mdn.github.io/learning-area/html/multimedia-and-embedding/video-and-audio-content/rabbit320.mp4";
+
+    //The application's configured logger factory, which the heads set up in App.InitializeLogging().
+    //  NullLogger covers the design-mode path, where the constructor returns before this is assigned.
+    private ILogger _log = NullLogger.Instance;
+
     public MainViewModel()
     {
         if (IsDesignMode(true)) { return; } //Leave as the first line of constructor
 
-        Debug.WriteLine("Main view model startup.");
+        _log = LogExtensionPoint.AmbientLoggerFactory.CreateLogger<MainViewModel>();
+        _log.LogInformation("Main view model startup.");
 
         //Load (and, because the player has AutoPlay enabled, start) the default media on startup
         LoadMedia();
@@ -319,24 +341,24 @@ The page must show something immediately while its data arrives, and must show a
 
 ```csharp
 // From CodeBrix.Samples/PolyHavenBrowser/src/PolyHavenBrowser.Core/ViewModels/MainViewModel.cs
+/// <summary>Whether the initial catalog fetch is still in flight.</summary>
+[AffectsProperties(nameof(CatalogLoadingVisibility))]
 public bool IsCatalogLoading
 {
     get;
-    private set
-    {
-        SetProperty(ref field, value);
-        NotifyPropertyChanged(nameof(CatalogLoadingVisibility));
-    }
+    private set => SetProperty(ref field, value);
 } = true;
 
+/// <summary>The visibility of the initial catalog-loading indicator.</summary>
 public Visibility CatalogLoadingVisibility => IsCatalogLoading ? Visibility.Visible : Visibility.Collapsed;
 
+/// <summary>The status line shown while the catalog loads (or when it fails).</summary>
 public string CatalogStatusText
 {
     get;
     private set => SetProperty(ref field, value);
 } = "Loading the Poly Haven model catalog…";
-
+// ...
 private async Task LoadCatalogAsync()
 {
     try
@@ -377,10 +399,7 @@ Notice `GetService<T>()`: the view model resolves what it needs from the contain
 Naming the task lets a page or a test await it:
 
 ```csharp
-// Adapted from CodeBrix.Samples/JustBetweenUs/Shared/ViewModels/MainViewModel.cs
-// The sample starts a fire-and-forget Task in the constructor and pads it with a
-// fixed Task.Delay before showing its first dialog; this version keeps the same
-// steps but names the initialization so a page or a test can await it.
+// Condensed from CodeBrix.Samples/JustBetweenUs/Shared/ViewModels/MainViewModel.cs
 public MainViewModel()
 {
     if (!IsDesignMode(true))
@@ -397,6 +416,11 @@ private async Task InitializeAsync()
 {
     var defaultKey = await _encryptSvc.GetDefaultKey();
     InvokeOnMainThread(() => EncryptionKey = defaultKey);
+
+    //A dialog needs a UI anchor that does not exist until the page has been laid out, so wait
+    //  for the page to say that it is ready instead of guessing how long that takes.
+    await _pageReady.Task;
+    await ShowInfo("This application is adapted from a sample provided by Paul Ainsworth.");
 }
 ```
 
@@ -408,12 +432,12 @@ The same pattern loads documents named on the command line, which is what turns 
 // From CodeBrix.Samples/PdfSideBySide/src/PdfSideBySide.Core/ViewModels/MainViewModel.cs
     /// <summary>
     /// Convenience for repeated comparisons: launching a head as
-    /// PdfSideBySide.LinuxX11 left.pdf right.pdf pre-loads the two documents, so the
+    /// <c>PdfSideBySide.LinuxX11 left.pdf right.pdf</c> pre-loads the two documents, so the
     /// user need not browse for them. Anything that goes wrong is reported in the status line.
     /// </summary>
     private async Task OpenStartupDocumentsAsync()
     {
-        var arguments = Environment.GetCommandLineArgs();
+        var arguments = GetService<IStartupArguments>()?.GetCommandLineArgs() ?? Environment.GetCommandLineArgs();
         if (arguments.Length < 3) { return; }
 
         IsBusy = true;
@@ -481,14 +505,25 @@ Where several panes are exclusive, hold the mode in one field and route every pa
 ```csharp
 // From CodeBrix.Samples/KenneyAssetBrowser/src/KenneyAssetBrowser.Core/ViewModels/MainViewModel.cs
 private enum ViewerMode { None, Image, Model, Text, Audio }
-
+// ...
 public Visibility ImageViewerVisibility => _viewerMode == ViewerMode.Image ? Visibility.Visible : Visibility.Collapsed;
-public Visibility ModelViewerVisibility => _viewerMode == ViewerMode.Model ? Visibility.Visible : Visibility.Collapsed;
-public Visibility TextViewerVisibility => _viewerMode == ViewerMode.Text ? Visibility.Visible : Visibility.Collapsed;
-public Visibility NoPreviewVisibility => _viewerMode == ViewerMode.None ? Visibility.Visible : Visibility.Collapsed;
-public Visibility AudioViewerVisibility => _viewerMode == ViewerMode.Audio ? Visibility.Visible : Visibility.Collapsed;
-public Visibility ZoomBarVisibility => ImageViewerVisibility;
 
+/// <summary>The 3D model viewer's visibility.</summary>
+public Visibility ModelViewerVisibility => _viewerMode == ViewerMode.Model ? Visibility.Visible : Visibility.Collapsed;
+
+/// <summary>The text viewer's visibility.</summary>
+public Visibility TextViewerVisibility => _viewerMode == ViewerMode.Text ? Visibility.Visible : Visibility.Collapsed;
+
+/// <summary>The no-preview caption's visibility.</summary>
+public Visibility NoPreviewVisibility => _viewerMode == ViewerMode.None ? Visibility.Visible : Visibility.Collapsed;
+
+/// <summary>The audio player panel's visibility.</summary>
+public Visibility AudioViewerVisibility => _viewerMode == ViewerMode.Audio ? Visibility.Visible : Visibility.Collapsed;
+
+/// <summary>The zoom toolbar's visibility (2D viewer only).</summary>
+[AffectsCommands(nameof(ZoomInCommand), nameof(ZoomOutCommand), nameof(ZoomResetCommand))]
+public Visibility ZoomBarVisibility => ImageViewerVisibility;
+// ...
 private void SetViewerMode(ViewerMode mode, string hint, bool activateViewer = true)
 {
     _viewerMode = mode;
@@ -569,6 +604,7 @@ public SimpleCommand RunCommand => field ??= new SimpleCommand(
     () => !IsRunning && Source is not null && SelectedDestination is not null,
     (Func<object, Task>)(_ => RunAsync()));
 
+/// <summary>Stops the conversion that is under way.</summary>
 public SimpleCommand CancelCommand => field ??= new SimpleCommand(
     () => IsRunning && !IsCancelling, _ => DoCancel());
 
@@ -648,11 +684,11 @@ private async Task DoCreate()
         IsBusy = true;
         ProgressValue = 0;
         // ...
-        var progress = new Progress<CreateProgress>(p => InvokeOnMainThread(() =>
+        var progress = new Progress<CreateProgress>(p =>
         {
             StatusText = p.Message;
             ProgressValue = p.PercentComplete;
-        }));
+        });
 
         var result = await _documentSvc.CreateDocumentAsync(request, progress);
 
@@ -689,6 +725,7 @@ public sealed class ConversionProgress
     // ...
     public bool IsIndeterminate => StagePercent is null;
 
+    /// <summary>How far through the whole conversion, from 0 to 100.</summary>
     /// <remarks>
     /// A stage with no percentage of its own counts as half-done, so the bar still moves forward
     /// when one finishes rather than sitting still until the last stage starts.
@@ -703,6 +740,8 @@ public sealed class ConversionProgress
         }
     }
 
+    /// <summary>A line for the status bar.</summary>
+    /// <returns>The stage, its number, and its percentage when there is one.</returns>
     public override string ToString() => StagePercent is null
         ? $"{Stage} ({StageNumber} of {StageCount})"
         : $"{Stage} ({StageNumber} of {StageCount}) - {StagePercent:F0}%";
@@ -752,7 +791,15 @@ A command that takes many seconds runs while the user is free to navigate away o
 
 ```csharp
 // From CodeBrix.Samples/PolyHavenBrowser/src/PolyHavenBrowser.Core/ViewModels/MainViewModel.cs
-private bool CanCreateDocument() => IsModelViewActive && !_isCreatingDocument;
+/// <summary>Whether a marketing one-sheet is being built right now (re-entry gate).</summary>
+[AffectsCommands(nameof(DocumentCommand))]
+public bool IsCreatingDocument
+{
+    get;
+    private set => SetProperty(ref field, value);
+}
+
+private bool CanCreateDocument() => IsModelViewActive && !IsCreatingDocument;
 
 private async Task CreateDocumentAsync()
 {
@@ -770,13 +817,13 @@ private async Task CreateDocumentAsync()
 
     // ... pick the output path ...
 
-    _isCreatingDocument = true;
-    DocumentCommand.RaiseCanExecuteChanged();
+    IsCreatingDocument = true;
     var saved = false;
     try
     {
         // ... stages 1-4, then: ...
         await Task.Run(() => new MarketingSheetCreator().CreateToFile(request, outputPath));
+
         DocumentStatusText = $"Saved: {outputPath}";
         saved = true;
     }
@@ -787,8 +834,7 @@ private async Task CreateDocumentAsync()
     }
     finally
     {
-        _isCreatingDocument = false;
-        DocumentCommand.RaiseCanExecuteChanged();
+        IsCreatingDocument = false;
     }
 
     if (saved)
@@ -860,10 +906,13 @@ When a sensor callback, a processing worker and the UI are all involved, the cap
 // From CodeBrix.Samples/WebcamPainter/src/WebcamPainter.Core/ViewModels/MainViewModel.cs
 private void OnFrameArrived(object sender, EventArgs e)
 {
-    //Capture-thread context: get out fast
+    //Capture-thread context: get out fast. Dispose nulls the field, so work from a local.
+    var source = _captureService;
+    if (source == null) { return; }
+
     if (!HasFrame)
     {
-        InvokeOnMainThread(() => HasFrame = _captureService.HasFrame);
+        InvokeOnMainThread(() => HasFrame = source.HasFrame);
     }
 
     if (IsCaptureMode)
@@ -875,7 +924,7 @@ private void OnFrameArrived(object sender, EventArgs e)
         //Paint Mode: the live feed drives the hand tracker and the little self-view
         var tracker = _tracker;
         if (tracker is { IsRunning: true }
-            && _captureService.TryCopyLatestFrame(ref _visionFrame, out var width, out var height))
+            && source.TryCopyLatestFrame(ref _visionFrame, out var width, out var height))
         {
             tracker.SubmitFrame(_visionFrame, width, height);
         }
@@ -907,13 +956,18 @@ Where the consumer is thread-safe, only the status line needs the UI thread:
     if (openCount != _reportedOpenPalmCount)
     {
         _reportedOpenPalmCount = openCount;
-        InvokeOnMainThread(() => StatusText = openCount switch
+        InvokeOnMainThread(() =>
         {
+            //Back may have run since this frame was analyzed: its status line stands
+            if (IsCameraMode) { return; }
+            StatusText = openCount switch
+            {
             0 => "Show the camera your open palm - the colors will gather toward it.",
             1 => "The colors are chasing your open palm - close your hand to set them free.",
             _ => $"The colors are chasing {openCount} open palms - close your hands to set them free.",
-        });
-    }
+        };
+    });
+}
 ```
 
 Notice the comparison before the dispatch: the same guard, applied to a value rather than a flag.
@@ -926,12 +980,29 @@ A registered service exposes only `Task`-returning methods and does the blocking
 // From CodeBrix.Samples/KenneyAssetBrowser/src/KenneyAssetBrowser.Core/Services/AssetCatalogService.cs
 public class AssetCatalogService
 {
+    /// <summary>
+    /// Reads every bundle zip in the assets folder on a worker thread.
+    /// </summary>
+    /// <param name="folderPath">The folder holding the user's downloaded bundle zip files.</param>
+    /// <returns>The loaded catalog (empty when the folder is missing or holds no zips).</returns>
     public Task<AssetFolderCatalog> LoadCatalogAsync(string folderPath) =>
         Task.Run(() => AssetFolderCatalog.LoadFrom(folderPath));
 
+    /// <summary>
+    /// Opens one bundle's archive for on-demand entry reads on a worker thread.
+    /// The caller owns (and must dispose) the returned archive.
+    /// </summary>
+    /// <param name="bundle">The bundle to open.</param>
     public Task<BundleArchive> OpenArchiveAsync(AssetBundle bundle) =>
         Task.Run(() => new BundleArchive(bundle.ZipPath));
 
+    /// <summary>
+    /// Reads one entry's bytes from a bundle without keeping the archive open - used for
+    /// one-off reads like the sidebar cover thumbnails.
+    /// </summary>
+    /// <param name="bundle">The bundle to read from.</param>
+    /// <param name="entryPath">The forward-slash path of the file inside the archive.</param>
+    /// <returns>The entry's bytes, or <c>null</c> when the bundle has no such entry.</returns>
     public Task<byte[]> ReadEntryBytesAsync(AssetBundle bundle, string entryPath) =>
         Task.Run(() =>
         {
@@ -955,24 +1026,47 @@ private async Task SelectAsync(SampleAssetKind kind)
     RaiseSelectionChanged();
     IsBusy = true;
 
+    //Progress callbacks are posted to the UI thread, so one can land after a failure has
+    //already been reported below; once the load has finished, late ones are ignored.
+    var finished = false;
+
     try
     {
-        var progress = new Progress<string>(message => StatusText = message);
-        var asset = await _assets.EnsureSampleAsync(kind, progress, CancellationToken.None);
+        var progress = new Progress<string>(message =>
+        {
+            if (!finished) { StatusText = message; }
+        });
+        var asset = await _assets.EnsureSampleAsync(kind, progress, _lifetime.Token);
 
-        //Decode/build off the UI thread; the painters upload to GL lazily during Paint.
-        var painter = await Task.Run(() => BuildPainter(kind, asset));
-        _currentPainter = painter;
-        StatusText = $"{Label(kind)}: {asset.Name}    ·    {Hint(kind)}";
+        //Decode off the UI thread; the painters upload to GL lazily during Paint.
+        var decoded = await Task.Run(() => DecodeSample(kind, asset), _lifetime.Token);
+
+        //Hand the decoded content to a painter back on the UI thread: the painters, their
+        //cameras and the bound status line are only ever touched there. Awaited, so the
+        //busy flag clears and Initialization completes only once the sample is on display,
+        //and a view model disposed meanwhile never reaches its released painters.
+        await InvokeOnMainThreadAsync(() =>
+        {
+            finished = true;
+            if (_isDisposed) { return Task.FromResult(false); }
+            CurrentPainter = ApplyDecodedSample(kind, decoded);
+            StatusText = $"{Label(kind)}: {asset.Name}    ·    {Hint(kind)}";
+            return Task.FromResult(true);
+        });
+    }
+    catch (OperationCanceledException)
+    {
+        //The view model is shutting down; leave the status line as it is.
     }
     catch (Exception ex)
     {
+        finished = true;
         StatusText = $"Could not load the {kind.ToString().ToLowerInvariant()} sample: {ex.Message}";
     }
     finally
     {
         IsBusy = false;
-        InvalidateCanvas?.Invoke();
+        RequestRender();
     }
 }
 ```
@@ -1111,18 +1205,18 @@ Notice the cached "nothing found" singleton: the event fires on empty frames too
 Two independent mechanisms keep an expensive canvas responsive. Paint coalescing keeps at most one pending invalidate; backlog detection compares the pointer event's own timestamp against a stopwatch and, when the input stream has fallen behind, advances the drag anchor without rendering:
 
 ```csharp
-// From CodeBrix.Samples/PolyHavenBrowser_viewer_only/src/PolyHavenBrowser.UI/Views/MainPage.xaml.cs
+// From CodeBrix.Samples/PolyHavenBrowser_viewer_only/src/PolyHavenBrowser.Core/ViewModels/MainViewModel.cs
 //Coalescing: never queue more than one paint. While one is pending, pointer moves only
 //update the camera; the next paint draws the latest state.
 private bool _renderPending;
-
-private void RequestRender()
+// ...
+public void RequestRender()
 {
     if (_renderPending) { return; }
     _renderPending = true;
-    DisplayCanvas?.Invalidate();
+    InvalidateCanvas?.Invoke();
 }
-
+// ...
 private bool IsBacklogFrame(ulong timestamp)
 {
     if (!_gestureClock.IsRunning) { return false; }
@@ -1143,7 +1237,7 @@ Notice that the pending flag is cleared at the top of the paint handler, so a re
 void PointerSkip(double x, double y);
 ```
 
-Notice the last piece: on pointer release the page requests one more render at full, non-drag resolution, which is what makes a two-tier resolution scheme work.
+Notice the last piece: on pointer release the view model's `PointerReleased()` requests one more render at full, non-drag resolution, which is what makes a two-tier resolution scheme work.
 
 A GPU backend that a paint callback is about to use gets pre-warmed off the UI thread, so a missing driver becomes a status message rather than an exception inside the paint handler:
 
@@ -1255,12 +1349,14 @@ public string SearchText
         if (newValue == field) { return; }
 
         SetProperty(ref field, newValue);
-        DebounceRebuild();
+        _ = DebounceRebuildAsync();
     }
 } = string.Empty;
-
-//Waits a beat after the last keystroke before rebuilding, so typing stays smooth.
-private async void DebounceRebuild()
+// ...
+//Waits a beat after the last keystroke before rebuilding, so typing stays smooth. It
+//returns a Task rather than being `async void`, so a failure is captured in the task
+//instead of escaping onto the UI thread from a property setter.
+private async Task DebounceRebuildAsync()
 {
     _searchDebounce?.Cancel();
     var debounce = new CancellationTokenSource();
@@ -1277,7 +1373,7 @@ private async void DebounceRebuild()
 }
 ```
 
-Notice that `async void` is right here - it is a fire-and-forget UI reaction, and the cancellation is caught rather than allowed to escape. The setter compares before assigning, so re-setting the same text does not restart the timer. A discrete choice such as a sort selector rebuilds immediately; only free text needs debouncing.
+Notice that the debounce returns a `Task`, which the setter discards, rather than being `async void`: it is still a fire-and-forget UI reaction, but a failure is captured in the task instead of escaping onto the UI thread from a property setter, and the cancellation is caught rather than allowed to escape. The setter compares before assigning, so re-setting the same text does not restart the timer. A discrete choice such as a sort selector rebuilds immediately; only free text needs debouncing.
 
 ## Dialogs raised from a view model
 
@@ -1303,7 +1399,7 @@ private async Task DoClear()
         StatusText = "Cleared - paint something new.";
     }
 }
-
+// ...
 private async Task DoGoBack()
 {
     if (!CanGoBack()) { return; }
@@ -1384,6 +1480,7 @@ private enum SaveConfirmation
     Save,
     Discard,
     Cancel,
+    // ...
 }
 
 /// <summary>
@@ -1436,6 +1533,7 @@ public bool HasDownloadFolder => !string.IsNullOrWhiteSpace(_downloadFolder);
 /// <summary>The folder-picker button's caption: an invitation, or the chosen path.</summary>
 public string DownloadFolderLabel => HasDownloadFolder ? _downloadFolder : "Choose download folder…";
 
+/// <summary>Opens the folder picker to choose where models download to.</summary>
 public SimpleCommand PickFolderCommand => field ??=
     new SimpleCommand((Func<object, Task>)(_ => PickFolderAsync()));
 
@@ -1455,8 +1553,9 @@ private async Task PickFolderAsync()
     _downloadFolder = FileDialogHelper.ToFileSystemPath(folder.Path);
     NotifyPropertyChanged(nameof(HasDownloadFolder));
     NotifyPropertyChanged(nameof(DownloadFolderLabel));
+    // ...
 }
-
+// ...
 private async Task DownloadAsync(ModelCellViewModel cell)
 {
     if (cell == null || IsDownloading) { return; }
@@ -1489,15 +1588,16 @@ private void LoadMedia()
     try
     {
         var uri = new Uri(MediaAddress);
-        PlayerSource = MediaSource.CreateFromUri(uri);
+        SetPlayerSource(MediaSource.CreateFromUri(uri));
         StatusText = $"Loaded: {uri}";
     }
     catch (Exception ex)
     {
+        _log.LogWarning(ex, "Cannot load '{MediaAddress}'.", MediaAddress);
         StatusText = $"Cannot load '{MediaAddress}': {ex.Message}";
     }
 }
-
+// ...
 public string StatusText
 {
     get;
@@ -1513,6 +1613,7 @@ A rule the model enforces deserves its own exception type, with the message alre
 // From CodeBrix.Samples/PdfSideBySide/src/libs/PdfSideBySide.PdfRender/Documents/DuplicateDocumentException.cs
 public sealed class DuplicateDocumentException : InvalidOperationException
 {
+    /// <summary>Creates the exception for filePath, which is already open as alreadyOpenSide.</summary>
     public DuplicateDocumentException(string filePath, DocumentSide alreadyOpenSide)
         : base($"“{Path.GetFileName(filePath)}” is already selected as " +
                $"{DescribeSide(alreadyOpenSide)}; choose a different PDF for " +
@@ -1629,17 +1730,27 @@ public MainViewModel()
     if (IsDesignMode(true)) { return; } //Leave as the first line of constructor
 
     probe = GetService<IMediaProbe>() ?? new MediaProbe();
+    toolCheck = GetService<IExternalToolCheck>() ?? new ExternalToolCheck();
 
     Playback = new PlaybackViewModel();
     Conversion = new ConversionViewModel();
     Conversion.ConversionFinished += OnConversionFinished;
+
+    //The conversion half's own status line - a cancelled save dialog, a refused plan, the plan
+    //while it runs - has no text block of its own, so it goes on the one status bar.
+    Conversion.PropertyChanged += OnConversionPropertyChanged;
 }
+
+#region | Bindable properties |
 
 /// <summary>The player half: what is open, the transport, the chapters and the captions.</summary>
 public PlaybackViewModel Playback { get; }
 
 /// <summary>The conversion half: the destination, the size, the action and the progress.</summary>
 public ConversionViewModel Conversion { get; }
+
+/// <summary>Every file this session has opened or produced, newest last.</summary>
+public ObservableCollection<SourceMediaInfo> Library { get; } = new();
 
 /// <summary>The file the player is showing and the conversion panel is set up for.</summary>
 [AffectsCommands(nameof(RemoveCommand))]
@@ -1683,7 +1794,7 @@ Two identical regions are better served by scoping the region's own `DataContext
         BrowseCommand = new SimpleCommand(browse);
     }
     // ...
-    /// <summary>Shows document (or clears the pane when it is null).</summary>
+    /// <summary>Shows document (or clears the pane when it is <c>null</c>).</summary>
     internal void ShowDocument(PdfPageDocument document)
     {
         FilePath = document?.FilePath;
@@ -1792,9 +1903,14 @@ public ChapterEntry SelectedChapter
         if (!suppressSelectionChanges && value is not null)
         {
             surface?.SeekToChapter(value.Index);
+            // ...
         }
+        // ...
     }
+    // ...
 }
+
+private void OnPlayStateChanged(object sender, EventArgs e) => RefreshPlayState();
 
 private void OnChapterChanged(object sender, EventArgs e)
 {
@@ -1825,25 +1941,24 @@ A picker that offers something the running platform cannot do should say why, ra
 
 ```csharp
 // From CodeBrix.Samples/PolyHavenBrowser_viewer_only/src/PolyHavenBrowser.Core/ViewModels/MainViewModel.cs
-public string SelectedRenderEngineName
+public RenderEngineKind SelectedRenderEngine
 {
-    get => _selectedRenderEngineName;
+    get => _selectedRenderEngine;
     set
     {
-        if (string.IsNullOrEmpty(value) || value == _selectedRenderEngineName) { return; }
+        if (value == _selectedRenderEngine) { return; }
 
         //Optimistic: show the new selection at once; SwitchEngineAsync reverts it if the
         //engine is unsupported or fails to initialize.
-        _selectedRenderEngineName = value;
-        NotifyPropertyChanged(nameof(SelectedRenderEngineName));
-        _ = SwitchEngineAsync(value);
+        SetEnumProperty(ref _selectedRenderEngine, value);
+        _ = RunSwitchEngineAsync(value);
     }
 }
-
+// ...
 private void RevertEngineSelection()
 {
-    _selectedRenderEngineName = _currentEngineKind.ToString();
-    NotifyPropertyChanged(nameof(SelectedRenderEngineName));
+    _selectedRenderEngine = _currentEngineKind;
+    NotifyPropertyChanged(nameof(SelectedRenderEngine));
 }
 ```
 
@@ -1911,10 +2026,14 @@ public AssetCellViewModel(string title, AssetCellKind kind, string kindLabel, st
 /// </summary>
 public SimpleCommand OpenCommand => field ??=
     new SimpleCommand((Func<object, Task>)(_ => _openAsync(this)));
-
+// ...
 /// <summary>The placeholder glyph's visibility (shown until a thumbnail arrives, or always for kinds without one).</summary>
 public Visibility PlaceholderVisibility => _thumbnail == null ? Visibility.Visible : Visibility.Collapsed;
 
+/// <summary>
+/// Fetches the cell's thumbnail from the bundle archive and hands it to the Image
+/// control. Failures leave the placeholder glyph showing.
+/// </summary>
 public async Task LoadThumbnailAsync()
 {
     if (_thumbnail != null || _thumbnailFailed || _thumbnailBytesAsync == null) { return; }
@@ -1966,8 +2085,16 @@ public class AssetCellCollection : ObservableCollection<AssetCellViewModel>
     //Enough cells to overfill the first screen even on a wide monitor.
     private const int InitialBatch = 36;
 
+    /// <summary>
+    /// How many further cells to materialize each time the grid asks for more. How near the
+    /// bottom edge counts as "near" is a measurement only the view can make, but how much to
+    /// add when it does is this collection's own policy, beside its initial batch.
+    /// </summary>
+    public const int ScrollBatch = 24;
+
     private readonly IReadOnlyList<AssetCellViewModel> _source;
 
+    /// <summary>Creates the collection over an already filtered and ordered cell list.</summary>
     public AssetCellCollection(IReadOnlyList<AssetCellViewModel> source)
     {
         _source = source ?? throw new ArgumentNullException(nameof(source));
@@ -1975,9 +2102,18 @@ public class AssetCellCollection : ObservableCollection<AssetCellViewModel>
         RequestMore(InitialBatch);
     }
 
+    /// <summary>The total number of assets behind the collection (materialized or not).</summary>
     public int TotalCount => _source.Count;
+
+    /// <summary>Whether assets remain that are not showing in the grid yet.</summary>
     public bool HasMoreItems => Count < _source.Count;
 
+    /// <summary>
+    /// Materializes up to <c>count</c> further cells (each one starts fetching its
+    /// thumbnail as it appears). Safe to call repeatedly; extra calls simply no-op once
+    /// every asset is showing.
+    /// </summary>
+    /// <param name="count">The maximum number of cells to add.</param>
     public void RequestMore(int count)
     {
         var toLoad = Math.Min(count, _source.Count - Count);
@@ -1998,7 +2134,8 @@ public class AssetCellCollection : ObservableCollection<AssetCellViewModel>
 ```csharp
 // From CodeBrix.Samples/KenneyAssetBrowser/src/KenneyAssetBrowser.UI/Views/MainPage.xaml.cs
 //Lazy grid loading: as the grid scrolls within two screens of its bottom edge,
-//ask the cell collection to materialize the next batch.
+//ask the cell collection to materialize the next batch (how big a batch is the
+//collection's own policy).
 CatalogScroll.ViewChanged += (_, _) =>
 {
     var cells = ViewModel?.Cells;
@@ -2007,19 +2144,17 @@ CatalogScroll.ViewChanged += (_, _) =>
     var remaining = CatalogScroll.ExtentHeight - CatalogScroll.VerticalOffset - CatalogScroll.ViewportHeight;
     if (remaining < CatalogScroll.ViewportHeight * 2)
     {
-        cells.RequestMore(24);
+        cells.RequestMore(AssetCellCollection.ScrollBatch);
     }
 };
-
+// ...
 //A new cell collection means the user switched bundle, searched or
 //re-filtered: jump back to the top.
-if (args.PropertyName == nameof(MainViewModel.Cells))
-{
+catalogBridge.ScrollCatalogToTop = () =>
     CatalogScroll.ChangeView(null, 0, null, disableAnimation: true);
-}
 ```
 
-Notice that filtering swaps in a whole new collection instance rather than mutating the existing one, which is what makes "scroll back to the top" a single property change to watch; that a threshold of two viewports means a batch is already in place before the user reaches the end; and that `RequestMore` is safe to call repeatedly and no-ops once everything is materialized.
+Notice that filtering swaps in a whole new collection instance rather than mutating the existing one, which is what makes "scroll back to the top" a single bridge call the view model makes when it swaps the collection; that a threshold of two viewports means a batch is already in place before the user reaches the end; and that `RequestMore` is safe to call repeatedly and no-ops once everything is materialized.
 
 A tree that is expensive to enumerate loads a level at a time. Each row is its own small view model, and a synthetic placeholder child keeps the expand chevron visible before the real children exist:
 
@@ -2045,10 +2180,12 @@ public bool IsExpanded
     set
     {
         SetProperty(ref field, value);
-        if (value) { _ = EnsureChildrenLoadedAsync(); }
+        //A setter cannot await, so the one-shot child load is started through a helper
+        //  that observes it rather than through a bare fire-and-forget discard.
+        if (value) { BackgroundWork.StartAndObserve(EnsureChildrenLoadedAsync, ReportChildLoadFailure); }
     }
 }
-
+// ...
 /// <summary>Loads the real children on first expand (no-op afterwards).</summary>
 internal async System.Threading.Tasks.Task EnsureChildrenLoadedAsync()
 {
@@ -2163,10 +2300,14 @@ bool userConfirmed = !effect.IsConfigurable || await effect.LaunchConfiguration 
 chrome.MainWindowBusy = true;
 
 if (!userConfirmed) {
+    Debug.WriteLine ("User decided not to proceed with the render");
     renderHandle.Cancel ();
     await renderHandle.Task;
     return;
 }
+
+// The user confirmed, so show progress dialog
+Debug.WriteLine (DateTime.Now.ToString ("HH:mm:ss:ffff") + "LivePreviewManager.Apply()");
 
 dialog.Show ();
 
@@ -2226,6 +2367,7 @@ Most view models need far less than that:
 
 public override void Dispose()
 {
+    (PlayerSource as IDisposable)?.Dispose();
     _loadCommand?.Dispose();
     _loadCommand = null;
     base.Dispose();
@@ -2243,7 +2385,7 @@ Notice that this is where the explicit command backing fields earn their keep: a
 ```csharp
 // From CodeBrix.Samples/JustBetweenUs/Shared/ViewModels/MainViewModel.cs
 public SimpleCommand ShowOsInfoCommand =>
-    (field ??= new SimpleCommand(DoShowOsInfo));
+    (_showOsInfoCommand ??= new SimpleCommand(DoShowOsInfo));
 
 private async Task DoShowOsInfo()
 {
@@ -2255,6 +2397,9 @@ private async Task DoShowOsInfo()
     sb.AppendLine($"Product name: {_osInfo.ProductName}");
     sb.AppendLine($"Product name (for display): {_osInfo.ProductNameDisplay}");
 
+    //Note that when running via CodeBrix.Platform on Android, the following lines will not be displayed - since
+    //  the SimpleDialog text is truncated on this platform - it must have a maximum number of lines.
+    //  Further note: CodeBrix.Platform is not supported on Android
     sb.AppendLine($"Running as user: {_osInfo.RunningAsUser}{((_osInfo.IsAdminUser is true) ? " (local admin)" : "")}");
     sb.AppendLine($"DotNet version: {_osInfo.DotNetVersion}");
     sb.AppendLine($"Platform architecture: {_osInfo.PlatformArchitecture}");
@@ -2309,7 +2454,7 @@ Notice the caching field: `GatherInfo` is awaited once. Pass `withConsoleOutput:
 | Blocking work in a service behind `Task.Run` | [KenneyAssetBrowser AssetCatalogService](https://github.com/ellisnet/CodeBrix.Samples/blob/main/KenneyAssetBrowser/src/KenneyAssetBrowser.Core/Services/AssetCatalogService.cs) |
 | Load an asset off the UI thread and resolve its side files | [KenneyAssetBrowser GltfModelLoader](https://github.com/ellisnet/CodeBrix.Samples/blob/main/KenneyAssetBrowser/src/libs/KenneyAssetBrowser.Rendering/Models/GltfModelLoader.cs) |
 | Pre-warm a rendering backend off the UI thread | [PolyHavenBrowser_viewer_only MainViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/PolyHavenBrowser_viewer_only/src/PolyHavenBrowser.Core/ViewModels/MainViewModel.cs) |
-| Coalesce repaints and drop backlogged pointer frames | [PolyHavenBrowser_viewer_only MainPage code-behind](https://github.com/ellisnet/CodeBrix.Samples/blob/main/PolyHavenBrowser_viewer_only/src/PolyHavenBrowser.UI/Views/MainPage.xaml.cs) |
+| Coalesce repaints and drop backlogged pointer frames | [PolyHavenBrowser_viewer_only MainViewModel](https://github.com/ellisnet/CodeBrix.Samples/blob/main/PolyHavenBrowser_viewer_only/src/PolyHavenBrowser.Core/ViewModels/MainViewModel.cs) |
 | A sensor pipeline on a worker thread, latest frame wins | [WebcamPainter HandTracker](https://github.com/ellisnet/CodeBrix.Samples/blob/main/WebcamPainter/src/libs/WebcamPainter.Vision/HandTracker.cs) |
 | Survive a native runtime tearing down mid-frame | [WebcamPainter HandTracker](https://github.com/ellisnet/CodeBrix.Samples/blob/main/WebcamPainter/src/libs/WebcamPainter.Vision/HandTracker.cs) |
 | Publish a small immutable result type | [WebcamPainter HandTrackingResult](https://github.com/ellisnet/CodeBrix.Samples/blob/main/WebcamPainter/src/libs/WebcamPainter.Vision/HandTrackingResult.cs) |

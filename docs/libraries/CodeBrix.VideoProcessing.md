@@ -171,7 +171,7 @@ bare name, resolved through PATH. `.exe` is appended on Windows only, and the sa
 `GlobalFFOptions.Current` is loaded on first access from a file named `ffmpeg.config.json` in the
 process's current directory when that file exists, deserialized straight into `FFOptions`, so its keys
 are `BinaryFolder`, `TemporaryFilesFolder`, `WorkingDirectory`, `EncodingWebName`, `LogLevel`,
-`ExtensionOverrides` and `UseCache`. `Configure(FFOptions)` replaces the process-wide options;
+`ExtensionOverrides`, `UseCache` and `AllowAv1EncoderFallback`. `Configure(FFOptions)` replaces the process-wide options;
 `Configure(Action<FFOptions>)` mutates them in place. `FFMpegArgumentProcessor.Configure(...)` is the
 per-run alternative: it clones `GlobalFFOptions.Current` and applies the actions to the clone, so globals
 are never mutated.
@@ -220,12 +220,12 @@ same output throws `FFMpegArgumentException`. Build the whole chain in one call.
 
 ```csharp
 // WRONG - throws
-.OutputToFile(out, true, o => o
+.OutputToFile(output, true, o => o
     .WithVideoFilters(f => f.Scale(1280, 720))
     .WithVideoFilters(f => f.Fps(30)))
 
 // RIGHT
-.OutputToFile(out, true, o => o
+.OutputToFile(output, true, o => o
     .WithVideoFilters(f => f.Scale(1280, 720).Fps(30)))
 ```
 
@@ -378,7 +378,7 @@ into a video.
 `FFMpegErrorOutput`, the captured standard error. Around it sit `FFMpegStreamFormatException` (a pipe
 frame that does not match the first one), `FFMpegArgumentException` (an empty filter list, a second
 filter chain on one output, an empty `ZScaleOptions` or a non-finite `Npl`), `FFOptionsException`,
-`FFProbeException` and `FormatNullException`. A canceled run throws `OperationCanceledException`, and a
+`FFProbeException`, `FFMpegEncoderNotFoundException` and `FormatNullException`. A canceled run throws `OperationCanceledException`, and a
 missing conversion input with `verifyExists: true` surfaces as `System.IO.FileNotFoundException` when the
 process starts. Catching `FFMpegException` plus `OperationCanceledException` plus `System.IO.IOException`
 covers essentially every failure mode at run time.

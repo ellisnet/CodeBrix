@@ -66,7 +66,7 @@ using CodeBrix.Platform.UI.MediaPlayer.Skia;   // SkiaMediaPlayerExtension
 Package ids carry the license suffix; namespaces do not.
 
 > [!IMPORTANT]
-> This is the only published CodeBrix.Platform package that is not Apache-2.0. It is LGPL-2.1-or-later, and the `.LgplLicenseForever` suffix is deliberate truth-in-labeling so that nobody adds an LGPL dependency to an application by accident. If your application must stay LGPL-free, do not use this package: on macOS you do not need it at all, and for audio-only playback the Apache-2.0 [AudioPlayer](AudioPlayer.md) add-in is the alternative.
+> This is the only CodeBrix.Platform add-in with a copyleft license. It is LGPL-2.1-or-later, and the `.LgplLicenseForever` suffix is deliberate truth-in-labeling so that nobody adds an LGPL dependency to an application by accident. If your application must stay LGPL-free, do not use this package: on macOS you do not need it at all, and for audio-only playback the Apache-2.0 [AudioPlayer](AudioPlayer.md) add-in is the alternative.
 
 ## Using it
 

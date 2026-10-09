@@ -482,8 +482,10 @@ apt install libegl1 libgl1-mesa-dri
 ## Related
 
 - [CodeBrix.Platform.OpenGL](../../libraries/CodeBrix.Platform.OpenGL.md) - the managed OpenGL binding this add-in draws through, usable on its own in any .NET 10 application
+- [OpenGL in PlayTests](../playtest/opengl.md) - testing pages that use these elements with PlayTest: the `CodeBrix.Platform.PlayTest.OpenGL.ApacheLicenseForever` companion package gives a PlayTest run real GL contexts, so GL pixels appear in screenshots
 - [Graphics2DSK](Graphics2DSK.md) - the zero-copy processor-side element, for drawing that does not need the GPU
 - [SkiaSharp views](SkiaSharpViews.md) - `SKXamlCanvas`, whose `SKSwapChainPanel` placeholder `SkiaGLCanvasElement` stands in for
+- [CodeBrix.Graphics3D.Gltf2](../../libraries/CodeBrix.Graphics3D.Gltf2.md) - the managed glTF 2.0 reader, writer and runtime helpers that PolyHavenBrowser, PolyHavenBrowser_viewer_only and KenneyAssetBrowser load their models with before drawing them here
 - [PolyHavenBrowser](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PolyHavenBrowser) in [CodeBrix.Samples](../../samples/README.md) - a glTF preview in a GL canvas, automatic camera framing, a second translucent pass, and off-screen product shots
 - [PolyHavenBrowser_viewer_only](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PolyHavenBrowser_viewer_only) in [CodeBrix.Samples](../../samples/README.md) - three interchangeable GPU backends behind one interface, composited onto a Skia canvas
 - [KenneyAssetBrowser](https://github.com/ellisnet/CodeBrix.Samples/tree/main/KenneyAssetBrowser) in [CodeBrix.Samples](../../samples/README.md) - a 3D model preview alongside image, sprite-sheet and animation viewers

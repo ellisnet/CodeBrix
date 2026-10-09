@@ -17,11 +17,11 @@ detail, the examples and the pitfalls.
 | | |
 | --- | --- |
 | **Repository** | [ellisnet/CodeBrix.Audio](https://github.com/ellisnet/CodeBrix.Audio) |
-| **Packages** | [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever) - the desktop package, the one an application references: it brings in Core and adds the Windows, Linux and macOS native backends<br>[`CodeBrix.Audio.Core.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.Core.MitLicenseForever) - ships the `CodeBrix.Audio` and `CodeBrix.Audio.Engine` assemblies, with no audio device backend; the desktop package references it automatically<br>[`CodeBrix.Audio.ModestSynth.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.ModestSynth.MitLicenseForever) - the synthesis add-on, on its own [page](CodeBrix.Audio.ModestSynth.md) |
-| **License** | MIT for all three; see [License](#license) |
+| **Packages** | [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever) - the desktop package, the one an application references: it brings in Core and adds the Windows, Linux and macOS native backends<br>[`CodeBrix.Audio.Core.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.Core.MitLicenseForever) - ships the `CodeBrix.Audio` and `CodeBrix.Audio.Engine` assemblies, with no audio device backend; the desktop package references it automatically<br>[`CodeBrix.Audio.ModestSynth.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.ModestSynth.MitLicenseForever) - the synthesis add-on, on its own [page](CodeBrix.Audio.ModestSynth.md)<br>[`CodeBrix.Audio.MidiConnect.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MidiConnect.MitLicenseForever) - physical MIDI device input and output, recording and timed device playback; depends on Core only |
+| **License** | MIT for all four; see [License](#license) |
 | **Requires** | .NET 10 or later. No system audio package and no system-wide codec is required on Windows, macOS or Linux |
 | **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application, through the [AudioPlayer add-in](../platform/add-ins/AudioPlayer.md) |
-| **Platforms** | Windows, macOS and Linux. The bundled native backend ships for `win-x64`, `win-arm64`, `linux-x64`, `linux-arm64`, `linux-riscv64`, `osx-x64` and `osx-arm64` |
+| **Platforms** | Windows, macOS and Linux. The bundled native backend ships for `win-x64`, `win-arm64`, `linux-x64`, `linux-arm64`, `linux-riscv64`, `osx-x64` and `osx-arm64`. Android (API 33 and later, ARM64 and x64) uses the separate [`CodeBrix.Audio.Android.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.Android.ApacheLicenseForever) package in place of the desktop package, over the same Core assemblies - see [CodeBrix.Audio.Android](CodeBrix.Audio.Android.md) |
 
 ## What it does
 
@@ -104,7 +104,8 @@ What the library deliberately does not do:
   becomes a live control model, and nothing here draws it.
 - No store, no licensing and no copy protection, and no plugin hosting: this is a library, not a
   plugin host and not a plugin. It plays instrument **files**.
-- No MIDI devices. MIDI arrives as a Standard MIDI File, or as messages your code sends.
+- No MIDI devices in this package. MIDI arrives as a Standard MIDI File, or as messages your code sends;
+  live device input and output is the separate `CodeBrix.Audio.MidiConnect.MitLicenseForever` package.
 
 ## Getting started
 
@@ -171,7 +172,7 @@ content - the same code plays every built-in format.
 
 ## Key concepts
 
-The section is nine pages. Read the one that matches the job.
+Each concept below has a page of its own. Read the one that matches the job.
 
 ### Reading and writing files
 
@@ -385,13 +386,14 @@ whichever part of the library they start with.
 
 ## Samples and tools in the repository
 
-The repository ships three packages and has no sample applications and no demo projects. Everything
-below is developer tooling and test data: none of it is packed, and none of it is needed to consume
-any of the packages. Nothing in `tools/` installs anything on your machine - every script checks for what
+The repository ships four packages. Everything below is samples, developer tooling and test data:
+none of it is packed, and none of it is needed to consume any of the packages. Nothing in `tools/` installs anything on your machine - every script checks for what
 it needs, names anything missing, prints the command that would install it, and stops.
 
 | Name | What it demonstrates | Where |
 | --- | --- | --- |
+| MidiConnect | A console harness for the MIDI device package: list devices, monitor and record a performance to a `.mid`, inspect a file, and play one out to a device | [`samples/MidiConnect`](https://github.com/ellisnet/CodeBrix.Audio/tree/main/samples/MidiConnect) |
+| SunoInstrumentSwap | Renders a stems export twice - as downloaded, and with every transcribed part played through an instrument library chosen by name | [`samples/SunoInstrumentSwap`](https://github.com/ellisnet/CodeBrix.Audio/tree/main/samples/SunoInstrumentSwap) |
 | Native library build scripts | Builds the native audio backend for every shipped runtime identifier, in containers on Linux | [`tools/build_native_libraries`](https://github.com/ellisnet/CodeBrix.Audio/tree/main/tools/build_native_libraries) |
 | Test fixture generator | Regenerates the synthesized audio and SoundFont fixtures the tests run against | [`tools/make_test_fixtures`](https://github.com/ellisnet/CodeBrix.Audio/tree/main/tools/make_test_fixtures) |
 | SFZ opcode survey | Decides the scope of SFZ support by counting rather than guessing, parsing a folder of real SFZ libraries with the library's own parser | [`tools/sfz_opcode_survey`](https://github.com/ellisnet/CodeBrix.Audio/tree/main/tools/sfz_opcode_survey) |
@@ -418,6 +420,7 @@ real SoundFont and no sampler library is committed anywhere in the repository.
 | Overview (README) | [README.md](https://github.com/ellisnet/CodeBrix.Audio/blob/main/README.md) |
 | Complete API guide, covering both bundled assemblies (ships inside the package too) | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Audio/blob/main/AGENT-README.txt) |
 | The add-on's own guide | [src/CodeBrix.Audio.ModestSynth/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Audio/blob/main/src/CodeBrix.Audio.ModestSynth/AGENT-README.txt) |
+| The MIDI device package's guide | [src/CodeBrix.Audio.MidiConnect/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Audio/blob/main/src/CodeBrix.Audio.MidiConnect/AGENT-README.txt) |
 | Tools and other non-package content | [EXTRAS-README.txt](https://github.com/ellisnet/CodeBrix.Audio/blob/main/EXTRAS-README.txt) |
 | Map of every document in the repository | [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Audio/blob/main/README-INDEX.txt) |
 | Tests (worked examples of every API) | [tests/CodeBrix.Audio.Tests](https://github.com/ellisnet/CodeBrix.Audio/tree/main/tests/CodeBrix.Audio.Tests) |
@@ -432,7 +435,7 @@ assemblies, because one package, Core, ships both.
 CodeBrix.Audio is licensed under the MIT License, and the license is also named in the package IDs:
 the desktop package, `CodeBrix.Audio.MitLicenseForever`, and `CodeBrix.Audio.Core.MitLicenseForever`,
 which carries both assemblies. The synthesis add-on, `CodeBrix.Audio.ModestSynth.MitLicenseForever`, is
-MIT as well, and the three packages are built and published from this one repository at the same
+MIT as well, as is the MIDI device package, `CodeBrix.Audio.MidiConnect.MitLicenseForever`, and the four packages are built and published from this one repository at the same
 version. License acceptance is required at install
 time, and the license notice for the bundled native backend travels with the native binaries into your
 application's output folder. For the provenance and licensing of open source code included in this

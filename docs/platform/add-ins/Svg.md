@@ -4,7 +4,7 @@
 
 **Makes the core framework's `SvgImageSource` actually render.** The core already defines `SvgImageSource`, its `UriSource`, `RasterizePixelWidth` and `RasterizePixelHeight` properties, its `Opened` and `OpenFailed` events, and the `Image` control's handling of it - but the core has no SVG parser. This add-in plugs one in and hands the `Image` control a canvas element that draws the parsed picture, as vectors, at whatever size the `Image` is arranged to.
 
-It is an invisible add-in. Application code never names a type from this package: you reference it once, then use the core's `SvgImageSource` in XAML and in code with no add-in type in sight.
+It is an invisible add-in. Application code normally never names a type from this package: you reference it once, then use the core's `SvgImageSource` in XAML and in code with no add-in type in sight. The exceptions are the public statics on `SvgProvider` - `SetCss` and `GetCss`, to theme an icon through a stylesheet set before loading, and `GetRasterizedPixelSize`.
 
 | | |
 | --- | --- |
@@ -58,7 +58,7 @@ using Windows.Storage.Streams;           // IRandomAccessStream,
 There is nothing to call and nothing to configure. The assembly carries `[assembly: ApiExtension(typeof(ISvgProvider), typeof(SvgProvider))]`; the XAML source generator finds that attribute while compiling the application and emits the registration into the generated `App` code, so every `SvgImageSource` constructed afterwards gets a provider.
 
 > [!WARNING]
-> Without the package, `SvgImageSource` still exists - it is a core type - but every instance logs the error "To use SVG on this platform, make sure to install the CodeBrix.Platform.WinUI.Svg package." and the `Image` stays blank. That log line is the symptom of a missing or misplaced reference; the package you install is `CodeBrix.Platform.Svg.ApacheLicenseForever`, in `.Core`.
+> Without the package, `SvgImageSource` still exists - it is a core type - but the first one logs a once-per-process warning, "SvgImageSource: no SVG provider is registered, SVG images stay empty. To use SVG on this platform, install the CodeBrix.Platform.Svg.ApacheLicenseForever package.", and every `Image` stays blank. That log line is the symptom of a missing or misplaced reference; install the package it names, in `.Core`.
 
 ## Using it
 
@@ -184,9 +184,6 @@ While both `RasterizePixelWidth` and `RasterizePixelHeight` are `NaN` - the defa
 
 Use this for a large, complex SVG shown at a constant size, where each repaint becomes a bitmap copy instead of a re-draw of the picture. Changing either value after load re-rasterizes immediately, on the thread that sets the property - so do not animate them.
 
-> [!WARNING]
-> The two values are applied crosswise when the bitmap is allocated: the height value sizes the bitmap's width and the width value sizes its height. Use equal values for a square raster unless you have verified the result at your aspect ratio.
-
 ### Swapping the image at run time
 
 ```csharp
@@ -225,10 +222,10 @@ There are none. One Skia runtime assembly serves every head, and no head-specifi
 
 ## Pitfalls
 
-- **Blank image plus "make sure to install the CodeBrix.Platform.WinUI.Svg package" in the log** means the add-in is not referenced by the project chain that compiles the application. Put `CodeBrix.Platform.Svg.ApacheLicenseForever` in `.Core`.
+- **Blank image plus "no SVG provider is registered" in the log** means the add-in is not referenced by the project chain that compiles the application. Put `CodeBrix.Platform.Svg.ApacheLicenseForever` in `.Core`.
 - **`embedded://` is not understood by `SvgImageSource`.** Use `SetSourceAsync` with the manifest stream.
 - **Loading errors do not throw.** A bad path or an unreachable URI leaves the `Image` blank and raises nothing; only a malformed document raises `OpenFailed` and `Image.ImageFailed`.
-- **`RasterizePixelWidth` and `RasterizePixelHeight` only take effect when both are non-`NaN`**, and they are applied crosswise when the bitmap is allocated.
+- **`RasterizePixelWidth` and `RasterizePixelHeight` only take effect when both are non-`NaN`**.
 - **Rasterized output is stretched to the arranged size.** A 32-pixel raster shown at 128 pixels is blurry. Rasterize at the largest size you will show, or stay in vector mode.
 - **The intrinsic size comes from the parsed picture's bounds.** Give the `Image` an explicit `Width` and `Height`, or rely on `Stretch` inside a sized container, when the SVG's own `width`, `height` or `viewBox` is not what you want on screen.
 - **`SetSourceAsync(null)` throws `ArgumentException`.**
@@ -245,7 +242,6 @@ There are none. One Skia runtime assembly serves every head, and no head-specifi
 - [Lottie](Lottie.md) - the companion add-in for animated vector content
 - [Graphics2DSK](Graphics2DSK.md) - the canvas element the parsed picture is drawn on, and one of this add-in's dependencies
 - [JustBetweenUs](https://github.com/ellisnet/CodeBrix.Samples/tree/main/JustBetweenUs) in [CodeBrix.Samples](../../samples/README.md) - an `EmbeddedImage` control that loads `.svg` embedded resources through `SetSourceAsync` and `ms-appx` and `https` URIs through `UriSource`; the in-repository copy is at [samples/CodeBrixPlatform/JustBetweenUs](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform/JustBetweenUs)
-- [KenneyAssetBrowser](https://github.com/ellisnet/CodeBrix.Samples/tree/main/KenneyAssetBrowser) in [CodeBrix.Samples](../../samples/README.md) - previews SVG art alongside images, fonts, maps, models and audio
 
 ## Documentation and source
 

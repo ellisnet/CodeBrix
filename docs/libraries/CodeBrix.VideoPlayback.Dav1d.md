@@ -15,7 +15,7 @@ a decoder type. Use it from any .NET 10 application, or from a CodeBrix.Platform
 | **License** | BSD 2-Clause; see [License](#license) |
 | **Requires** | .NET 10 or later, and a presenter to draw the frames. No native-asset package to add |
 | **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application |
-| **Platforms** | Windows x64 and ARM64, macOS on Intel and Apple Silicon, Linux x64, ARM64 and RISC-V 64 |
+| **Platforms** | Windows x64 and ARM64, macOS on Intel and Apple Silicon, Linux x64, ARM64 and RISC-V 64, Android ARM64 and x64 (API 33 and later) |
 
 ## What it does
 
@@ -43,8 +43,10 @@ Add this package to any application that has to play AV1, which is every applica
 `.cbv` file or a WebM file this family authors. It brings
 [`CodeBrix.VideoPlayback.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.VideoPlayback.MitLicenseForever)
 with it, which in turn brings
-[`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever);
-those are the whole of what a video player needs to read and decode a file.
+[`CodeBrix.Audio.Core.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.Core.MitLicenseForever);
+those are the whole of what a video player needs to read and decode a file. To hear the sound, the
+application also references the platform audio package - `CodeBrix.Audio.MitLicenseForever` on the
+desktop or `CodeBrix.Audio.Android.ApacheLicenseForever` on Android.
 
 Two things it does not bring, and an application usually needs:
 

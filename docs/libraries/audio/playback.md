@@ -17,7 +17,7 @@ installed on Windows, macOS or Linux.
 | **License** | MIT; see [License](#license) |
 | **Requires** | .NET 10 or later. No system audio package and no system-wide codec is required on Windows, macOS or Linux |
 | **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application, through the [AudioPlayer add-in](../../platform/add-ins/AudioPlayer.md) |
-| **Platforms** | Windows, macOS and Linux. The bundled native backend ships for `win-x64`, `win-arm64`, `linux-x64`, `linux-arm64`, `linux-riscv64`, `osx-x64` and `osx-arm64` |
+| **Platforms** | Windows, macOS and Linux. The bundled native backend ships for `win-x64`, `win-arm64`, `linux-x64`, `linux-arm64`, `linux-riscv64`, `osx-x64` and `osx-arm64`. Android uses the separate `CodeBrix.Audio.Android.ApacheLicenseForever` package in place of the desktop package |
 
 ## What it does
 

@@ -444,14 +444,14 @@ For modal input - a picker that swallows keys - derive from `TextAreaStackedInpu
 
 One paint pass runs on a Skia canvas: Background-layer renderers, then the selection, then each visual line's element backgrounds, text and decorations, then Caret-layer renderers. Only the visual lines intersecting the viewport are constructed, and a height tree tracks line heights, so a very large document opens and scrolls like a small one.
 
-Text is shaped and measured by the family's shared text engine, so glyphs, widths and line heights are identical to a `TextBlock` in the same font; the editor never falls back to a system font. The editor manages its own scrolling with two `ScrollBar` controls synced to the `TextView`'s scroll offsets; there is no `ScrollViewer` inside.
+Text is shaped and measured by the family's shared text engine, so glyphs, widths and line heights are identical to a `TextBlock` in the same font, and a character the font lacks is resolved exactly as it is for a `TextBlock` - from the framework's `FeatureConfiguration.Font.SymbolsFont`, then `FeatureConfiguration.Font.FallbackFontFamilies`, then the host's installed fonts unless `FeatureConfiguration.Font.RestrictToEmbeddedFonts` is on. The editor manages its own scrolling with two `ScrollBar` controls synced to the `TextView`'s scroll offsets; there is no `ScrollViewer` inside.
 
 ### What the control does not include
 
 - No built-in language services: no parsers, no semantic completion, no error squiggles. `ICompletionData`, `IOverloadProvider` and the rendering hooks are the seams for your own.
 - No brace-folding strategy in the box - only `XmlFoldingStrategy` - and no indentation strategy beyond `DefaultIndentationStrategy` and `CSharpIndentationStrategy`.
 - No find-and-replace user interface: the search panel finds only, and replace goes through `ISearchStrategy` plus `Document.Replace`.
-- No printing, no minimap, no multiple carets, no split views, no UI automation peer, and no themes or resource dictionaries to restyle the chrome. The editor, search panel and completion popups build their visuals in code and expose brush properties instead.
+- No printing, no minimap, no multiple carets, no split views, and no themes or resource dictionaries to restyle the chrome. The automation peer, `AdvancedTextEditAutomationPeer`, exposes the Edit control type and the value pattern, but not UI Automation's text and text-range patterns. The editor, search panel and completion popups build their visuals in code and expose brush properties instead.
 - No XAML-declared key bindings or commands; bindings are added from code.
 - XSHD is the only highlighting definition format.
 - No IME composition for CJK input methods, and no drag-and-drop of selected text, although the two option flags exist.

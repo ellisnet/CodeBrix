@@ -72,6 +72,7 @@ using CodeBrix.LilyPort.Engine.Layout;    // OutputDef, Stencil, Performance,
                                           //   PaperBook, PaperScore, IStencilSink
 using CodeBrix.LilyPort.Engine.Music;     // MusicObject, Moment, Duration, Pitch
 using CodeBrix.LilyPort.Parsing.Session;  // LilyParserSession, ParseOutcome
+using CodeBrix.LilyPort.Parsing.Driver;   // ParseAbortedException
 using CodeBrix.LilyScheme;                // Interpreter (RunWithLargeStack)
 ```
 

@@ -16,14 +16,14 @@ you use them from any .NET 10 application or from a CodeBrix.Platform applicatio
 | **License** | MIT; see [License](#license) |
 | **Requires** | .NET 10 or later, and nothing else on any operating system: no native-assets package, no runtime identifier, no system font, no `apt`/`brew`/`msi` step |
 | **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application |
-| **Platforms** | Windows, macOS and Linux. Every part of the conversion is managed code - no native library, no GPU, no window system and no system font anywhere in the chain |
+| **Platforms** | Windows, macOS, Linux and Android - on Android, with a one-time font registration at start-up. Every part of the conversion is managed code - no native library, no GPU, no window system and no system font anywhere in the chain |
 
 ## What it does
 
 | Package | Its role | Brings in |
 | --- | --- | --- |
 | `CodeBrix.Texinfo2Html.MitLicenseForever` | Texinfo source in, HTML and CSS out - nothing else | nothing; the .NET base class library only |
-| `CodeBrix.Texinfo2Pdf.MitLicenseForever` | Texinfo source in, a finished PDF out, in one call | Texinfo2Html and `CodeBrix.PdfDocCreate.Html2Pdf.MitLicenseForever` |
+| `CodeBrix.Texinfo2Pdf.MitLicenseForever` | Texinfo source in, a finished PDF out, in one call | Texinfo2Html, `CodeBrix.PdfDocCreate.Html2Pdf.MitLicenseForever` and `CodeBrix.PdfDocuments.MitLicenseForever` |
 
 ```mermaid
 flowchart LR
@@ -401,6 +401,9 @@ static void AddFontFile(string filePath, bool includeInFallback = false)
 static void AddFontFiles(IEnumerable<string> filePaths, bool includeInFallback = false)
 static void AddFontFilesFromDirectory(string directory, bool includeInFallback = false)
 static void AddFallbackFamily(string familyName)
+static IReadOnlyList<string> AddPackagedFontAssets(Func<string, Stream> openAsset, string storageDirectory)
+static IReadOnlyList<string> AddFontAssets(IEnumerable<string> assetNames, Func<string, Stream> openAsset,
+    string storageDirectory, bool includeInFallback = false)
 ```
 
 `TexinfoPdfFonts` registration is process-global and idempotent; do it once at startup, not per render.
@@ -594,7 +597,10 @@ and
 `<Name>/Fonts/*.ttf` plus manifest layout they ship.
 
 No native assets, no runtime identifier and no per-head package are ever required, so the same code runs
-unchanged on every operating system a .NET 10 application targets.
+unchanged on every operating system a .NET 10 application targets. The one addition is on Android, where
+the application calls `TexinfoPdfFonts.AddPackagedFontAssets(name => context.Assets.Open(name), fontDirectory)`
+once at start-up so the packaged fonts are found (set `TexinfoPdfIncludeAndroidFonts` to `false` to leave
+them out of the package).
 
 ## Pitfalls
 

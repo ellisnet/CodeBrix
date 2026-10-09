@@ -99,7 +99,7 @@ static void AppSettingsService.Set(string key, object? value)
 static bool AppSettingsService.HasValue(string key)
 ```
 
-There is no generic constraint on `T`, and `Set` is not generic: it takes `object?` and serializes the value by its runtime type with `System.Text.Json`, using the default options plus enums-as-strings. Every `Set` writes through to `settings.sqlite` immediately and synchronously, and a null value removes the key.
+There is no generic constraint on `T`, and the everyday `Set` is not generic: it takes `object?` and serializes the value by its runtime type with `System.Text.Json`, using the default options plus enums-as-strings. Every `Set` writes through to `settings.sqlite` immediately and synchronously, and a null value removes the key. A trimmed or native AOT application uses the reflection-free overloads instead, each taking a `JsonTypeInfo<T>` from a `JsonSerializerContext`: `Get<T>(key, defaultValue, jsonTypeInfo)`, `Set<T>(key, value, jsonTypeInfo)`, `Wrap<T>(key, defaultValue, jsonTypeInfo)` and `AppSettingProperty.Create<T>(key, defaultValue, jsonTypeInfo, oldKey)`.
 
 `Get<T>(key, defaultValue)` returns the default when the key is unset, when the stored JSON deserializes to null, or when it cannot be read as `T`. In that last case the mismatch is logged as a warning and the default is returned, never thrown. `Get<T>(key)` is the same with `default(T)`.
 

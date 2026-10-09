@@ -57,7 +57,7 @@ Every head project is nearly identical. The only differences between heads are t
 | Linux (frame buffer) | [`CodeBrix.Platform.Runtime.Skia.FrameBuffer.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.FrameBuffer.ApacheLicenseForever) | `.UseLinuxFrameBuffer()` |
 | macOS | [`CodeBrix.Platform.Runtime.Skia.MacOS.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Runtime.Skia.MacOS.ApacheLicenseForever) | `.UseMacOS()` |
 
-The `.Use...()` methods are extension methods in the `CodeBrix.Platform.UI.Hosting` namespace, surfaced by the corresponding head package - so a head sees only the one method that matches its package. Every one except `UseMacOS()` also has an overload taking a configuration lambda. The head package brings the core framework and the shared Skia runtime in transitively, along with `buildTransitive` targets that set `CodeBrixRuntimeIdentifier=Skia` and the head's compilation constants.
+The `.Use...()` methods are extension methods in the `CodeBrix.Platform.UI.Hosting` namespace, surfaced by the corresponding head package - so a head sees only the one method that matches its package. Every one also accepts a configuration lambda. The head package brings the core framework and the shared Skia runtime in transitively, along with `buildTransitive` targets that set `CodeBrixRuntimeIdentifier=Skia` and the head's compilation constants.
 
 ## The three kinds of projects
 
@@ -265,7 +265,10 @@ Notice that this runs after the host is initialized and before the run loop star
 
 ```csharp
 // From CodeBrix.Samples/NotionDocumentCreator/src/NotionDocumentCreator.UI/App.xaml.cs
-public App()
+public App() : this(null) { }
+
+// Alternate hosts may replace external services before any view models are constructed.
+public App(Action<IServiceCollection> configureServices)
 {
     //Set Roboto as the default font for all text in the application
     global::CodeBrix.Platform.UI.FeatureConfiguration.Font.DefaultTextFontFamily =
@@ -282,6 +285,7 @@ public App()
     {
         //Register the app's services here
         services.AddCreateDocument();
+        configureServices?.Invoke(services);
     });
     SimpleViewModel.SetIsDesignMode(false);
 
@@ -302,12 +306,14 @@ An application with a settings store opens it in the same constructor, after the
     {
         //Register the app's services here
         services.AddKenneyAssetBrowser();
+        configureServices?.Invoke(services);
     });
     SimpleViewModel.SetIsDesignMode(false);
 
-    //Open (or silently create) the single portable settings.sqlite store —
-    //  including its startup auto-backup and pruning — before any UI renders.
-    SettingsService.Initialize();
+    //Open (or silently create) the single portable settings.sqlite store -
+    //  including its startup auto-backup and pruning - before any UI renders.
+    if (settingsDirectory == null) SettingsService.Initialize();
+    else SettingsService.Initialize(settingsDirectory);
 
     InitializeComponent();
 ```
@@ -331,7 +337,7 @@ Notice that the registration is a call, not a module initializer: the source of 
 
 ```csharp
 // From CodeBrix.Samples/MediaPlayerDemo/src/MediaPlayerDemo.Core/Helpers/HostHelper.cs
-using CodeBrix.Platform.Simple;
+﻿using CodeBrix.Platform.Simple;
 using Microsoft.Extensions.Hosting;
 
 namespace MediaPlayerDemo.Helpers;
@@ -459,7 +465,7 @@ Notice that the factory assignment stays unguarded: `LogExtensionPoint` is in [C
 
 Further nested classes exist for narrower cases. Read the XML doc comments on the class in your editor before flipping one: most exist for compatibility with older behavior, and the defaults are right for new applications.
 
-The `Rendering` group is how an application chooses a render path without touching a head - `UseOpenGLOnWin32`, `UseOpenGLOnX11`, `PreferGLESOverGLOnX11`, `UseVulkanOnWayland`, `ForceVulkanOnWayland`, `UseOpenGLOnWayland` and `UseMetalOnMacOS`, each `bool?` where null means "use the GPU path when it is available". A head builder's own `RenderingBackend(...)` call takes precedence over these. [02 - Runs on every laptop](02-runs-on-every-laptop.md) has the per-head defaults and the trade-offs.
+The `Rendering` group is how an application chooses a render path without touching a head - `UseOpenGLOnWin32`, `UseOpenGLOnX11`, `PreferGLESOverGLOnX11`, `UseVulkanOnWayland`, `ForceVulkanOnWayland`, `UseOpenGLOnWayland` and `UseMetalOnMacOS`. Most are `bool?`, where null means "use the GPU path when it is available"; `PreferGLESOverGLOnX11` and `ForceVulkanOnWayland` are plain `bool` switches, off by default. A head builder's own `RenderingBackend(...)` call takes precedence over these. [02 - Runs on every laptop](02-runs-on-every-laptop.md) has the per-head defaults and the trade-offs.
 
 `EnableVisualSubtreeSkippingOptimization`, with its two thresholds, avoids re-rendering subtrees that have not changed, and is the first thing to try on a busy page.
 
@@ -497,9 +503,9 @@ Three timing rules govern the rest.
 
 - `DefaultTextFontFamily` and `FallbackFontFamilies` must be set before the first text is measured, which means in the `App` constructor.
 - `SymbolsFont` - the font used for `SymbolIcon` glyphs - must be set AFTER `App.InitializeComponent()`.
-- `RestrictToEmbeddedFonts` confines resolution to fonts the application ships.
+- `RestrictToEmbeddedFonts` confines resolution to fonts the application ships. It is off by default and, like the font families, must be set before the first text is measured, because resolved fonts are cached.
 
-Fallback entries name the plain, weight-less face files; a font package also ships per-weight files whose names will not resolve there. A character no font can supply renders as the font's `.notdef` glyph - blank or a box, depending on the font. The framework never substitutes the host machine's fonts unless `FallbackFontFamilies` is left empty and the application's own fonts have no glyph. To avoid a re-layout when a font arrives late, preload it:
+Fallback entries name the plain, weight-less face files; a font package also ships per-weight files whose names will not resolve there. By default, a character the requested font has no glyph for is taken from the framework's symbols font (`FeatureConfiguration.Font.SymbolsFont`) if that has it, then from the first `FallbackFontFamilies` entry that has it and, failing that, from the host machine's installed fonts; only when none of them has it does it render as the font's `.notdef` glyph - blank or a box, depending on the font. With `FeatureConfiguration.Font.RestrictToEmbeddedFonts = true` the host's fonts are not consulted at all, so a missing character renders as `.notdef`; the PlayTest head and the frame-buffer emulated head (when its launch contract asks for font isolation) turn the restriction on so they show what a device with only the application's fonts would show. Shipping every font the application needs remains the recommended practice and the only way to get identical rendering on every machine. To avoid a re-layout when a font arrives late, preload it:
 
 ```csharp
 await FontFamilyHelper.PreloadAsync(
@@ -599,7 +605,7 @@ Every application folder carries one `THIRD-PARTY-NOTICES.txt` listing bundled c
 
 ## What to copy, and from where
 
-Every application in [CodeBrix.Samples](https://github.com/ellisnet/CodeBrix.Samples) is built exactly this way, and each one has a `README.md` that walks its own layout. The applications inside the framework repository, under [samples/CodeBrixPlatform](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform), have the same project shape, with one difference that matters: with a single exception they reference the framework through `ProjectReference` into `src/` rather than through `PackageReference`, which is the opposite of what a real application does. **Copy the samples' project structure and their XAML and C#, not their reference lines.** The exception, [EmulateFrameBufferDemo](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform/EmulateFrameBufferDemo), consumes the framework from NuGet packages exactly as an application does.
+Every application in [CodeBrix.Samples](https://github.com/ellisnet/CodeBrix.Samples) is built exactly this way, and each one has a `README.md` that walks its own layout. The applications inside the framework repository, under [samples/CodeBrixPlatform](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform), have the same project shape, with one difference that matters: with two exceptions they reference the framework through `ProjectReference` into `src/` rather than through `PackageReference`, which is the opposite of what a real application does. **Copy the samples' project structure and their XAML and C#, not their reference lines.** The exceptions, [EmulateFrameBufferDemo](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform/EmulateFrameBufferDemo) and [KeyPressTester_packages](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform/KeyPressTester_packages), consume the framework from NuGet packages exactly as an application does.
 
 The framework repository also ships [templates/TemplateApp.zip](https://github.com/ellisnet/CodeBrix.Platform/blob/main/templates/TemplateApp.zip), a complete six-head application named TemplateApp with `src/TemplateApp.Core`, `src/TemplateApp.UI` and all six heads - data rather than a buildable project, kept in step with the structure documented here.
 

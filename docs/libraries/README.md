@@ -17,12 +17,13 @@ building.
 | What you are building | What to reference |
 | --- | --- |
 | A cross-platform desktop application (Windows, Linux, and/or macOS) from one shared codebase | The CodeBrix.Platform framework family: your `.Core` library references [`CodeBrix.Platform.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.ApacheLicenseForever) plus any optional add-ins, and each per-platform head executable references exactly one head package |
+| The same CodeBrix.Platform application on Android - Googlebooks, docked phones, tablets and phones | [CodeBrix.Android](CodeBrix.Android.md): the Android head and the Android target framework of `.Core` reference [`CodeBrix.Android.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.ApacheLicenseForever) instead of the CodeBrix.Platform package, plus the Android package of each add-in |
 | A native WinUI 3 / Windows App SDK application | The `CodeBrix.Platform.WinUI.*` toolkit family |
 | A WPF application | [`CodeBrix.Platform.WPF.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.WPF.ApacheLicenseForever) |
 | A .NET MAUI application | [`CodeBrix.Platform.Mobile.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Mobile.ApacheLicenseForever) |
 | Any .NET 10 application that needs a specific capability | The matching library from the catalog below - these are UI-framework-agnostic |
 
-Two rules govern the first four rows:
+Two rules govern the first five rows:
 
 - Do not mix the two UI-framework families in one application head. A given application head
   (executable) uses one family or the other, never both.
@@ -48,6 +49,7 @@ Every library on this page requires .NET 10 or later.
 | Library | What it is | Packages | License |
 | --- | --- | --- | --- |
 | [CodeBrix.Platform](CodeBrix.Platform.md) | Cross-platform desktop UI framework: write once against the WinUI XAML API surface, render natively on Windows, Linux and macOS | [`CodeBrix.Platform.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.ApacheLicenseForever), plus the head, add-in and native-toolkit packages listed below | Apache 2.0, with two exceptions named below |
+| [CodeBrix.Android](CodeBrix.Android.md) | Builds CodeBrix.Platform applications as native, desktop-first Android applications - Googlebooks, docked phones, tablets and phones - with Material Components views and adaptive layout | [`CodeBrix.Android.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.ApacheLicenseForever), plus one `CodeBrix.Android.<AddIn>.ApacheLicenseForever` package per add-in, listed below | Apache 2.0 |
 | [CodeBrix.Platform.Extensions](CodeBrix.Platform.Extensions.md) | Functional helpers, a disposables toolkit, collection extensions, comparers, `ILogger` extensions and lock-free threading primitives in one assembly | [`CodeBrix.Platform.Extensions.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Extensions.ApacheLicenseForever) | Apache 2.0 |
 | [CodeBrix.ServiceLocator](CodeBrix.ServiceLocator.md) | An abstraction over IoC containers: resolve services by type, or by type plus a string key, with no hard reference on a container | [`CodeBrix.ServiceLocator.MsplLicenseForever`](https://www.nuget.org/packages/CodeBrix.ServiceLocator.MsplLicenseForever) | Ms-PL |
 | [CodeBrix.Platform.Unicode](CodeBrix.Platform.Unicode.md) | Delivers the ICU native runtime and its data archive to a .NET application on Windows and on macOS | [`CodeBrix.Platform.Unicode.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.Unicode.ApacheLicenseForever)<br>[`CodeBrix.Platform.UnicodeMacOs.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.UnicodeMacOs.ApacheLicenseForever) | Apache 2.0 and Unicode 3.0 |
@@ -90,6 +92,11 @@ The add-ins - added once in `.Core`:
 - [`CodeBrix.Platform.AudioPlayer.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.AudioPlayer.ApacheLicenseForever)
 - [`CodeBrix.Platform.VideoPlayer.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.VideoPlayer.ApacheLicenseForever)
 
+The UI test head - referenced from a `.PlayTests` test project only, never from an application or head project (see [PlayTest](../platform/playtest/README.md)):
+
+- [`CodeBrix.Platform.PlayTest.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.PlayTest.ApacheLicenseForever) - runs the application's real XAML offscreen and drives it with Playwright-style locators, actions and retrying assertions
+- [`CodeBrix.Platform.PlayTest.OpenGL.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.PlayTest.OpenGL.ApacheLicenseForever) - real OpenGL contexts in PlayTests, for applications that use the Graphics3DGL add-in
+
 The native-framework toolkits, for applications built on Microsoft's own UI frameworks:
 
 - [`CodeBrix.Platform.WinUI.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.WinUI.ApacheLicenseForever)
@@ -101,6 +108,36 @@ The native-framework toolkits, for applications built on Microsoft's own UI fram
 Every one of these is Apache 2.0 except `CodeBrix.Platform.SkiaSharp.Views.MitLicenseForever`
 (MIT) and `CodeBrix.Platform.MediaPlayer.LgplLicenseForever` (LGPL-2.1-or-later) - and, as
 everywhere in the family, the package ID says which.
+
+</details>
+
+<details>
+<summary>Every package produced from the CodeBrix.Android repository</summary>
+
+The framework package, referenced by the Android head and by the Android target framework of `.Core`:
+
+- [`CodeBrix.Android.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.ApacheLicenseForever)
+
+One Android package per CodeBrix.Platform add-in, referenced from the Android target framework in place of the add-in's CodeBrix.Platform package:
+
+- [`CodeBrix.Android.AdvancedTextEdit.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.AdvancedTextEdit.ApacheLicenseForever)
+- [`CodeBrix.Android.AppSettings.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.AppSettings.ApacheLicenseForever)
+- [`CodeBrix.Android.AudioPlayer.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.AudioPlayer.ApacheLicenseForever)
+- [`CodeBrix.Android.CommandBar.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.CommandBar.ApacheLicenseForever)
+- [`CodeBrix.Android.FlexPanel.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.FlexPanel.ApacheLicenseForever)
+- [`CodeBrix.Android.Graphics2DSK.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.Graphics2DSK.ApacheLicenseForever)
+- [`CodeBrix.Android.Graphics3DGL.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.Graphics3DGL.ApacheLicenseForever)
+- [`CodeBrix.Android.Lottie.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.Lottie.ApacheLicenseForever)
+- [`CodeBrix.Android.MediaPlayer.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.MediaPlayer.ApacheLicenseForever)
+- [`CodeBrix.Android.PlotterView.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.PlotterView.ApacheLicenseForever)
+- [`CodeBrix.Android.SkiaSharp.Views.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.SkiaSharp.Views.ApacheLicenseForever)
+- [`CodeBrix.Android.Svg.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.Svg.ApacheLicenseForever)
+- [`CodeBrix.Android.TerminalView.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.TerminalView.ApacheLicenseForever)
+- [`CodeBrix.Android.TextLayout.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.TextLayout.ApacheLicenseForever)
+- [`CodeBrix.Android.VideoPlayer.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.VideoPlayer.ApacheLicenseForever)
+- [`CodeBrix.Android.WebView.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.WebView.ApacheLicenseForever)
+
+Every one of these is Apache 2.0, and every package of one release depends on the others of that release at exactly the same version. [Android and Googlebooks](../platform/15-android.md#add-ins-on-android) maps each one to its CodeBrix.Platform counterpart.
 
 </details>
 
@@ -133,12 +170,18 @@ call: you add a `PackageReference` and then reference a font by URI.
 | Library | What it is | Packages | License |
 | --- | --- | --- | --- |
 | [CodeBrix.Audio](CodeBrix.Audio.md) | Reads WAV, MP3, Ogg Vorbis, FLAC and AIFF, reads and writes Standard MIDI Files, plays media and sound effects, plays SoundFont, SFZ and Decent Sampler instruments, and plays a multi-track song of recordings and MIDI performances | [`CodeBrix.Audio.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MitLicenseForever) (desktop)<br>[`CodeBrix.Audio.Core.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.Core.MitLicenseForever) | MIT |
+| [CodeBrix.Audio.Android](CodeBrix.Audio.Android.md) | The Android platform package for CodeBrix.Audio: device playback and capture through Android's native low-latency audio path, native WAV, MP3, FLAC and Ogg Vorbis codecs, audio focus, MIDI 1.0 ports and extraction of packaged sample libraries from the APK, referenced in place of the desktop package | [`CodeBrix.Audio.Android.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.Android.ApacheLicenseForever) | Apache 2.0 |
 | [CodeBrix.Audio.ModestSynth](CodeBrix.Audio.ModestSynth.md) | Adds synthesis to CodeBrix.Audio: ten oscillator waveforms, seven creative effects, a patch model and a polyphonic synthesizer that plays a patch from MIDI | [`CodeBrix.Audio.ModestSynth.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.ModestSynth.MitLicenseForever) | MIT |
 | [CodeBrix.Audio.MusicGeneration](CodeBrix.Audio.MusicGeneration.md) | Produces music as MIDI events that arrive while it is still being written - from a model such as SkyTNT or MuPT, or from a piece it carries - voices it through a CodeBrix.Audio instrument library, and plays it for as long as anybody listens or renders it to a file | [`CodeBrix.Audio.MusicGeneration.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MusicGeneration.MitLicenseForever) | MIT |
+| [CodeBrix.Audio.MusicGeneration](CodeBrix.Audio.MusicGeneration.md#the-model-adapters-and-the-model-packages) (SkyTNT model) | The SkyTNT music model, packaged with a one-call registration class for CodeBrix.Audio.MusicGeneration: writes MIDI events - electronica with drums - and runs on a managed engine | [`CodeBrix.Audio.MusicGeneration.SkyTNT.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MusicGeneration.SkyTNT.ApacheLicenseForever) | Apache 2.0 |
+| [CodeBrix.Audio.MusicGeneration](CodeBrix.Audio.MusicGeneration.md#the-model-adapters-and-the-model-packages) (MuPT model) | The MuPT music model, packaged with a one-call registration class for CodeBrix.Audio.MusicGeneration: writes ABC notation - folk and dance tunes in parts, with no drums | [`CodeBrix.Audio.MusicGeneration.MuPT.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MusicGeneration.MuPT.ApacheLicenseForever) | Apache 2.0 |
 | [CodeBrix.Audio.Opus](CodeBrix.Audio.Opus.md) | Adds Ogg Opus decoding and encoding to CodeBrix.Audio, in pure managed code with no native binaries | [`CodeBrix.Audio.Opus.BsdLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.Opus.BsdLicenseForever) | BSD 3-Clause |
+| [CodeBrix.Audio.Samples.FluidR3Gm](CodeBrix.Audio.Samples.FluidR3Gm.md) | A recorded General MIDI instrument library for CodeBrix.Audio: carries the FluidR3_GM SoundFont, registered under the name `FluidR3Gm` in one line | [`CodeBrix.Audio.Samples.FluidR3Gm.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.Samples.FluidR3Gm.MitLicenseForever) | MIT, the SoundFont included |
 | [CodeBrix.Platform.MediaPlayerCore](CodeBrix.Platform.MediaPlayerCore.md) | Renders video, outputs audio, captures from a webcam and controls playback on Windows, Linux and macOS desktops | [`CodeBrix.MediaCore.LgplLicenseForever`](https://www.nuget.org/packages/CodeBrix.MediaCore.LgplLicenseForever)<br>[`CodeBrix.Platform.MediaPlayerCore.LgplLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.MediaPlayerCore.LgplLicenseForever)<br>[`CodeBrix.Webcam.LgplLicenseForever`](https://www.nuget.org/packages/CodeBrix.Webcam.LgplLicenseForever) | LGPL-2.1-or-later |
 | [CodeBrix.Platform.OpenGL](CodeBrix.Platform.OpenGL.md) | A managed OpenGL Core-profile binding, with the native-library resolution and the vector, matrix and scalar math the signatures need | [`CodeBrix.Platform.OpenGL.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.OpenGL.MitLicenseForever) | MIT |
-| [CodeBrix.Platform.GameEngine](CodeBrix.Platform.GameEngine.md) | A managed 2D / 2.5D game engine: tile maps, sprites, layered scenes, cameras, animation, physics, input, audio and a save system | [`CodeBrix.Platform.GameEngine.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.MitLicenseForever)<br>[`CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever)<br>[`CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever)<br>[`CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever) | MIT; the gamepad package is MIT and zlib |
+| [CodeBrix.Sdl3](CodeBrix.Sdl3.md) | C# bindings for SDL3 - windows, input, gamepads, audio, cameras, 2D rendering and the GPU API - with the SDL3 native library for Windows, macOS, Linux and Android inside the package | [`CodeBrix.Sdl3.ZlibLicenseForever`](https://www.nuget.org/packages/CodeBrix.Sdl3.ZlibLicenseForever) | MIT and zlib |
+| [CodeBrix.Graphics3D.Gltf2](CodeBrix.Graphics3D.Gltf2.md) | Reads, writes and builds glTF 2.0 3D models (`.gltf` and `.glb`): the document model, mesh, material and scene builders, and runtime helpers that prepare a model for a renderer | [`CodeBrix.Graphics3D.Gltf2.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Graphics3D.Gltf2.MitLicenseForever) | MIT |
+| [CodeBrix.Platform.GameEngine](CodeBrix.Platform.GameEngine.md) | A managed 2D / 2.5D game engine: tile maps, sprites, layered scenes, cameras, animation, physics, input, audio and a save system, with optional add-ons that each have a page: [gamepads](gameengine/gamepads.md), [Kenney asset packs](gameengine/kenney-assets.md) read from their downloaded zips, [generated music](gameengine/generated-music.md) an AI model writes while the game runs, and [cards and dice](gameengine/cards-and-dice.md) on an animated tabletop for card, dice and board-style games | [`CodeBrix.Platform.GameEngine.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.MitLicenseForever)<br>[`CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever)<br>[`CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever)<br>[`CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever)<br>[`CodeBrix.Platform.GameEngine.CardsAndDice.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.CardsAndDice.MitLicenseForever) | MIT; the gamepad package is MIT and zlib |
 
 ## Video playback, processing and vision
 
@@ -166,6 +209,7 @@ call: you add a `PackageReference` and then reference a font by URI.
 | [CodeBrix.MarkupParse](CodeBrix.MarkupParse.md) | Parses HTML into a navigable DOM tree you query with CSS selectors, traverse, modify and serialize back to HTML | [`CodeBrix.MarkupParse.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.MarkupParse.MitLicenseForever) | MIT |
 | [CodeBrix.StyleSheetParse](CodeBrix.StyleSheetParse.md) | Turns CSS text into a strongly typed object model you can query, manipulate and serialize back to CSS, with selector specificity | [`CodeBrix.StyleSheetParse.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.StyleSheetParse.MitLicenseForever) | MIT |
 | [CodeBrix.YamlParse](CodeBrix.YamlParse.md) | Reads and writes YAML at three levels: object serialization, a document tree, and a constant-memory streaming scanner, parser and emitter | [`CodeBrix.YamlParse.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.YamlParse.MitLicenseForever) | MIT |
+| [CodeBrix.TomlParse](CodeBrix.TomlParse.md) | Reads, parses, validates, updates and creates TOML 1.1 files: an object serializer, an untyped document model, a lossless syntax tree, and a source generator for trimmed and NativeAOT applications | [`CodeBrix.TomlParse.BsdLicenseForever`](https://www.nuget.org/packages/CodeBrix.TomlParse.BsdLicenseForever) | BSD 2-Clause |
 | [CodeBrix.Json.Extensions](CodeBrix.Json.Extensions.md) | Adds attribute-driven polymorphic deserialization and object-identity preservation to `System.Text.Json`, using only its public surface | [`CodeBrix.Json.Extensions.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Json.Extensions.MitLicenseForever) | MIT |
 | [CodeBrix.Compression](CodeBrix.Compression.md) | Creates, reads and extracts Zip, GZip, Tar and BZip2 archives, with AES encryption and Zip64, and decompresses legacy DCL and `.Z` data | [`CodeBrix.Compression.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Compression.MitLicenseForever) | MIT |
 
@@ -174,10 +218,14 @@ call: you add a `PackageReference` and then reference a font by URI.
 | Library | What it is | Packages | License |
 | --- | --- | --- | --- |
 | [CodeBrix.Sqlite](CodeBrix.Sqlite.md) | A managed SQLite library that adds selective encryption, a row mapper, blind-index search and safe live backup to an ordinary SQLite file | [`CodeBrix.Sqlite.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Sqlite.ApacheLicenseForever) | Apache 2.0 |
+| [CodeBrix.PostgresClient](CodeBrix.PostgresClient.md) | A fully managed ADO.NET data provider for PostgreSQL - pooled data sources, batching, COPY, notifications, replication, multi-host failover and rich type mapping - with a built-in lightweight object mapper | [`CodeBrix.PostgresClient.PostgreSqlLicenseForever`](https://www.nuget.org/packages/CodeBrix.PostgresClient.PostgreSqlLicenseForever) | PostgreSQL License |
 | [CodeBrix.Redis](CodeBrix.Redis.md) | A managed Redis client: the RESP protocol, the connection multiplexer with cluster, sentinel and replica awareness, the full command surface, and a distributed lock | [`CodeBrix.Redis.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Redis.MitLicenseForever) | MIT |
 | [CodeBrix.Docker](CodeBrix.Docker.md) | A typed, async client for the Docker Engine API over a Unix socket, a Windows named pipe, TCP or an SSH tunnel | [`CodeBrix.Docker.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Docker.MitLicenseForever) | MIT |
 | [CodeBrix.SSH](CodeBrix.SSH.md) | A managed SSH-2 client: remote command execution, an interactive shell, SFTP, SCP, port forwarding and NETCONF | [`CodeBrix.SSH.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.SSH.MitLicenseForever) | MIT |
 | [CodeBrix.Cryptography](CodeBrix.Cryptography.md) | General-purpose cryptography: ciphers, digests, MACs, signatures, key agreement, post-quantum algorithms, TLS and DTLS, OpenPGP, CMS and X.509 | [`CodeBrix.Cryptography.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Cryptography.MitLicenseForever) | MIT |
+| [CodeBrix.Ollama.ModelManager](CodeBrix.Ollama.ModelManager.md) | Downloads large language models into a local store laid out exactly as Ollama's own, derives ONNX, reduced-ONNX, converted-GGUF and quantized models from them, and resolves a model name to the files on disk | [`CodeBrix.Ollama.ModelManager.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Ollama.ModelManager.MitLicenseForever) | MIT |
+| [CodeBrix.Ollama.ModelRunner](CodeBrix.Ollama.ModelRunner.md) | Runs a GGUF model in-process over a native engine it ships - chat, tools, embeddings, constrained output, quantizing - and runs ONNX graphs, MIDI music generation and text generation on managed code with nothing installed | [`CodeBrix.Ollama.ModelRunner.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Ollama.ModelRunner.MitLicenseForever) | MIT |
+| [CodeBrix.Swarm](CodeBrix.Swarm.md) | Runs a swarm of worker processes across many hosts under one coordinator: a Queen that owns its own web host and sends one-way messages, a Hive per host that starts Workers while the host has room, and the Worker process itself | [`CodeBrix.Swarm.Queen.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Swarm.Queen.MitLicenseForever)<br>[`CodeBrix.Swarm.Hive.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Swarm.Hive.MitLicenseForever)<br>[`CodeBrix.Swarm.Worker.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Swarm.Worker.MitLicenseForever) | MIT |
 
 ## Music notation, Scheme, scripting and terminals
 

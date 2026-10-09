@@ -36,8 +36,9 @@ which is the default - when you want the file to play as ordinary MIDI, whatever
 is not merely "do nothing": it is the way to **insist** a file plays as plain MIDI, with two semitones
 of bend unless RPN 0 says otherwise and no zones at all.
 
-There are no MIDI devices here. This is about MIDI **files**: record the performance in a sequencer,
-export the clip, and play the file.
+There are no MIDI devices in this package. This is about MIDI **files**: record the performance in a
+sequencer, export the clip, and play the file. To capture an MPE performance live from a device, use
+the separate `CodeBrix.Audio.MidiConnect.MitLicenseForever` package.
 
 ## Getting started
 
@@ -121,8 +122,8 @@ forwards them to whichever instrument format is loaded.
 
 Each synthesizer carries the same members itself, so you can set them without a player.
 `SoundFontSynthesizer`, `SfzSynthesizer` and `DecentSamplerSynthesizer` all expose `MpeMode`,
-`MpeMemberBendRange`, the member counts, `MpeLowerZone`, `MpeUpperZone`, `ReleaseVelocity`,
-`MpeTimbre` and `MpePressure`.
+`MpeMemberBendRange`, the member counts, `MpeLowerZone`, `MpeUpperZone` and `ReleaseVelocity`;
+`SoundFontSynthesizer` and `SfzSynthesizer` also expose `MpeTimbre` and `MpePressure`.
 
 A synthesizer of your own joins in by implementing `CodeBrix.Audio.Synth.Mpe.IMpeSynthesizer`.
 `MidiMusicPlayer` then forwards the same settings to it and reads its zones and lift velocities.
@@ -163,8 +164,8 @@ synthesizer.MpeMemberBendRange = 48;       // semitones, when the file is silent
   messages carry them.
 - **A lift changes no sound.** No sampled format defines a consumer for release velocity, so it is
   captured and reported rather than heard.
-- **There is no MIDI device input.** Record the performance in a sequencer, export the clip, and play
-  the file.
+- **There is no MIDI device input in this package.** Record the performance in a sequencer, export the
+  clip, and play the file, or capture it live with the separate MidiConnect package.
 
 ## Documentation and source
 

@@ -21,7 +21,7 @@
 - Hosts the CLR from Python through the embedded `clr` module: load .NET assemblies and call .NET APIs from Python code.
 - Lets Python classes derive from .NET classes and implement .NET interfaces, and lets Python members be exposed to .NET with explicit CLR signatures through `clr.clrproperty` and `clr.clrmethod`.
 - Exposes the CPython buffer protocol through `PyObject.GetBuffer` and `PyBuffer`, so bulk data moves in blocks rather than element by element.
-- Locates the CPython shared library through three routes, and reports the CPython version range it supports at run time - `PythonEngine.MinSupportedVersion`, `MaxSupportedVersion` and `IsSupportedVersion(version)` - rather than hard-coding it.
+- Locates the CPython shared library through four routes, and reports the CPython version range it supports at run time - `PythonEngine.MinSupportedVersion`, `MaxSupportedVersion` and `IsSupportedVersion(version)` - rather than hard-coding it.
 - Gives you the whole interop surface under the `CodeBrix.Python` namespace: engine lifecycle and the GIL, typed Python object wrappers, scopes, custom conversion codecs, .NET types subclassed from Python, and the finalizer queue.
 
 ## When to use it
@@ -104,11 +104,12 @@ That is the whole contract: reference the package, make the shared library finda
 
 The file is named `python3XX.dll` on Windows, `libpython3.XX.dylib` on macOS and `libpython3.XX.so` (sometimes with a `.1.0` suffix) on Linux, where `XX` is the CPython minor version installed on the machine. It must be a shared build, and the process bitness must match it.
 
-Discovery tries three routes, and the first that yields a path wins:
+Discovery tries four routes, and the first that yields a path wins:
 
 1. `Runtime.PythonDLL`, assigned from code - the explicit, deterministic route.
 2. The `PYTHONNET_PYDLL` environment variable.
-3. Virtual-environment discovery: when `PYTHONNET_VENV` (preferred) or `VIRTUAL_ENV` names a directory containing a `pyvenv.cfg`, the `home` and `version` keys in that file locate the library next to the base interpreter, and the environment's own `bin/python` (`Scripts\python.exe` on Windows) becomes the program name. `PYTHONNET_PYEXE` overrides the program name independently.
+3. `PythonEngine.VirtualEnvironment`, set from code before initialization: the library is resolved from that environment's own `pyvenv.cfg`.
+4. Virtual-environment discovery from the process environment: when `PYTHONNET_VENV` (preferred) or `VIRTUAL_ENV` names a directory containing a `pyvenv.cfg`, the `home` and `version` keys in that file locate the library next to the base interpreter, and the environment's own `bin/python` (`Scripts\python.exe` on Windows) becomes the program name. `PYTHONNET_PYEXE` overrides the program name independently.
 
 Outside those cases you must set `Runtime.PythonDLL` yourself.
 
@@ -131,6 +132,7 @@ public static string PythonHome  { get; set; }   // Py_SetPythonHome
 public static string PythonPath  { get; set; }   // Py_SetPath
 public static void   SetNoSiteFlag()             // disables the site module
 public static bool   DebugGIL { get; set; }      // default false
+public static string? VirtualEnvironment { get; set; }  // a venv folder, resolved at Initialize()
 public static InteropConfiguration InteropConfiguration { get; set; }
 ```
 
@@ -240,7 +242,7 @@ public interface IPyObjectDecoder                  // Python -> CLR
 
 Register with `PyObjectConversions.RegisterEncoder` and `RegisterDecoder`. Registration is process-wide and additive, the first registered codec that reports it can handle a conversion wins, so register the most specific codecs first, and there is no public unregister - scope codec registration to application start-up. `EncoderGroup` and `DecoderGroup` implement the single-codec interfaces themselves, so a group registers exactly like one codec, groups nest, and collection-initializer syntax works.
 
-The built-in codecs in `CodeBrix.Python.Codecs` are each opt-in through a static `Register()` and expose a singleton `Instance`: `ListDecoder` (a Python `list` to `IList<T>`, as a live view rather than a copy), `SequenceDecoder` (any sequence to `ICollection<T>`), `IterableDecoder` (any iterable to `IEnumerable<T>`), `TupleCodec<TTuple>` (round-trips CLR and Python tuples), `EnumPyIntCodec` (CLR enums to and from Python `int`) and `RawProxyEncoder` (the base class for exposing a CLR object as a raw proxy, skipping all conversions). These decoders are lossless views, which is why they are deliberately narrow: `ListDecoder` will not decode to `List<int>`, because that would require copying. Lossy conversions belong in a codec of your own.
+The built-in codecs live in `CodeBrix.Python.Codecs`. `ListDecoder`, `SequenceDecoder`, `IterableDecoder` and `TupleCodec<TTuple>` are each opt-in through a static `Register()` and expose a singleton `Instance`; `EnumPyIntCodec` exposes only `Instance`; and `RawProxyEncoder` is a base class with neither. In turn: `ListDecoder` (a Python `list` to `IList<T>`, as a live view rather than a copy), `SequenceDecoder` (any sequence to `ICollection<T>`), `IterableDecoder` (any iterable to `IEnumerable<T>`), `TupleCodec<TTuple>` (round-trips CLR and Python tuples), `EnumPyIntCodec` (CLR enums to and from Python `int`) and `RawProxyEncoder` (the base class for exposing a CLR object as a raw proxy, skipping all conversions). These decoders are lossless views, which is why they are deliberately narrow: `ListDecoder` will not decode to `List<int>`, because that would require copying. Lossy conversions belong in a codec of your own.
 
 ### Exposing .NET to Python
 
@@ -512,7 +514,7 @@ finally
 - Releasing the GIL on a different thread than the one that acquired it. Set `PythonEngine.DebugGIL = true` during development to turn that into an immediate, precise exception.
 - `await` inside a `using (Py.GIL())` block. The continuation may resume on another thread and release a lock it does not own; split the method so each GIL block is fully synchronous.
 - Setting `Runtime.PythonDLL` too late. It must be assigned before `PythonEngine.Initialize()`, and the same applies to `PythonHome`, `PythonPath`, `ProgramName` and `SetNoSiteFlag()`.
-- Expecting the shared library to be found automatically. Discovery covers only `PYTHONNET_PYDLL` and the virtual environments named by `PYTHONNET_VENV` or `VIRTUAL_ENV`; outside those cases you must set `Runtime.PythonDLL`.
+- Expecting the shared library to be found automatically. Discovery covers only `PYTHONNET_PYDLL`, `PythonEngine.VirtualEnvironment` and the virtual environments named by `PYTHONNET_VENV` or `VIRTUAL_ENV`; outside those cases you must set `Runtime.PythonDLL`.
 - Assuming `Shutdown()` can be undone. The Python runtime can no longer be used in the process after it, so do not build a restart loop around it - keep one engine for the process lifetime. It also resets `InteropConfiguration`, discarding custom base-type providers.
 - Letting `PyObject`s outlive the interpreter. Wrappers still alive at shutdown raise `RuntimeShutdownException` on the finalizer path; dispose them, or handle that exception in `Finalizer.Instance.ErrorHandler`.
 - Using a disposed `PyObject`. `Dispose()` releases a *reference*, not the Python object - use `NewReference()` when you need an independently owned wrapper.

@@ -154,8 +154,8 @@ There are two ways, and they behave differently.
 1. **Reference the dash-free family URI** - `.../Fonts/RobotoMono.ttf` - and let the element's
    `FontWeight`, `FontStyle` and `FontStretch` drive the choice. On a platform that supports the font
    manifest, those three properties are matched against the triples in `RobotoMono.ttf.manifest` and
-   the matching static file is used. On a platform without manifest support, the variable font itself
-   covers the weight axis. This is the recommended form: it is the only one that works identically on
+   the matching static file is used. Every CodeBrix.Platform head supports the manifest; the variable
+   font's weight axis is not applied at run time. This is the recommended form: it is the only one that works identically on
    every head.
 2. **Reference a specific static file directly** - `.../Fonts/RobotoMono-Bold.ttf`. Simple, but the
    dash-bearing statics are pruned on platforms that do not support the manifest, so a direct static
@@ -236,8 +236,8 @@ resolve on every platform.
 ## Examples
 
 Weight and style, chosen through the manifest. On a manifest-capable head these resolve to
-`RobotoMono-Bold.ttf`, `RobotoMono-Italic.ttf` and `RobotoMono-SemiBoldItalic.ttf` respectively; on
-other heads the variable font covers the weight axis.
+`RobotoMono-Bold.ttf`, `RobotoMono-Italic.ttf` and `RobotoMono-SemiBoldItalic.ttf` respectively, and
+every CodeBrix.Platform head is manifest-capable.
 
 ```xml
 <StackPanel>
@@ -321,8 +321,8 @@ public App()
 }
 ```
 
-The URI assigned to `DefaultTextFontFamily` must carry no `#FamilyName` fragment - that one is not
-merely useless, it breaks the startup manifest preload.
+The URI assigned to `DefaultTextFontFamily` needs no `#FamilyName` fragment - the framework strips it, so
+it is useless there too.
 
 A specific script on a specific element, which is the deterministic alternative to the fallback
 chain:
@@ -376,7 +376,7 @@ The minimum project file that consumes the package:
 
 ## Using it in a CodeBrix.Platform application
 
-A CodeBrix.Platform application head references this package like any other. Then two edits and
+A CodeBrix.Platform application references this package from its `.Core` library, like any other bundled font. Then two edits and
 nothing else:
 
 1. `App.xaml` - add the `m:FontFamily` resource under the key `RobotoMonoFont`.
@@ -400,10 +400,7 @@ The platform performs the lookup, and only when the application has registered t
 ## Pitfalls
 
 - **Never append a `#FamilyName` fragment to a font URI from this package.** CodeBrix.Platform strips
-  the fragment before resolving the font, so it buys nothing - and on the value assigned to
-  `FeatureConfiguration.Font.DefaultTextFontFamily` it actively breaks the startup font-manifest
-  preload, because the `.manifest` suffix the preload appends lands inside the URI fragment and is
-  dropped.
+  the fragment before resolving the font, so it buys nothing.
 - **Do not reference a dash-bearing static file from code or XAML that must work on every head.**
   Those files are pruned at build time on platforms without manifest support; the reference then
   points at a file that is not there. Reference the dash-free family URI and set `FontWeight` and

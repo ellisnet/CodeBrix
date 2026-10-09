@@ -2,28 +2,31 @@
 
 # Testing your application
 
-**By the end of this chapter you will have a test project that matches the family conventions and is actually discovered, fixtures and doubles that keep the expensive work out of every test, headless graphics and golden-image comparison for the drawing code, and a scripted run that drives the whole application on a real head.** Every recipe below comes from the test projects of the reference applications, and names the file it came from.
+**By the end of this chapter you will have a test project that matches the family conventions and is actually discovered, fixtures and doubles that keep the expensive work out of every test, headless graphics and golden-image comparison for the drawing code, and PlayTests that drive the application's real pages through locators, actions and retrying assertions.** Every recipe below comes from the test projects of the reference applications, and names the file it came from.
 
-One constraint organizes all of it. A view model derived from `SimpleViewModel` cannot be constructed outside a running application host, because its dispatcher needs one. So the answers move out of the view model into plain classes a test can reach, and the few parts that cannot move - the page, the player element, the visual tree - are covered by a scripted run instead. [05 - MVVM the right way](05-mvvm-the-right-way.md) is where those view models come from; this chapter is how you prove them.
+One constraint organizes all of it. A view model derived from `SimpleViewModel` cannot be constructed outside a running application host, because its dispatcher needs one. So the answers move out of the view model into plain classes a unit test can reach, and the parts that cannot move - the view models, the pages, the visual tree - are covered by PlayTests, which run the whole application under a real host on a virtual screen. [05 - MVVM the right way](05-mvvm-the-right-way.md) is where those view models come from; this chapter is how you prove them.
 
 ## What a test project can reach
 
-Three layers, three ways of covering them. The first two are ordinary unit tests in an ordinary test host. The third needs the application running.
+Three layers, two kinds of test. The first two are ordinary unit tests in an ordinary test host. The third needs the application running, and [PlayTest](playtest/README.md) is what runs it.
 
 ```mermaid
 flowchart TB
   Rules[Plain rules classes] --> Unit[Unit tests, no host]
   Libs[Libraries under src/libs] --> Unit
-  VM[View models] --> Script[Scripted run on a real head]
-  Page[Pages, elements, visual tree] --> Script
+  VM[View models] --> PT[PlayTests on the virtual screen]
+  Page[Pages, elements, visual tree] --> PT
 ```
 
 | Layer | Where it lives | How you cover it |
 | --- | --- | --- |
 | Decisions and rules | Static classes of plain methods over plain values | Unit tests that construct nothing |
 | Services, renderers, parsers, stores | Libraries under `src/libs` | Unit tests, with fixtures and doubles |
-| View models | `.Core` | A scripted run that drives their commands |
-| Pages, elements, layout | `.UI` and the heads | A scripted run on a real head |
+| View models | `.Core` | PlayTests that drive them through the page, with services replaced by fakes |
+| Pages, elements, layout | `.UI` | PlayTests: locators, real pointer and keyboard input, retrying assertions |
+
+> [!TIP]
+> For the UI layers, go straight to [UI tests with PlayTest](#ui-tests-with-playtest) below, or to the [PlayTest page set](playtest/README.md), which has a complete minimal example. The sections in between cover the unit tests underneath.
 
 Every decision goes in a static class of plain methods over plain values; the view model is a thin observable wrapper that calls them and raises change notifications. The view model keeps the wiring, the collections and the commands; the class keeps the answers. CodeBrixVideoTool states the reason in the rules class itself.
 
@@ -37,9 +40,19 @@ Every decision goes in a static class of plain methods over plain values; the vi
 /// </remarks>
 public static class PlaybackSelection
 {
+    /// <summary>Whether the in-application player can open a file at all.</summary>
+    /// <param name="item">What probing found in the file, or null.</param>
+    /// <returns>True when the player can open it.</returns>
     public static bool CanOpen(SourceMediaInfo item) =>
         item is not null && MediaFormats.IsPlayable(item.Format);
 
+    /// <summary>
+    /// Why a file is not being played, in a sentence that says what to do about it instead of only
+    /// what went wrong.
+    /// </summary>
+    /// <param name="item">What probing found in the file.</param>
+    /// <returns>The sentence to show.</returns>
+    /// <exception cref="ArgumentNullException">The item is null.</exception>
     public static string DescribeUnplayable(SourceMediaInfo item)
     {
         ArgumentNullException.ThrowIfNull(item);
@@ -101,7 +114,7 @@ A `global.json` at the application root selects the runner for every project bel
 }
 ```
 
-Test projects build as executables and opt into the Microsoft Testing Platform runner. This is the shape every test project in the reference applications carries; package IDs are shown resolved here, and versions are left out so NuGet takes the latest.
+Test projects build as executables and opt into the Microsoft Testing Platform runner. This is the shape every test project in the reference applications carries; package IDs are shown resolved here, and the versions are elided from the listing - the projects themselves pin each one.
 
 ```xml
 <!-- Adapted from CodeBrix.Samples/PalmVisualizer/tests/libs/PalmVisualizer.Rendering.Tests/PalmVisualizer.Rendering.Tests.csproj
@@ -160,7 +173,7 @@ Notice that the test names the behavior in a sentence, and that the three commen
 > [!WARNING]
 > Do not pass `--nologo` to `dotnet test` in Microsoft Testing Platform mode. It is a VSTest-only switch; the SDK forwards it to the test application, which rejects it and exits before discovery, so the run reports "Zero tests ran" and nothing executes. The spelling to use is `dotnet test -- --no-banner`.
 
-Without the `global.json` above, `dotnet test` fails immediately with "Testing with VSTest target is no longer supported by Microsoft.Testing.Platform on .NET 10 SDK and later." A few of the reference applications have no `global.json` at all and select the runner by project properties alone; adding the file matches the rest of the repository.
+Without the `global.json` above, `dotnet test` fails immediately with "Testing with VSTest target is no longer supported by Microsoft.Testing.Platform on .NET 10 SDK and later." In CodeBrix.Samples, an application folder without a `global.json` of its own is covered by the one at the repository root.
 
 ## Building against the real platform assemblies
 
@@ -190,7 +203,7 @@ Notice what the failure looks like without it: the call compiles cleanly and thr
 ```
 
 > [!IMPORTANT]
-> `CodeBrixRuntimeIdentifier` gives a test project the real platform implementations. It does not lift the view-model limit: a `SimpleViewModel` still needs a running application host. Put the rules in plain classes, and drive the view models from a scripted run.
+> `CodeBrixRuntimeIdentifier` gives a test project the real platform implementations. It does not lift the view-model limit: a `SimpleViewModel` still needs a running application host. Put the rules in plain classes, and drive the view models from [PlayTests](#ui-tests-with-playtest).
 
 ### The native assets a head would have supplied
 
@@ -576,7 +589,7 @@ An API client is almost entirely testable with no network, including the exact U
 internal static class TestClient
 {
     public static (IPolyHavenApiClient Client, StubHttpMessageHandler Stub) Create(
-        PolyHavenClientOptions options = null)
+        PolyHavenClientOptions? options = null)
     {
         var stub = new StubHttpMessageHandler();
         var factory = new DefaultPolyHavenClientFactory(stub, options);
@@ -648,12 +661,18 @@ public class EncryptionServiceTests : IClassFixture<EncryptionTestingFixture>
         fixture.CreateAndRegisterLogger<EncryptionService>(_output);
     }
 
+    private string CleanLineEndings(string text) => 
+        (string.IsNullOrEmpty(text)) 
+            ? text 
+            : text.Replace("\r\n", "\n");
+
     [Fact]
     public void can_get_service() => GetService().Should().NotBeNull();
 
     [Fact]
     public async Task GetDefaultKey_retrieves_key() =>
         (await GetService().GetDefaultKey()).Should().NotBeNullOrEmpty();
+    // ...
 }
 ```
 
@@ -676,6 +695,7 @@ The fixture holds a logger factory that wraps the test framework's output helper
 ```csharp
 // From CodeBrix.Samples/JustBetweenUs/tests/JustBetweenUs.Encryption.Tests/Services/EncryptionServiceTests.cs
 _output = new SimpleTestOutputHelper(output);
+
 fixture.CreateAndRegisterLogger<EncryptionService>(_output);
 ```
 
@@ -748,13 +768,17 @@ public sealed class SampleMediaFixture : IAsyncLifetime
 
         Mode2Info = await probe.ProbeAsync(Mode2Path, CancellationToken.None).ConfigureAwait(false);
         Mode1Info = await probe.ProbeAsync(Mode1Path, CancellationToken.None).ConfigureAwait(false);
+        // ...
     }
 
     public ValueTask DisposeAsync()
     {
         try
         {
-            if (Directory.Exists(Root)) { Directory.Delete(Root, true); }
+            if (Directory.Exists(Root))
+            {
+                Directory.Delete(Root, true);
+            }
         }
         catch (IOException)
         {
@@ -804,6 +828,7 @@ public class ConversionRunnerTests
         File.Exists(output).Should().BeTrue();
         outcome.SizeInBytes.Should().BeGreaterThan(0);
     }
+    // ...
 }
 ```
 
@@ -820,6 +845,13 @@ Production code that initializes a singleton store at startup needs that store p
 // SettingsService is a process-global singleton, so it is pointed at a
 // throwaway folder once per test assembly - never at the user's real
 // ~/.config/Pinta.Brix/settings, which tests must never read or write.
+
+using System;
+using System.IO;
+using System.Runtime.CompilerServices;
+using Pinta.Brix.Settings;
+
+namespace Pinta.Brix.Engine.Tests;
 
 internal static class TestSettingsStore
 {
@@ -846,6 +878,10 @@ Notice the guard on the store's own initialized flag, and that each test assembl
 // pattern rather than exact names.
 public class SettingsStoreTests : IDisposable
 {
+    readonly string root;
+    readonly string directory;
+    readonly string externalDirectory;
+
     public SettingsStoreTests()
     {
         root = Path.Combine(Path.GetTempPath(), "kenney-asset-browser-tests", Path.GetRandomFileName());
@@ -859,7 +895,7 @@ public class SettingsStoreTests : IDisposable
     }
 
     AppSettingsStore CreateStore() => new AppSettingsStore(SettingsService.AppName, directory);
-
+    // ...
     // The auto-backup files whose names carry a parseable timestamp,
     // alphabetical (= chronological, the naming scheme's guarantee).
     string[] AutoBackupFiles() =>
@@ -868,6 +904,7 @@ public class SettingsStoreTests : IDisposable
             .Where(HasParseableTimestamp)
             .OrderBy(name => name)
             .ToArray();
+    // ...
 }
 ```
 
@@ -893,7 +930,7 @@ internal static class TestAssets
     }
 
     /// <summary>
-    /// Builds a single-triangle .glb: vertices (0,0,0), (1,0,0),
+    /// Builds a single-triangle .glb via CodeBrix.Graphics3D.Gltf2: vertices (0,0,0), (1,0,0),
     /// (0,1,0) with a red, double-sided material, optionally translated.
     /// </summary>
     public static byte[] BuildTriangleGlb(Vector3? translation = null) { /* ... */ }
@@ -908,6 +945,11 @@ An archive is the same idea, one level up.
 // From CodeBrix.Samples/KenneyAssetBrowser/tests/libs/KenneyAssetBrowser.AssetRead.Tests/TestZipBuilder.cs
 internal static class TestZipBuilder
 {
+    /// <summary>
+    /// Writes a zip file containing the given entries.
+    /// </summary>
+    /// <param name="zipPath">The full path of the zip file to create.</param>
+    /// <param name="entries">Entry path → entry bytes.</param>
     public static void Build(string zipPath, IReadOnlyDictionary<string, byte[]> entries)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(zipPath)!);
@@ -1009,7 +1051,7 @@ Sometimes an input really has to be a file a real tool produced. Either copy it 
 
 ```csharp
 // From CodeBrix.Samples/PdfSideBySide/tests/libs/PdfSideBySide.PdfRender.Tests/Helpers/TestPdfs.cs
-/// <summary>Full path of the assets/Inanna.pdf sample copied beside the test binary.</summary>
+/// <summary>Full path of the <c>assets/Inanna.pdf</c> sample copied beside the test binary.</summary>
 public static string InannaPath => Path.Combine(AppContext.BaseDirectory, "assets", "Inanna.pdf");
 ```
 
@@ -1059,21 +1101,34 @@ private const int EGL_PLATFORM_SURFACELESS_MESA = 0x31DD;
 // ...
 
 /// <summary>Tries to create a current GL context; returns <see langword="null"/> when the machine can't.</summary>
-public static EglTestContext TryCreate()
+public static EglTestContext? TryCreate()
 {
-    if (!OperatingSystem.IsLinux()) { return null; }
+    if (!OperatingSystem.IsLinux())
+    {
+        return null;
+    }
 
     try
     {
         var display = eglGetPlatformDisplay(EGL_PLATFORM_SURFACELESS_MESA, IntPtr.Zero, IntPtr.Zero);
-        if (display == IntPtr.Zero || !eglInitialize(display, out _, out _)) { return null; }
+        if (display == IntPtr.Zero || !eglInitialize(display, out _, out _))
+        {
+            return null;
+        }
+
         // ... eglChooseConfig, eglCreateContext (client version 3), eglCreatePbufferSurface, eglMakeCurrent ...
 
         var gl = GL.GetApi(name => eglGetProcAddress(name));
         return new EglTestContext(display, context, surface, gl);
     }
-    catch (DllNotFoundException) { return null; }
-    catch (EntryPointNotFoundException) { return null; }
+    catch (DllNotFoundException)
+    {
+        return null;
+    }
+    catch (EntryPointNotFoundException)
+    {
+        return null;
+    }
 }
 ```
 
@@ -1091,6 +1146,7 @@ public class GlModelSceneRendererTests
         var context = EglTestContext.TryCreate();
         Assert.SkipWhen(context is null, "No EGL/OpenGL stack available on this machine (install Mesa llvmpipe).");
         return context!;
+        // ...
     }
 
     [Fact]
@@ -1101,7 +1157,12 @@ public class GlModelSceneRendererTests
         var gl = egl.Gl;
         const uint size = 64;
         var (fbo, colorRb, depthRb) = CreateFramebuffer(gl, size, size);
-        var renderer = new GlModelSceneRenderer { BackgroundColor = (0f, 0f, 1f, 1f) };
+
+        var renderer = new GlModelSceneRenderer
+        {
+            BackgroundColor = (0f, 0f, 1f, 1f), // blue background, red triangle
+        };
+
         try
         {
             //Act
@@ -1126,7 +1187,7 @@ public class GlModelSceneRendererTests
 }
 ```
 
-Notice the trait on the class, which lets the whole GPU suite be excluded by filter, and the `finally` that deletes every renderbuffer and framebuffer. A second context is worth having as well: the surfaceless one gives OpenGL ES, while a context that binds the desktop GL API and asks for a core profile is what the X11, Win32, WPF and macOS heads actually hand you - a bug that only appears on desktop GL is invisible in a suite that only ever tests ES.
+Notice the trait on the class, which lets the whole GPU suite be excluded by filter, and the `finally` that deletes every renderbuffer and framebuffer. A second context is worth having as well: the surfaceless one gives OpenGL ES, while a context that binds the desktop GL API and asks for a core profile is what the X11, Win32 and WPF heads actually hand you (macOS hands out OpenGL ES through ANGLE) - a bug that only appears on desktop GL is invisible in a suite that only ever tests ES.
 
 ### The same suite for every backend
 
@@ -1224,6 +1285,10 @@ public static (Document Document, Section Section, RenderContext Context, BlockR
 public static List<Paragraph> AllParagraphs(Section section) =>
     CollectParagraphs(section.Elements).ToList();
 
+/// <summary>Every table in the section (top level only).</summary>
+public static List<Table> AllTables(Section section) =>
+    section.Elements.Cast<object>().OfType<Table>().ToList();
+
 /// <summary>The concatenated plain text of one paragraph (line breaks become \n).</summary>
 public static string TextOf(Paragraph paragraph) => TextOfElements(paragraph.Elements);
 ```
@@ -1287,10 +1352,15 @@ A few tests genuinely need the network or a real account, and they must not fail
 // From CodeBrix.Samples/NotionDocumentCreator/tests/libs/NotionDocumentCreator.CreateDocument.Tests/NotionDocumentServiceTests.cs
 /// <summary>
 /// Integration tests against the live Notion API. Opt-in: they skip unless both
-/// NOTION_AUTH_TOKEN and NOTION_TEST_PAGE_ID environment variables are set ...
+/// NOTION_AUTH_TOKEN and NOTION_TEST_PAGE_ID environment variables are set (the
+/// test page is expected to be the 13-chapter "The Father of DRAKON" tree).
 /// </summary>
 public class NotionDocumentServiceTests : IDisposable
 {
+    private readonly NotionDocumentService _service;
+    private readonly string _authToken;
+    private readonly string _testPageId;
+
     public NotionDocumentServiceTests()
     {
         _authToken = Environment.GetEnvironmentVariable("NOTION_AUTH_TOKEN");
@@ -1304,7 +1374,11 @@ public class NotionDocumentServiceTests : IDisposable
         _service = new NotionDocumentService();
     }
 
-    public void Dispose() => _service?.Dispose();
+    // ...
+    public void Dispose()
+    {
+        _service?.Dispose();
+    }
 }
 ```
 
@@ -1337,27 +1411,118 @@ public sealed class LiveApiCollection : ICollectionFixture<LiveApiFixture>;
 
 Notice that assertions against live content are deliberately loose, because the content changes - and that assertions written against one specific account's data are a smoke test for that account rather than a portable suite. Split the fast live test (fetch and parse, no downloads) from the slow end-to-end one, so a regression can be caught without paying for the rest, and keep an offline counterpart for the same code path so a normal run is entirely offline.
 
+## UI tests with PlayTest
+
+PlayTest is the test head for CodeBrix.Platform applications and the primary way to test everything above the rules classes. A `.PlayTests` project references [`CodeBrix.Platform.PlayTest.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.PlayTest.ApacheLicenseForever) in place of a desktop head package, imports the application's `.UI` shared project and references `.Core`, so the application's real XAML, view models and services run - offscreen, on a fixed 1920 x 1080 or 1080 x 1920 virtual screen that renders identical pixels on Windows, Linux and macOS with no display server. Tests drive it through a Microsoft Playwright-style API: locators find elements by role and name, test ID, text or type; actions click, fill, drag and press keys with real input through the normal input pipeline; and assertions retry until they hold.
+
+```xml
+<!-- tests/MyApp.PlayTests/MyApp.PlayTests.csproj -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+  <Import Project="../../src/MyApp.UI/MyApp.UI.projitems" Label="Shared" />
+  <ItemGroup>
+    <ProjectReference Include="../../src/MyApp.Core/MyApp.Core.csproj" />
+    <PackageReference Include="CodeBrix.Platform.PlayTest.ApacheLicenseForever" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="all" />
+    <PackageReference Include="SilverAssertions.ApacheLicenseForever" />
+  </ItemGroup>
+</Project>
+```
+
+The fixture launches the application once per process and gives each test a fresh page; a test reads like the steps a user takes:
+
+```csharp
+public async ValueTask InitializeAsync() =>
+    Application = await PlayTestApplication.LaunchAsync(() => new App(), new()
+    {
+        ConfigurationAssembly = typeof(AppFixture).Assembly,
+    });
+
+public Task ResetAsync(ScreenOrientation? orientation = null)
+{
+    Application.FilePickers.Clear();
+    Application.Launcher.Clear();
+    return Application.Page.SetContentAsync(() => new MainPage(), orientation);
+}
+```
+
+```csharp
+// From CodeBrix.Samples/GitHubIssueFinder/tests/GitHubIssueFinder.PlayTests/ApplicationTests.cs
+[Fact]
+public async Task Enter_submits_and_Escape_cancels_a_pending_search()
+{
+    Fixture.Search.WaitForCancellation = true;
+    await Page.GetByTestId("Owner").FillAsync("sample");
+    await Page.GetByTestId("Owner").PressAsync("Enter");
+    await Expect(Button("Cancel")).ToBeEnabledAsync();
+    await Page.GetByTestId("Owner").PressAsync("Escape");
+    await Expect(Button("Cancel")).ToBeDisabledAsync();
+    await Expect(Button("Search")).ToBeEnabledAsync();
+    Fixture.Search.LastRequest.Owner.Should().Be("sample");
+}
+```
+
+Notice that the search service is a fake the fixture registered through the application's own dependency-injection setup, so the real page and the real view model run against a scripted backend. The same head scripts the file and folder pickers, records launcher requests instead of opening a browser, isolates the clipboard, simulates the operating-system theme, switches orientation per test, takes page and element screenshots, records every step of a run, and opens an optional live preview with `--headed`. A companion package, [`CodeBrix.Platform.PlayTest.OpenGL.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.PlayTest.OpenGL.ApacheLicenseForever), gives applications built on the Graphics3DGL add-in real OpenGL contexts.
+
+PlayTest has its own page set:
+
+| Page | What it covers |
+| --- | --- |
+| [PlayTest](playtest/README.md) | What it is, the two packages, and a complete minimal example: project file, fixture and tests |
+| [Getting started](playtest/getting-started.md) | The project file, `global.json`, the fixture, the per-test reset and the first run, line by line |
+| [Locators and actions](playtest/locators-and-actions.md) | `GetByRole`, `GetByTestId`, `GetByText`, `GetByLabel`, `GetByType<T>`, strict mode, clicks, fills, keys, held keys, the mouse and drags |
+| [Assertions and reading state](playtest/assertions.md) | `Expect(...)`, `EvaluateAsync`, `WaitForAsync`, timeouts and failure reports |
+| [Pickers, clipboard, theme and orientation](playtest/pickers-clipboard-theme-orientation.md) | Scripted pickers, the launcher, the isolated clipboard, the simulated theme, orientation, window close and minimize |
+| [Screenshots and recording](playtest/screenshots-and-recording.md) | Page and element screenshots, measuring pixels, and `--screenshotfolder` |
+| [Running, switches and the preview](playtest/running-and-switches.md) | `--headed`, `--headless`, `--theme`, `--orientation`, the environment variables, project preferences and precedence |
+| [Patterns from the samples](playtest/patterns-from-the-samples.md) | Replacing services at the DI boundary, a shared fixture base, throwaway stores and the launch-once pattern for process-wide engines |
+| [OpenGL](playtest/opengl.md) | The companion package, per-OS requirements, opting out, and asserting GL content with `PixelStats` |
+
+> [!IMPORTANT]
+> Run PlayTests serially, one application per process: serialize the assembly with `[assembly: Xunit.v3.Parallelization(Mode = Xunit.Sdk.ParallelMode.None)]` and share one fixture. A second launch in the same process throws.
+
+PlayTest runs on the desktop only; for what covers an application's Android head, see [Testing an Android head](15-android.md#testing-an-android-head).
+
 ## Scripted end-to-end runs
 
-The parts a unit test cannot reach - a real head, a real player element, a real visual tree - still need proving. The page reads options from the environment in its constructor and, when they are present, hooks its loaded event to run a script that drives the view model's own commands and properties. Nothing about the run changes what the application does when the variables are not set.
+PlayTests run the application on the virtual test head. What only a real desktop head can show - the native window and that head's own render path - is proved by a scripted run of the shipping executable. The page reads options from the environment in its constructor and, when they are present, hooks its loaded event to run a script that drives the view model's own commands and properties. Nothing about the run changes what the application does when the variables are not set.
 
 ```csharp
 // From CodeBrix.Samples/CodeBrixVideoTool/src/CodeBrixVideoTool.UI/Views/MainPage.xaml.cs
 //Optional scripted run: import, play and report without anyone touching the window.
 if (SmokeOptions.FromEnvironment() is { } smoke)
 {
-    Loaded += (_, _) => RunSmoke(smoke);
+    Loaded += (_, _) => StartSmokeRun(smoke);
 }
 ```
 
 The script prints machine-readable lines and exits with a status, so a build agent can read the result without parsing prose.
 
 ```csharp
-// From CodeBrix.Samples/CodeBrixVideoTool/src/CodeBrixVideoTool.UI/Views/MainPage.xaml.cs
+// From CodeBrix.Samples/CodeBrixVideoTool/src/CodeBrixVideoTool.Core/Smoke/SmokeRun.cs
 private static void Fact(string name, object value) =>
     Console.WriteLine($"CBVT-SMOKE: {name}={value?.ToString() ?? "(null)"}");
 
-private static void Finish(int failures)
+private void Check(string step, bool ok, string detail)
+{
+    Console.WriteLine($"CBVT-SMOKE: {(ok ? "PASS" : "FAIL")} {step} ({detail})");
+    if (!ok)
+    {
+        failures++;
+    }
+}
+
+private void Finish()
 {
     Console.WriteLine($"CBVT-SMOKE: RESULT {(failures == 0 ? "PASS" : $"FAIL ({failures})")}");
     Console.Out.Flush();
@@ -1368,20 +1533,31 @@ private static void Finish(int failures)
 Driving a command that finishes on an event is the one piece of real technique here: replace the bridge delegate that would have shown a dialog, then await a completion source the event completes.
 
 ```csharp
-// From CodeBrix.Samples/CodeBrixVideoTool/src/CodeBrixVideoTool.UI/Views/MainPage.xaml.cs
+// From CodeBrix.Samples/CodeBrixVideoTool/src/CodeBrixVideoTool.Core/Smoke/SmokeRun.cs
 var outputPath = Path.Combine(
     options.WorkFolder, "smoke" + MediaFormats.Extension(options.Destination));
-viewModel.Conversion.PickOutputPathAsync = (_, _) => Task.FromResult(outputPath);
+SetOutputPath(viewModel.Conversion, outputPath);
 
-var finished = new TaskCompletionSource<Processing.Operations.ConversionOutcome>();
-void OnFinished(object _, Processing.Operations.ConversionOutcome result) => finished.TrySetResult(result);
-viewModel.Conversion.ConversionFinished += OnFinished;
-viewModel.Conversion.RunCommand.Execute(null);
-var outcome = await finished.Task;
-viewModel.Conversion.ConversionFinished -= OnFinished;
+var outcome = await RunConversionAsync(viewModel.Conversion);
+
+// ...
+
+private static void SetOutputPath(IOutputPathBridge bridge, string path) =>
+    bridge.PickOutputPathAsync = (_, _) => Task.FromResult(path);
+// ...
+private static async Task<ConversionOutcome> RunConversionAsync(ConversionViewModel conversion)
+{
+    var finished = new TaskCompletionSource<ConversionOutcome>();
+    void OnFinished(object _, ConversionOutcome result) => finished.TrySetResult(result);
+    conversion.ConversionFinished += OnFinished;
+    conversion.RunCommand.Execute(null);
+    var outcome = await finished.Task;
+    conversion.ConversionFinished -= OnFinished;
+    return outcome;
+}
 ```
 
-Notice that the bridge delegates are what make the script possible: replacing the save-path delegate with one that returns a fixed path removes the only dialog in the way. Those delegates are the same seam [07 - Platform services](07-platform-services.md) uses for pickers and dialogs. Two more rules keep a script honest: anything that happens off an event rather than in the command needs a bounded retry loop before the script asserts on it, rather than an assumption that it has landed; and to prove a visual rule is real rather than only configured, the script forces a layout pass, gets the item's container, walks the visual tree for the named element and compares it against a control case. Where a case is expected to fail a profile check, assert the expectation rather than success. The whole script is the smoke-mode region of [MainPage.xaml.cs](https://github.com/ellisnet/CodeBrix.Samples/blob/main/CodeBrixVideoTool/src/CodeBrixVideoTool.UI/Views/MainPage.xaml.cs).
+Notice that the bridge delegates are what make the script possible: replacing the save-path delegate with one that returns a fixed path removes the only dialog in the way. Those delegates are the same seam [07 - Platform services](07-platform-services.md) uses for pickers and dialogs. Two more rules keep a script honest: anything that happens off an event rather than in the command needs a bounded retry loop before the script asserts on it, rather than an assumption that it has landed; and to prove a visual rule is real rather than only configured, the script forces a layout pass, gets the item's container, walks the visual tree for the named element and compares it against a control case. Where a case is expected to fail a profile check, assert the expectation rather than success. The whole script is [SmokeRun.cs](https://github.com/ellisnet/CodeBrix.Samples/blob/main/CodeBrixVideoTool/src/CodeBrixVideoTool.Core/Smoke/SmokeRun.cs) in the `.Core` library; the page only starts it and answers the few questions that only the window can answer.
 
 A game takes the idea one step further. Rather than calling the view model's commands, an autopilot that one environment variable switches on supplies input exactly where a player would, through the same input path as the keyboard and gamepad, and the same variable moves the settings store somewhere disposable so the run never touches the player's own settings or records: [Let an autopilot play through the player's input path and keep its saves apart](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Testing.md#let-an-autopilot-play-through-the-players-input-path-and-keep-its-saves-apart).
 
@@ -1438,6 +1614,13 @@ public void nearer_geometry_occludes_farther_geometry_regardless_of_draw_order()
         pixels[center].Should().BeGreaterThan((byte)128);
         pixels[center + 2].Should().BeLessThan((byte)128);
     }
+    finally
+    {
+        renderer.Uninitialize(gl);
+        gl.DeleteRenderbuffer(colorRb);
+        gl.DeleteRenderbuffer(depthRb);
+        gl.DeleteFramebuffer(fbo);
+    }
 }
 ```
 
@@ -1459,12 +1642,16 @@ Notice that it asserts on a single known pixel rather than an aggregate, and cov
 - [ ] Golden-image comparison uses a tolerance, reports the first differing pixels with both values, and has a save hook for accepting a new golden
 - [ ] A process-global store is pointed at a throwaway folder by a module initializer, never at the user's real data
 - [ ] The scripted run does nothing unless its environment variables are set, prints machine-readable lines, and exits with a status
+- [ ] View models and pages are covered by a `.PlayTests` project that imports the `.UI` shared project, references `.Core` and the PlayTest package, and never references a desktop head package
+- [ ] PlayTests run serially against one application launched once per process, with a fresh page per test and the picker queues and launcher history cleared in the reset
+- [ ] External services are replaced with fakes at the application's own DI boundary, and settings live in a throwaway folder
 
 ---
 
 **Where to go next**
 
 - [11 - Packaging and shipping](11-packaging-and-shipping.md) - the next chapter: turning a tested solution into something you can hand over
+- [PlayTest](playtest/README.md) - the UI test head: locators, actions, retrying assertions, pickers, screenshots and the preview
 - [SilverAssertions](../libraries/SilverAssertions.md) - the whole assertion vocabulary, including equivalency, events and the extensibility points
 - [CodeBrix.TestMocks](../libraries/CodeBrix.TestMocks.md) - mocks, auto-generated test data and the xUnit v3 data attributes in one package
 - [Blueprints](../samples/blueprints.md) - the full recipe files these excerpts were mined from

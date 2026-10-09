@@ -17,11 +17,12 @@
 | [07 - Platform services](07-platform-services.md) | Windowing, dispatching, pickers, the clipboard, dialogs and the bridges a view model reaches them through |
 | [08 - Add-ins](08-add-ins.md) | Every add-in package in one table, and which heads each one is live on |
 | [09 - Graphics, media and vision](09-graphics-media-and-vision.md) | 2D and 3D drawing surfaces, video and audio playback, camera capture and on-device vision |
-| [10 - Testing your application](10-testing-your-application.md) | Test projects, fixtures, headless graphics and golden-image comparison |
+| [10 - Testing your application](10-testing-your-application.md) | Test projects, fixtures, headless graphics and golden-image comparison, and UI tests with PlayTest - which has [its own page set](playtest/README.md): locators, actions, retrying assertions, pickers, screenshots and the preview |
 | [11 - Packaging and shipping](11-packaging-and-shipping.md) | Solutions per operating system, native payloads, and the notices file every application carries |
 | [12 - Troubleshooting](12-troubleshooting.md) | The failures that have a known cause: blank windows, missing pickers, duplicate types, missing engines |
 | [13 - Reference applications](13-reference-applications.md) | The complete applications you can open, build and read |
 | [14 - Sharing code with native frameworks](14-sharing-code-with-native-frameworks.md) | Running one view model on the Skia heads and on native Windows and mobile heads |
+| [15 - Android and Googlebooks](15-android.md) | Shipping the same application on Googlebooks, docked phones, tablets and phones with CodeBrix.Android: the Android head, the add-in packages, adaptive layout and the build |
 
 ## If you only read three chapters
 

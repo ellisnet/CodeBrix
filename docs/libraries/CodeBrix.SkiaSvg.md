@@ -526,7 +526,7 @@ if (svg.TryEnsureRetainedSceneGraph(out var scene))
     // modify an element in the DOM
     var bar = svg.SourceDocument.GetElementById<SvgRectangle>("bar1");
     bar.Height = new SvgUnit(SvgUnitType.Pixel, 150);
-    bar.Fill = new SvgColorServer(System.Drawing.Color.Green);
+    bar.Fill = new SvgColorServer(SvgColor.Green);
 
     // recompile only the affected subtree
     var mutation = svg.ApplyRetainedSceneMutationById("bar1");

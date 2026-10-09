@@ -45,10 +45,11 @@ rather than a `<sample>`. It is pure managed code with no native payload of its 
 
 ## When to use it
 
-There are three ways to use this package, and they are independent of one another.
+There are four ways to use this package, and they are independent of one another.
 
 | Way | What it looks like |
 | --- | --- |
+| **The complete General MIDI sound set** | `GeneralMidiInstrumentLibrary.Register()` puts all 128 General MIDI programs and the 47-note percussion kit, synthesized, into CodeBrix.Audio's instrument registry under the name `"ModestSynthGm"` - no SoundFont to find and nothing to download. Nothing registers it for you. `GeneralMidiSynthesizer` also stands on its own: `new GeneralMidiSynthesizer(44100)` plays a `.mid` with no configuration |
 | **One oscillator or one effect** | Create an oscillator, tell it the sample rate and the pitch, and ask it for blocks of samples; or create an effect, prepare it at your sample rate and push blocks through it. Nothing needs registering, nothing needs a file, and CodeBrix.Audio's players and writers take the samples from there |
 | **The standalone synthesizer** | `ModestSynthesizer` plays a `ModestPatch` from MIDI events - sixteen channels, velocity, the sustain pedal, pitch bend, voice stealing and an amplitude envelope. No preset file and no registration are involved |
 | **Inside a Decent Sampler instrument** | A group can hold an `<oscillator>` element instead of, or as well as, samples, and an effect chain can name a type the core does not carry. One call at start-up hands both sets over |
@@ -76,7 +77,7 @@ dotnet add package CodeBrix.Audio.ModestSynth.MitLicenseForever
 ```
 
 The package ID carries the `.MitLicenseForever` suffix; the namespace is `CodeBrix.Audio.ModestSynth`,
-with no suffix. The public surface is spread over seven namespaces, and everything else in the
+with no suffix. The public surface is spread over eight namespaces, and everything else in the
 assembly is internal:
 
 ```csharp
@@ -404,7 +405,7 @@ The format's own guidance for settings: a bass guitar wants damping 0.3 to 0.5 w
 
 `WavetableOscillator`, in `CodeBrix.Audio.ModestSynth.Wavetable`, takes `Table` (a `WavetableFile`, or
 null), `Position` (0..1, default 0.0) and `FrameInterpolation` (default true), exposes `HasTable`,
-`Problem`, `MipLevel` and `Table` read-only, and offers `TryLoad(path, frameSize)` and
+`Problem` and `MipLevel` read-only, and offers `TryLoad(path, frameSize)` and
 `ReportProblem(reason)`.
 
 It reads one cycle per period from a frame of a multi-frame `.wav` file, so moving `Position` walks
@@ -1020,9 +1021,10 @@ dependency and makes the `Register()` call - the add-ins never do.
 
 ## Samples and tools in the repository
 
-The repository ships two packages and has no sample applications and no demo projects. Everything in
-`tools/` is developer tooling and test data: none of it is packed, and none of it is needed to consume
-either package. The test suite is the best worked example of every public API.
+The repository ships four packages - the desktop package, Core, this add-on and the MIDI device
+package - and its two samples are described on the [CodeBrix.Audio](CodeBrix.Audio.md#samples-and-tools-in-the-repository)
+page. Everything in `tools/` is developer tooling and test data: none of it is packed, and none of it is
+needed to consume any of the packages. The test suite is the best worked example of every public API.
 
 | Name | What it demonstrates | Where |
 | --- | --- | --- |

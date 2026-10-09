@@ -152,9 +152,13 @@ letters `U+02C6`-`U+02DD`, combining diacritics `U+0300`-`U+0328`, `U+1E80`-`U+1
 guillemets - `U+20AC` EURO SIGN, `U+2122` TRADE MARK SIGN, `U+2212` MINUS SIGN, and `U+25CC` DOTTED
 CIRCLE, the placeholder ring for combining marks.
 
-The CodeBrix family never falls back to a system font, so a codepoint outside the coverage above
-renders as `.notdef` rather than borrowing a glyph from the OS - and this font draws a box for
-`.notdef`, so a miss shows up as a tofu box rather than vanishing.
+By default CodeBrix.Platform looks for a codepoint outside the coverage above in the symbols font, then in the fonts listed in
+`FeatureConfiguration.Font.FallbackFontFamilies` and then in the host machine's installed fonts, so on
+a development desktop it may borrow a glyph from the OS that a device with only the application's
+fonts would not have. With `FeatureConfiguration.Font.RestrictToEmbeddedFonts = true` - which the
+PlayTest head and the font-isolated frame-buffer emulator set for you - host fonts are never consulted
+and the codepoint renders as `.notdef`. This font draws a box for `.notdef`, so a miss shows up as a
+tofu box rather than vanishing.
 
 ### Writing music characters
 
@@ -343,8 +347,7 @@ above.
 - **Do not set Noto Music as an application's default text font**, and do not assign its URI to
   `DefaultTextFontFamily`.
 - **Never add a `#FamilyName` fragment to the font URI.** CodeBrix.Platform strips it during font
-  resolution, and on `DefaultTextFontFamily` it silently disables the startup manifest preload - the
-  appended `.manifest` lands inside the fragment and is dropped by `Uri.PathAndQuery`.
+  resolution, so it never helps.
 - **Do not write `NotoMusic-Regular.ttf` in a URI.** There is no such file in this package; the file
   is `NotoMusic.ttf`.
 - **Do not request bold or italic.** There is one face; any "bold" you get is synthetic and will not
@@ -353,8 +356,10 @@ above.
   will split a surrogate pair.
 - **Do not expect Greek or Cyrillic prose glyphs from this font.** The shipped `cmap` has none; the
   Greek in this font is the ancient musical-notation block.
-- **There is no system-font fallback anywhere in the CodeBrix family.** A codepoint this font lacks
-  will not be borrowed from the OS; it renders as `.notdef`, which this font draws as a box.
+- **Do not count on a system font to fill a gap.** By default a codepoint this font lacks may be
+  borrowed from the host's installed fonts on a desktop and be missing on a device; under
+  `FeatureConfiguration.Font.RestrictToEmbeddedFonts` it renders as `.notdef`, which this font draws
+  as a box.
 - **`ms-appx:///` is a CodeBrix.Platform concept, not a .NET one.** In a console application or a
   unit test the URI will not resolve; locate the file on disk instead.
 - **Do not expect this package to add a `.targets` file to your build.** It has none by design.

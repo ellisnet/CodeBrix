@@ -508,7 +508,7 @@ public interface IExporter { void Export(IPlotModel model, Stream stream); }
 
 The exporters call `Update(true)` and `Render` on the model themselves, so a `PlotModel` can be handed
 straight to them with no cast. `CodeBrix.Plotter.Skia` carries `PngExporter` (`Width`, `Height`,
-`Dpi`, `UseTextShaping`), `JpegExporter` (which adds `Quality`), `PdfExporter` (vector PDF through
+`Dpi`, `UseTextShaping`), `JpegExporter` (`Width`, `Height`, `Dpi` and `Quality`, with no `UseTextShaping`), `PdfExporter` (vector PDF through
 `SKDocument`) and `SvgExporter` (vector SVG through `SKSvgCanvas`).
 
 The root namespace also holds an SVG writer that needs no SkiaSharp at all, with `IsDocument`,
@@ -918,21 +918,21 @@ export; and note that `EdgeRenderingMode.PreferSpeed` skips pixel snapping.
 
 | Name | What it demonstrates | Where |
 | --- | --- | --- |
-| PicoScope sample | Live oscilloscope traces streamed into a chart and rendered through two different SkiaSharp canvas hosts | [`samples/PicoScope`](https://github.com/ellisnet/CodeBrix.Plotter/tree/main/samples/PicoScope) |
+| PicoScope sample | Live oscilloscope traces streamed into a chart and shown through the CodeBrix.Platform PlotterView add-in, on Linux (X11, Wayland, frame buffer) and Windows (Win32-Skia, WPF-Skia) heads | [`samples/PicoScope`](https://github.com/ellisnet/CodeBrix.Plotter/tree/main/samples/PicoScope) |
 | PicoScope guide | Capability map, cookbook, device API reference and troubleshooting for that sample | [`samples/PicoScope/README.md`](https://github.com/ellisnet/CodeBrix.Plotter/blob/main/samples/PicoScope/README.md) |
 | Example library | A complete `PlotModel` per chart variation, organized by feature - the fastest way to find a working recipe | [`tests/CodeBrix.Plotter.Tests/ExampleLibrary`](https://github.com/ellisnet/CodeBrix.Plotter/tree/main/tests/CodeBrix.Plotter.Tests/ExampleLibrary) |
 | Skia examples | Worked `SkiaRenderContext` usage, the `TypefaceResolver` contract, and every exporter | [`tests/CodeBrix.Plotter.Tests/Skia`](https://github.com/ellisnet/CodeBrix.Plotter/tree/main/tests/CodeBrix.Plotter.Tests/Skia) |
 
 The PicoScope sample is the one to read for architecture. Its `ScopePlot` class builds and owns a
 `PlotModel` and exposes it as a property - a clean separation between chart state and the UI head -
-appends live data under `MaxPointsPerChannel` and `StreamWindowSeconds` limits, and is rendered
-unchanged by a WPF head hosting an `SKElement` and a WinUI head hosting an `SKXamlCanvas`. The
-device-agnostic project holds `IPicoScope`, the model types, `PicoScopeFinder` and
-`SimulatedPicoScope`; a Windows-only project holds the driver interop; and a `Shared/` folder is
-linked as source into both heads. Running it against real hardware is Windows-only, needs a 64-bit
-process and the vendor's `ps2000.dll` resolvable at run time from a separate install, and needs the
-vendor's own desktop application closed first, because only one process may hold the device open.
-Without hardware, `PicoScopeFinder` falls back to `SimulatedPicoScope`, so the sample still runs.
+appends live data under `MaxPointsPerChannel` and `StreamWindowSeconds` limits, and is shown through
+the PlotterView add-in on every head. The device-agnostic library, `src/libs/PicoScope.ScopeData`, holds
+`IScopeDataDevice`, the model types, `ScopeDeviceFinder` and `SimulatedScopeDataDevice`, and
+`PicoScope.ScopeData.Ps2000` holds the driver interop in one assembly for Windows and Linux. Real
+hardware works on Windows, with the vendor's `ps2000.dll` from a separate install, and on Linux, with the
+vendor's `libps2000` package; only one process may hold the device open, so close the vendor's own
+application first. Without hardware, `ScopeDeviceFinder` falls back to `SimulatedScopeDataDevice`, so
+the sample still runs.
 
 The reference application in [CodeBrix.Samples](https://github.com/ellisnet/CodeBrix.Samples) is
 [PicoScope.Brix](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PicoScope.Brix), a six-head CodeBrix.Platform oscilloscope

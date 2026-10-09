@@ -21,20 +21,20 @@ application - it has no dependencies of its own and needs nothing installed on t
 ## What it does
 
 - **Block and stream ciphers** - AES with x86 acceleration, ARIA, Blowfish, Camellia, CAST5 and CAST6,
-  ChaCha20, DES and Triple-DES, GOST 28147 and Kuznyechik, IDEA, Noekeon, RC2, RC4, RC5, RC6,
+  ChaCha20, DES and Triple-DES, GOST 28147, IDEA, Noekeon, RC2, RC4, RC5, RC6,
   Rijndael, SEED, Serpent, Salsa20, SM4, Threefish, Twofish, XSalsa20 and more.
 - **Modes and padding** - CBC, CCM, CFB, CTS, EAX, ECB, GCM with carry-less-multiply acceleration,
-  GOFB, KCCM, KGCM, OCB, OFB, OpenPGP CFB and SIC/CTR, plus PKCS#7, ISO 7816-4, ISO 10126-2, TBC,
+  GOFB, KCCM, KCTR, OCB, OFB, OpenPGP CFB and SIC/CTR, plus PKCS#7, ISO 7816-4, ISO 10126-2, TBC,
   X9.23 and zero-byte padding.
 - **Digests and extendable-output functions** - SHA-1, the SHA-2 family, SHA-3, SHAKE, cSHAKE, KMAC,
   TupleHash, ParallelHash, BLAKE2b and BLAKE2s with x86 paths, BLAKE3, Haraka, Keccak, MD2, MD4, MD5,
   RIPEMD, SM3, Skein, Whirlpool, GOST3411 and the DSTU digests.
-- **MACs** - CBC-MAC, CMAC, GMAC, HMAC, KGMAC, Poly1305, SipHash, SkeinMac, DSTU7564Mac and more.
+- **MACs** - CBC-MAC, CMAC, GMAC, HMAC, KMAC, Poly1305, SipHash, SkeinMac, DSTU7564Mac and more.
 - **Public-key cryptography** - RSA, DSA, Diffie-Hellman, ElGamal, ECDSA, ECDH and ECMQV, ECGOST,
   EdDSA over Ed25519 and Ed448, X25519 and X448, SM2, with the associated key generation, key
   agreement and signature schemes.
-- **Post-quantum cryptography** - ML-KEM, ML-DSA, SLH-DSA, LMS/HSS, XMSS, Falcon, BIKE, HQC, Classic
-  McEliece, Frodo, NTRU and NTRU Prime, Picnic, SABER and SNOVA.
+- **Post-quantum cryptography** - ML-KEM, ML-DSA, SLH-DSA, LMS/HSS, Falcon, BIKE, HQC, Classic
+  McEliece, Frodo, NTRU and NTRU Prime, Picnic and SABER.
 - **Key derivation and password hashing** - Argon2, bcrypt, scrypt, HKDF, PBKDF1 and PBKDF2, the
   PKCS#12 KDF, the concatenation and X9.63 KDFs, and the TLS and SSL pseudo-random functions.
 - **TLS and DTLS** - a full TLS 1.0 to 1.3 and DTLS 1.0 to 1.2 client and server implementation, with
@@ -209,8 +209,8 @@ engine when the CPU supports it, and `IsHardwareAccelerated` tells you which one
 expects. Prefer it over `System.Random`, and reuse one instance: constructing one seeds a deterministic
 random bit generator, so constructing many in a loop is pure overhead. It exposes `GenerateSeed`,
 `SetSeed`, `NextBytes`, `NextInt`, `NextLong`, the static `GetNextBytes` and `Fill` helpers, and a
-`GetInstance(algorithm)` factory. `CryptoServicesRegistrar.GetSecureRandom()` returns a shared
-instance, and its overload returns the argument when it is non-null and the shared instance otherwise -
+`GetInstance(algorithm)` factory. `CryptoServicesRegistrar.GetSecureRandom()` returns a new
+instance, and its overload returns the argument when it is non-null and a new instance otherwise -
 useful when a `SecureRandom` parameter is optional. Deterministic and NIST-specified generators live
 in `Crypto.Prng` and `Crypto.Prng.Drbg`.
 
@@ -298,7 +298,7 @@ PBKDF2 is `Pkcs5S2ParametersGenerator`, and its key and IV sizes are in **bits**
 var pbkdf2 = new Pkcs5S2ParametersGenerator(new Sha256Digest());
 pbkdf2.Init(PbeParametersGenerator.Pkcs5PasswordToUtf8Bytes(password),
             salt, 600_000);
-var keyParam = (KeyParameter)pbkdf2.GenerateDerivedParameters(256);
+var keyParam = (KeyParameter)pbkdf2.GenerateDerivedMacParameters(256);
 ```
 
 `SCrypt.Generate`, `BCrypt.Generate` and `OpenBsdBCrypt` cover the other password KDFs;
@@ -312,10 +312,10 @@ lower it to "fix" a slow login.
 `RsaKeyPairGenerator` with `KeyGenerationParameters` produces an `AsymmetricCipherKeyPair`;
 `RsaKeyGenerationParameters` is the explicit-control variant when you want to choose the public
 exponent and certainty. Raw RSA is never used bare - wrap the engine in a padding scheme, and prefer
-`RSABlindedEngine` for private-key operations, which is the side-channel-hardened variant.
+`RsaBlindedEngine` for private-key operations, which is the side-channel-hardened variant.
 
 ```csharp
-var rsa = new OaepEncoding(new RSABlindedEngine(), new Sha256Digest());
+var rsa = new OaepEncoding(new RsaBlindedEngine(), new Sha256Digest());
 rsa.Init(forEncryption: true, pair.Public);
 byte[] wrapped = rsa.ProcessBlock(sessionKey, 0, sessionKey.Length);
 ```
@@ -341,12 +341,13 @@ bool ok = verifier.VerifySignature(signature);
 
 Mechanism names include `"SHA256withRSA"`, `"SHA384withRSA"`, `"SHA512withRSA"`,
 `"SHA256withRSAandMGF1"` for PSS, `"SHA256withECDSA"`, `"SHA256withDSA"`, `"Ed25519"`, `"Ed448"`,
-`"SHA256withSM2"`, `"ML-DSA"` and `"SLH-DSA"`. The concrete signers are all in `Crypto.Signers`, with
+`"SHA256withSM2"`, and the ML-DSA and SLH-DSA parameter-set names such as `"ML-DSA-65"` and
+`"SLH-DSA-SHA2-128S"`. The concrete signers are all in `Crypto.Signers`, with
 `HMacDsaKCalculator` for deterministic DSA and ECDSA.
 
 ### Elliptic curve, EdDSA and key agreement
 
-Named curves come from four registries that share a static shape - `ECNamedCurveTable` is the union of
+Named curves come from seven registries that share a static shape - `ECNamedCurveTable` is the union of
 them all - and feed `ECKeyGenerationParameters`:
 
 ```csharp
@@ -453,7 +454,7 @@ The signature factory lives in `CodeBrix.Cryptography.Crypto.Operators`, *not* i
 
 On the reading side, `X509Certificate` exposes the fields, the validity checks and the signature
 checks, and each comes in two flavors: `CheckValidity()` and `Verify()` throw, while `IsValidNow` and
-`IsSignatureValid()` return a bool. `X509CertificateParser` reads DER or PEM, single objects or
+`IsSignatureValid(key)` return a bool. `X509CertificateParser` reads DER or PEM, single objects or
 bundles, and `X509CrlParser`, `X509AttrCertParser` and `X509CertPairParser` mirror it.
 
 A PKCS#12 store is built through `Pkcs12StoreBuilder` and then filled:
@@ -509,7 +510,7 @@ pretty-print a parsed object.
 
 The protocol handlers wrap a byte stream for TLS or a datagram transport for DTLS, and hand back a
 `Stream` or a `DtlsTransport` once the handshake completes. The crypto is pluggable, and `BcTlsCrypto`
-is the in-box implementation that needs no configuration. `AbstractTlsClient` has exactly one member
+is the in-box implementation that needs no configuration. `DefaultTlsClient` has exactly one member
 you must implement: `GetAuthentication()`.
 
 ```csharp
@@ -556,7 +557,7 @@ suites; alerts arrive through `NotifyAlertRaised` and `NotifyAlertReceived`.
 ML-KEM, ML-DSA and SLH-DSA live in the main `Crypto` namespaces rather than under `Pqc`. Parameter
 sets are static instances - `MLKemParameters.ml_kem_512`, `ml_kem_768` and `ml_kem_1024`, with
 `MLDsaParameters` and `SlhDsaParameters` following the same shape - and each has a key pair generator.
-Encapsulation is `IKemEncapsulator` in `Crypto.Kems`, with `MLKemDecapsulator` as its peer. The
+Encapsulation is `MLKemEncapsulator` in `Crypto.Kems` (implementing `IKemEncapsulator`), with `MLKemDecapsulator` as its peer. The
 remaining NIST candidates live under `CodeBrix.Cryptography.Pqc.Crypto.*`, each with its own
 parameters, generators and signer or KEM types. Re-read the experimental warning above before using
 any of them.
@@ -854,7 +855,7 @@ There is no registration call.
 - `Asn1SignatureFactory` and `Asn1VerifierFactory` live in `CodeBrix.Cryptography.Crypto.Operators`,
   not `CodeBrix.Cryptography.Operators`. The latter namespace exists and holds different types.
 - Raw RSA has no padding at all and cannot encrypt more than `GetInputBlockSize()` bytes. Always wrap
-  it - `OaepEncoding` for encryption - and prefer `RSABlindedEngine` for private-key operations.
+  it - `OaepEncoding` for encryption - and prefer `RsaBlindedEngine` for private-key operations.
 - An ECDH or X25519 agreement result is not a key. Run it through a KDF, and convert the `BigInteger`
   with `BigIntegers.AsUnsignedByteArray(fieldSize, z)` rather than `ToByteArray()`.
 - TLS certificate validation is your job. An empty `NotifyServerCertificate` accepts every

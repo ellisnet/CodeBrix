@@ -27,7 +27,7 @@ the seam package.
 | `CodeBrix.Platform.MediaPlayerCore.LgplLicenseForever` | `CodeBrix.Platform.MediaPlayerCore.dll` | The seam a player UI is built on: the shared `IVideoView` type identity and the `MediaPosition` helper |
 | `CodeBrix.Webcam.LgplLicenseForever` | `CodeBrix.Webcam.dll` | Webcam capture: devices, live frames, photos, recording and overlays, with no engine type in sight |
 
-All three types live in the `CodeBrix.Platform.MediaPlayerCore` namespace family; the assembly names and
+The engine and seam packages' types live in the `CodeBrix.Platform.MediaPlayerCore` namespace family and the webcam package's under `CodeBrix.Webcam`; the assembly names and
 the namespaces deliberately differ, which is the first thing to know before writing a `using` line.
 
 ### The media engine

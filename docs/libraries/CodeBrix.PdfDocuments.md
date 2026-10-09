@@ -16,7 +16,7 @@ application or from a CodeBrix.Platform application.
 | **License** | MIT; see [License](#license) |
 | **Requires** | .NET 10 or later. `CodeBrix.PdfRasterizer.MitLicenseForever` is the only package with a native component; it bundles the PDFium binaries and needs no separate native-asset package |
 | **Use it from** | Any .NET 10 application, or a CodeBrix.Platform application |
-| **Platforms** | The four managed packages run wherever .NET 10 runs, in containers and on web servers. The rasterizer ships natives for win-x64, win-x86, win-arm64, osx-x64, osx-arm64, linux-x64, linux-arm64, linux-arm, linux-riscv64 and android-arm64; iOS and WebAssembly are not supported |
+| **Platforms** | The four managed packages run wherever .NET 10 runs, in containers and on web servers. The rasterizer ships natives for win-x64, win-x86, win-arm64, osx-x64, osx-arm64, linux-x64, linux-arm64, linux-arm, linux-riscv64, android-arm64 and android-x64; iOS and WebAssembly are not supported |
 
 ## What it does
 
@@ -610,8 +610,8 @@ file carries a subset of every glyph it used.
 
 - Do not confuse a package ID with a namespace. The `.MitLicenseForever` suffix belongs to the package
   ID only and never appears in code.
-- Do not open a PDF for `Import` and then modify or save it - saving an imported document throws
-  `InvalidOperationException`. Use `Modify` for editing.
+- Do not open a PDF for `Import` and then draw on it - creating an `XGraphics` on a page of an imported
+  document throws `InvalidOperationException`. Use `Modify` for editing.
 - Do not assume the font you asked for is the font you got. An unavailable family is silently
   substituted rather than raising an error.
 - Do not set `GlobalFontSettings.FontResolver` after any font has been used; the setter throws. And
@@ -624,7 +624,7 @@ file carries a subset of every glyph it used.
   bridge with `ImagingImageSource<TPixel>.FromImagingImage(image, format)`. Note also that
   `XImage.FromStream` takes a `Func<Stream>`, not a `Stream`.
 - Do not expect `Save(Stream)` to close the stream: the one-argument form leaves it open with
-  `Position` reset to 0, and the two-argument form disposes it.
+  `Position` reset to 0, and the two-argument form disposes it only when `closeStream` is true.
 - Do not set a `DocumentSecurityLevel` without a password - saving throws. Setting either password
   raises the level from `None` to `Encrypted128Bit`, and that is the intended way to turn encryption on.
 - Do not expect a gradient brush's `Transform` to do anything unless the brush is an `XShadingBrush`,

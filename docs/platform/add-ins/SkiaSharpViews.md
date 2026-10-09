@@ -8,7 +8,7 @@
 | --- | --- |
 | **Package** | [`CodeBrix.Platform.SkiaSharp.Views.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.SkiaSharp.Views.MitLicenseForever) |
 | **Adds** | `SKXamlCanvas` (fully functional), `SKPaintSurfaceEventArgs`, `UWPExtensions` conversion helpers, and `SKSwapChainPanel` with `SKPaintGLSurfaceEventArgs` as a non-functional placeholder |
-| **Heads** | All six. A single assembly, no extra native libraries. |
+| **Heads** | All six. Two assemblies, `CodeBrix.Platform.SkiaSharp.Views.Core.dll` and `CodeBrix.Platform.SkiaSharp.Views.dll`, and no extra native libraries. |
 | **Requires** | .NET 10 or later, and a running CodeBrix.Platform application. SkiaSharp and the core framework package arrive automatically. |
 
 The [Lottie](Lottie.md) and [Svg](Svg.md) add-ins depend on this package themselves. Reference it directly only when your own code uses `SKXamlCanvas` or the conversion helpers.
@@ -315,7 +315,7 @@ This package does not contain SkiaSharp itself - `SKCanvas`, `SKPaint` and the r
 
 ## Per-head notes
 
-`SKXamlCanvas` behaves the same on every head, and so does the `SKSwapChainPanel` placeholder. A single assembly serves all six, with no extra native libraries.
+`SKXamlCanvas` behaves the same on every head, and so does the `SKSwapChainPanel` placeholder. The same two assemblies serve all six, with no extra native libraries.
 
 One optional flag lives in the core package and is chained onto the host builder in each head's `Program.cs`.
 

@@ -25,6 +25,18 @@ root:
 
 ## Library repositories
 
+### CodeBrix.Android
+
+| | |
+| --- | --- |
+| **GitHub** | [ellisnet/CodeBrix.Android](https://github.com/ellisnet/CodeBrix.Android) |
+| **Packages** | [`CodeBrix.Android.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.ApacheLicenseForever) - the framework package, for the Android head and the Android target framework of `.Core`<br>[`CodeBrix.Android.AdvancedTextEdit.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.AdvancedTextEdit.ApacheLicenseForever)<br>[`CodeBrix.Android.AppSettings.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.AppSettings.ApacheLicenseForever)<br>[`CodeBrix.Android.AudioPlayer.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.AudioPlayer.ApacheLicenseForever)<br>[`CodeBrix.Android.CommandBar.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.CommandBar.ApacheLicenseForever)<br>[`CodeBrix.Android.FlexPanel.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.FlexPanel.ApacheLicenseForever)<br>[`CodeBrix.Android.Graphics2DSK.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.Graphics2DSK.ApacheLicenseForever)<br>[`CodeBrix.Android.Graphics3DGL.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.Graphics3DGL.ApacheLicenseForever)<br>[`CodeBrix.Android.Lottie.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.Lottie.ApacheLicenseForever)<br>[`CodeBrix.Android.MediaPlayer.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.MediaPlayer.ApacheLicenseForever)<br>[`CodeBrix.Android.PlotterView.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.PlotterView.ApacheLicenseForever)<br>[`CodeBrix.Android.SkiaSharp.Views.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.SkiaSharp.Views.ApacheLicenseForever)<br>[`CodeBrix.Android.Svg.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.Svg.ApacheLicenseForever)<br>[`CodeBrix.Android.TerminalView.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.TerminalView.ApacheLicenseForever)<br>[`CodeBrix.Android.TextLayout.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.TextLayout.ApacheLicenseForever)<br>[`CodeBrix.Android.VideoPlayer.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.VideoPlayer.ApacheLicenseForever)<br>[`CodeBrix.Android.WebView.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Android.WebView.ApacheLicenseForever) - one per CodeBrix.Platform add-in; every package of one release is published together at the same version |
+| **Documents** | [README.md](https://github.com/ellisnet/CodeBrix.Android/blob/main/README.md) · [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Android/blob/main/README-INDEX.txt) · [EXTRAS-README.txt](https://github.com/ellisnet/CodeBrix.Android/blob/main/EXTRAS-README.txt) · [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Android/blob/main/THIRD-PARTY-NOTICES.txt) · [templates/TEMPLATE_INTEGRATION.md](https://github.com/ellisnet/CodeBrix.Android/blob/main/templates/TEMPLATE_INTEGRATION.md) |
+| **AGENT-README.txt** | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Android/blob/main/AGENT-README.txt) - one file for the framework package and every add-in package (its ADD-INS ON ANDROID section) |
+| **Tests** | [tests](https://github.com/ellisnet/CodeBrix.Android/tree/main/tests) |
+| **Samples and tools** | [samples](https://github.com/ellisnet/CodeBrix.Android/tree/main/samples) · [templates/AndroidHead](https://github.com/ellisnet/CodeBrix.Android/tree/main/templates/AndroidHead) · [tools](https://github.com/ellisnet/CodeBrix.Android/tree/main/tools) |
+| **This site** | [CodeBrix.Android](libraries/CodeBrix.Android.md) · [Android and Googlebooks](platform/15-android.md) |
+
 ### CodeBrix.ArgumentParser
 
 | | |
@@ -61,6 +73,18 @@ root:
 | **Samples and tools** | [tools](https://github.com/ellisnet/CodeBrix.Audio/tree/main/tools) |
 | **This site** | [CodeBrix.Audio](libraries/CodeBrix.Audio.md) and its [Audio section](libraries/audio/reading-and-writing-files.md) · [CodeBrix.Audio.ModestSynth](libraries/CodeBrix.Audio.ModestSynth.md) |
 
+### CodeBrix.Audio.Android
+
+| | |
+| --- | --- |
+| **GitHub** | [ellisnet/CodeBrix.Audio.Android](https://github.com/ellisnet/CodeBrix.Audio.Android) |
+| **Packages** | [`CodeBrix.Audio.Android.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.Android.ApacheLicenseForever) - the Android platform package for CodeBrix.Audio, referenced in place of the desktop package |
+| **Documents** | [README.md](https://github.com/ellisnet/CodeBrix.Audio.Android/blob/main/README.md) · [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Audio.Android/blob/main/README-INDEX.txt) · [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Audio.Android/blob/main/THIRD-PARTY-NOTICES.txt) · [EXTRAS-README.txt](https://github.com/ellisnet/CodeBrix.Audio.Android/blob/main/EXTRAS-README.txt) |
+| **AGENT-README.txt** | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Audio.Android/blob/main/AGENT-README.txt) |
+| **Tests** | [tests](https://github.com/ellisnet/CodeBrix.Audio.Android/tree/main/tests) |
+| **Samples and tools** | [samples/AudioDiagnostics](https://github.com/ellisnet/CodeBrix.Audio.Android/tree/main/samples/AudioDiagnostics) · [tools](https://github.com/ellisnet/CodeBrix.Audio.Android/tree/main/tools) |
+| **This site** | [CodeBrix.Audio.Android](libraries/CodeBrix.Audio.Android.md) |
+
 ### CodeBrix.Audio.MusicGeneration
 
 | | |
@@ -74,6 +98,30 @@ root:
 | **Samples and tools** | None |
 | **This site** | [CodeBrix.Audio.MusicGeneration](libraries/CodeBrix.Audio.MusicGeneration.md) · [The music-generation blueprints](samples/blueprints.md#the-music-generation-blueprints) |
 
+### CodeBrix.Audio.MusicGeneration.MuPT
+
+| | |
+| --- | --- |
+| **GitHub** | [ellisnet/CodeBrix.Audio.MusicGeneration.MuPT](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.MuPT) |
+| **Packages** | [`CodeBrix.Audio.MusicGeneration.MuPT.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MusicGeneration.MuPT.ApacheLicenseForever) - the MuPT model, which writes ABC notation, with its registration class |
+| **Documents** | [README.md](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.MuPT/blob/main/README.md) · [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.MuPT/blob/main/README-INDEX.txt) · [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.MuPT/blob/main/THIRD-PARTY-NOTICES.txt) · [MODEL-CARD.md](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.MuPT/blob/main/MODEL-CARD.md) · [MODEL-PROVENANCE.json](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.MuPT/blob/main/MODEL-PROVENANCE.json) |
+| **AGENT-README.txt** | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.MuPT/blob/main/AGENT-README.txt) |
+| **Tests** | [tests](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.MuPT/tree/main/tests) |
+| **Samples and tools** | [tools](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.MuPT/tree/main/tools) |
+| **This site** | [CodeBrix.Audio.MusicGeneration](libraries/CodeBrix.Audio.MusicGeneration.md#the-model-adapters-and-the-model-packages), which describes both model packages |
+
+### CodeBrix.Audio.MusicGeneration.SkyTNT
+
+| | |
+| --- | --- |
+| **GitHub** | [ellisnet/CodeBrix.Audio.MusicGeneration.SkyTNT](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.SkyTNT) |
+| **Packages** | [`CodeBrix.Audio.MusicGeneration.SkyTNT.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.MusicGeneration.SkyTNT.ApacheLicenseForever) - the SkyTNT model, which writes MIDI events, with its registration class |
+| **Documents** | [README.md](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.SkyTNT/blob/main/README.md) · [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.SkyTNT/blob/main/README-INDEX.txt) · [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.SkyTNT/blob/main/THIRD-PARTY-NOTICES.txt) · [MODEL-CARD.md](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.SkyTNT/blob/main/MODEL-CARD.md) · [MODEL-PROVENANCE.json](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.SkyTNT/blob/main/MODEL-PROVENANCE.json) |
+| **AGENT-README.txt** | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.SkyTNT/blob/main/AGENT-README.txt) |
+| **Tests** | [tests](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.SkyTNT/tree/main/tests) |
+| **Samples and tools** | [tools](https://github.com/ellisnet/CodeBrix.Audio.MusicGeneration.SkyTNT/tree/main/tools) |
+| **This site** | [CodeBrix.Audio.MusicGeneration](libraries/CodeBrix.Audio.MusicGeneration.md#the-model-adapters-and-the-model-packages), which describes both model packages |
+
 ### CodeBrix.Audio.Opus
 
 | | |
@@ -85,6 +133,18 @@ root:
 | **Tests** | [tests](https://github.com/ellisnet/CodeBrix.Audio.Opus/tree/main/tests) |
 | **Samples and tools** | [tools](https://github.com/ellisnet/CodeBrix.Audio.Opus/tree/main/tools) |
 | **This site** | [CodeBrix.Audio.Opus](libraries/CodeBrix.Audio.Opus.md) |
+
+### CodeBrix.Audio.Samples.FluidR3Gm
+
+| | |
+| --- | --- |
+| **GitHub** | [ellisnet/CodeBrix.Audio.Samples.FluidR3Gm](https://github.com/ellisnet/CodeBrix.Audio.Samples.FluidR3Gm) |
+| **Packages** | [`CodeBrix.Audio.Samples.FluidR3Gm.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Audio.Samples.FluidR3Gm.MitLicenseForever) - the FluidR3_GM SoundFont as the `FluidR3Gm` instrument library |
+| **Documents** | [README.md](https://github.com/ellisnet/CodeBrix.Audio.Samples.FluidR3Gm/blob/main/README.md) · [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Audio.Samples.FluidR3Gm/blob/main/README-INDEX.txt) · [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Audio.Samples.FluidR3Gm/blob/main/THIRD-PARTY-NOTICES.txt) · [ASSET-PROVENANCE.json](https://github.com/ellisnet/CodeBrix.Audio.Samples.FluidR3Gm/blob/main/ASSET-PROVENANCE.json) |
+| **AGENT-README.txt** | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Audio.Samples.FluidR3Gm/blob/main/AGENT-README.txt) |
+| **Tests** | [tests](https://github.com/ellisnet/CodeBrix.Audio.Samples.FluidR3Gm/tree/main/tests) |
+| **Samples and tools** | [tools/AssetStager](https://github.com/ellisnet/CodeBrix.Audio.Samples.FluidR3Gm/tree/main/tools/AssetStager) |
+| **This site** | [CodeBrix.Audio.Samples.FluidR3Gm](libraries/CodeBrix.Audio.Samples.FluidR3Gm.md) |
 
 ### CodeBrix.Compression
 
@@ -121,6 +181,18 @@ root:
 | **Tests** | [tests](https://github.com/ellisnet/CodeBrix.Docker/tree/main/tests) |
 | **Samples and tools** | [samples/RedisSetupTool](https://github.com/ellisnet/CodeBrix.Docker/tree/main/samples/RedisSetupTool) |
 | **This site** | [CodeBrix.Docker](libraries/CodeBrix.Docker.md) |
+
+### CodeBrix.Graphics3D.Gltf2
+
+| | |
+| --- | --- |
+| **GitHub** | [ellisnet/CodeBrix.Graphics3D.Gltf2](https://github.com/ellisnet/CodeBrix.Graphics3D.Gltf2) |
+| **Packages** | [`CodeBrix.Graphics3D.Gltf2.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Graphics3D.Gltf2.MitLicenseForever) |
+| **Documents** | [README.md](https://github.com/ellisnet/CodeBrix.Graphics3D.Gltf2/blob/main/README.md) · [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Graphics3D.Gltf2/blob/main/README-INDEX.txt) · [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Graphics3D.Gltf2/blob/main/THIRD-PARTY-NOTICES.txt) |
+| **AGENT-README.txt** | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Graphics3D.Gltf2/blob/main/AGENT-README.txt) |
+| **Tests** | [tests](https://github.com/ellisnet/CodeBrix.Graphics3D.Gltf2/tree/main/tests) |
+| **Samples and tools** | None |
+| **This site** | [CodeBrix.Graphics3D.Gltf2](libraries/CodeBrix.Graphics3D.Gltf2.md) |
 
 ### CodeBrix.Imaging
 
@@ -206,6 +278,18 @@ root:
 | **Samples and tools** | None |
 | **This site** | [CodeBrix.NotionApi](libraries/CodeBrix.NotionApi.md) |
 
+### CodeBrix.Ollama
+
+| | |
+| --- | --- |
+| **GitHub** | [ellisnet/CodeBrix.Ollama](https://github.com/ellisnet/CodeBrix.Ollama) |
+| **Packages** | [`CodeBrix.Ollama.ModelManager.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Ollama.ModelManager.MitLicenseForever) - the local model store<br>[`CodeBrix.Ollama.ModelRunner.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Ollama.ModelRunner.MitLicenseForever) - the in-process runner; the two are independent of each other and are built and published from this repository at the same version |
+| **Documents** | [README.md](https://github.com/ellisnet/CodeBrix.Ollama/blob/main/README.md) · [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Ollama/blob/main/README-INDEX.txt) · [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Ollama/blob/main/THIRD-PARTY-NOTICES.txt) · [MUSECOCO-README.txt](https://github.com/ellisnet/CodeBrix.Ollama/blob/main/MUSECOCO-README.txt) |
+| **AGENT-README.txt** | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Ollama/blob/main/AGENT-README.txt) for ModelRunner · [src/CodeBrix.Ollama.ModelManager/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Ollama/blob/main/src/CodeBrix.Ollama.ModelManager/AGENT-README.txt) for ModelManager |
+| **Tests** | [tests](https://github.com/ellisnet/CodeBrix.Ollama/tree/main/tests) |
+| **Samples and tools** | [samples/ModelQueryTool](https://github.com/ellisnet/CodeBrix.Ollama/tree/main/samples/ModelQueryTool) · [llama-native-tools](https://github.com/ellisnet/CodeBrix.Ollama/tree/main/llama-native-tools) |
+| **This site** | [CodeBrix.Ollama.ModelManager](libraries/CodeBrix.Ollama.ModelManager.md) · [CodeBrix.Ollama.ModelRunner](libraries/CodeBrix.Ollama.ModelRunner.md) |
+
 ### CodeBrix.PdfDocuments
 
 | | |
@@ -223,12 +307,12 @@ root:
 | | |
 | --- | --- |
 | **GitHub** | [ellisnet/CodeBrix.Platform](https://github.com/ellisnet/CodeBrix.Platform) |
-| **Packages** | The framework, head, add-in and native-toolkit packages - listed in full in the [library catalog](libraries/README.md#platform-companions) |
+| **Packages** | The framework, head, add-in and native-toolkit packages - listed in full in the [library catalog](libraries/README.md#platform-companions) - plus the PlayTest test head, [`CodeBrix.Platform.PlayTest.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.PlayTest.ApacheLicenseForever), and its OpenGL companion, [`CodeBrix.Platform.PlayTest.OpenGL.ApacheLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.PlayTest.OpenGL.ApacheLicenseForever) |
 | **Documents** | [README.md](https://github.com/ellisnet/CodeBrix.Platform/blob/main/README.md) · [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Platform/blob/main/README-INDEX.txt) · [CODEBRIX-PLATFORM-README.md](https://github.com/ellisnet/CodeBrix.Platform/blob/main/CODEBRIX-PLATFORM-README.md) · [NOT-IMPLEMENTED.md](https://github.com/ellisnet/CodeBrix.Platform/blob/main/NOT-IMPLEMENTED.md) · [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Platform/blob/main/THIRD-PARTY-NOTICES.txt) |
 | **AGENT-README.txt** | One per package family - see the list below |
-| **Tests** | [src/Platform.UI.RuntimeTests](https://github.com/ellisnet/CodeBrix.Platform/tree/main/src/Platform.UI.RuntimeTests) · [src/Platform.UI.Toolkit.Tests](https://github.com/ellisnet/CodeBrix.Platform/tree/main/src/Platform.UI.Toolkit.Tests) |
+| **Tests** | [src/Platform.UI.RuntimeTests](https://github.com/ellisnet/CodeBrix.Platform/tree/main/src/Platform.UI.RuntimeTests) · [src/Platform.UI.Toolkit.Tests](https://github.com/ellisnet/CodeBrix.Platform/tree/main/src/Platform.UI.Toolkit.Tests) · [src/Platform.UI.Runtime.Skia.PlayTest.Tests](https://github.com/ellisnet/CodeBrix.Platform/tree/main/src/Platform.UI.Runtime.Skia.PlayTest.Tests) · [PlayTestDemo PlayTests](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform/PlayTestDemo/tests) |
 | **Samples and tools** | [samples/CodeBrixPlatform](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/CodeBrixPlatform) · [samples/Platforms](https://github.com/ellisnet/CodeBrix.Platform/tree/main/samples/Platforms) · [tools](https://github.com/ellisnet/CodeBrix.Platform/tree/main/tools) |
-| **This site** | [CodeBrix.Platform](libraries/CodeBrix.Platform.md) |
+| **This site** | [CodeBrix.Platform](libraries/CodeBrix.Platform.md) · [PlayTest](platform/playtest/README.md) |
 
 <details>
 <summary>Every AGENT-README.txt in the CodeBrix.Platform repository</summary>
@@ -250,6 +334,8 @@ root:
 - [src/AddIns/Platform.UI.MediaPlayer.Skia/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform/blob/main/src/AddIns/Platform.UI.MediaPlayer.Skia/AGENT-README.txt) - MediaPlayer
 - [src/AddIns/Platform.UI.AudioPlayer.Skia/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform/blob/main/src/AddIns/Platform.UI.AudioPlayer.Skia/AGENT-README.txt) - AudioPlayer
 - [src/AddIns/Platform.UI.VideoPlayer.Skia/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform/blob/main/src/AddIns/Platform.UI.VideoPlayer.Skia/AGENT-README.txt) - VideoPlayer
+- [src/Platform.UI.Runtime.Skia.PlayTest/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform/blob/main/src/Platform.UI.Runtime.Skia.PlayTest/AGENT-README.txt) - PlayTest, the UI test head
+- [src/Platform.UI.Runtime.Skia.PlayTest.OpenGL/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform/blob/main/src/Platform.UI.Runtime.Skia.PlayTest.OpenGL/AGENT-README.txt) - PlayTest.OpenGL, real OpenGL contexts for PlayTests
 - [src-platforms/Platform.WinUI/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform/blob/main/src-platforms/Platform.WinUI/AGENT-README.txt) - the WinUI toolkit family
 - [src-platforms/Platform.WPF/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform/blob/main/src-platforms/Platform.WPF/AGENT-README.txt) - the WPF toolkit
 - [src-platforms/Platform.Mobile/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform/blob/main/src-platforms/Platform.Mobile/AGENT-README.txt) - the MAUI toolkit
@@ -347,12 +433,12 @@ The curriculum for this repository is the [CodeBrix.Platform guide](platform/REA
 | | |
 | --- | --- |
 | **GitHub** | [ellisnet/CodeBrix.Platform.GameEngine](https://github.com/ellisnet/CodeBrix.Platform.GameEngine) |
-| **Packages** | [`CodeBrix.Platform.GameEngine.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.MitLicenseForever)<br>[`CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever)<br>[`CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever)<br>[`CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever) |
+| **Packages** | [`CodeBrix.Platform.GameEngine.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.MitLicenseForever)<br>[`CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.Sdl2.ZlibLicenseForever)<br>[`CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.KenneyAssets.MitLicenseForever)<br>[`CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.GeneratedMusic.MitLicenseForever)<br>[`CodeBrix.Platform.GameEngine.CardsAndDice.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Platform.GameEngine.CardsAndDice.MitLicenseForever) |
 | **Documents** | [README.md](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/README.md) · [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/README-INDEX.txt) · [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/THIRD-PARTY-NOTICES.txt) |
-| **AGENT-README.txt** | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/AGENT-README.txt) · [src/CodeBrix.Platform.GameEngine.Sdl2/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/src/CodeBrix.Platform.GameEngine.Sdl2/AGENT-README.txt) · [src/CodeBrix.Platform.GameEngine.KenneyAssets/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/src/CodeBrix.Platform.GameEngine.KenneyAssets/AGENT-README.txt) · [src/CodeBrix.Platform.GameEngine.GeneratedMusic/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/src/CodeBrix.Platform.GameEngine.GeneratedMusic/AGENT-README.txt) |
+| **AGENT-README.txt** | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/AGENT-README.txt) · [src/CodeBrix.Platform.GameEngine.Sdl2/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/src/CodeBrix.Platform.GameEngine.Sdl2/AGENT-README.txt) · [src/CodeBrix.Platform.GameEngine.KenneyAssets/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/src/CodeBrix.Platform.GameEngine.KenneyAssets/AGENT-README.txt) · [src/CodeBrix.Platform.GameEngine.GeneratedMusic/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/src/CodeBrix.Platform.GameEngine.GeneratedMusic/AGENT-README.txt) · [src/CodeBrix.Platform.GameEngine.CardsAndDice/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/blob/main/src/CodeBrix.Platform.GameEngine.CardsAndDice/AGENT-README.txt) |
 | **Tests** | [tests](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tests) |
-| **Samples and tools** | [samples](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples) (including [KenneyAssetsDemo](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/KenneyAssetsDemo)) · [tools](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tools) |
-| **This site** | [CodeBrix.Platform.GameEngine](libraries/CodeBrix.Platform.GameEngine.md) |
+| **Samples and tools** | [samples](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples) (including [KenneyAssetsDemo](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/KenneyAssetsDemo) and [CardsAndDiceDemo](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/samples/CardsAndDiceDemo)) · [tools](https://github.com/ellisnet/CodeBrix.Platform.GameEngine/tree/main/tools) |
+| **This site** | [CodeBrix.Platform.GameEngine](libraries/CodeBrix.Platform.GameEngine.md) and its add-on pages: [Gamepads](libraries/gameengine/gamepads.md) · [Kenney assets](libraries/gameengine/kenney-assets.md) · [Generated music](libraries/gameengine/generated-music.md) · [Cards and dice](libraries/gameengine/cards-and-dice.md) |
 
 ### CodeBrix.Platform.LinuxDBus
 
@@ -438,6 +524,18 @@ The curriculum for this repository is the [CodeBrix.Platform guide](platform/REA
 | **Samples and tools** | None |
 | **This site** | [CodeBrix.PolygonTools](libraries/CodeBrix.PolygonTools.md) |
 
+### CodeBrix.PostgresClient
+
+| | |
+| --- | --- |
+| **GitHub** | [ellisnet/CodeBrix.PostgresClient](https://github.com/ellisnet/CodeBrix.PostgresClient) |
+| **Packages** | [`CodeBrix.PostgresClient.PostgreSqlLicenseForever`](https://www.nuget.org/packages/CodeBrix.PostgresClient.PostgreSqlLicenseForever) |
+| **Documents** | [README.md](https://github.com/ellisnet/CodeBrix.PostgresClient/blob/main/README.md) · [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.PostgresClient/blob/main/README-INDEX.txt) · [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.PostgresClient/blob/main/THIRD-PARTY-NOTICES.txt) |
+| **AGENT-README.txt** | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.PostgresClient/blob/main/AGENT-README.txt) |
+| **Tests** | [tests](https://github.com/ellisnet/CodeBrix.PostgresClient/tree/main/tests) |
+| **Samples and tools** | None |
+| **This site** | [CodeBrix.PostgresClient](libraries/CodeBrix.PostgresClient.md) |
+
 ### CodeBrix.Python
 
 | | |
@@ -461,6 +559,18 @@ The curriculum for this repository is the [CodeBrix.Platform guide](platform/REA
 | **Tests** | [tests](https://github.com/ellisnet/CodeBrix.Redis/tree/main/tests) |
 | **Samples and tools** | None |
 | **This site** | [CodeBrix.Redis](libraries/CodeBrix.Redis.md) |
+
+### CodeBrix.Sdl3
+
+| | |
+| --- | --- |
+| **GitHub** | [ellisnet/CodeBrix.Sdl3](https://github.com/ellisnet/CodeBrix.Sdl3) |
+| **Packages** | [`CodeBrix.Sdl3.ZlibLicenseForever`](https://www.nuget.org/packages/CodeBrix.Sdl3.ZlibLicenseForever) |
+| **Documents** | [README.md](https://github.com/ellisnet/CodeBrix.Sdl3/blob/main/README.md) · [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Sdl3/blob/main/README-INDEX.txt) · [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Sdl3/blob/main/THIRD-PARTY-NOTICES.txt) |
+| **AGENT-README.txt** | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Sdl3/blob/main/AGENT-README.txt) |
+| **Tests** | [tests](https://github.com/ellisnet/CodeBrix.Sdl3/tree/main/tests) |
+| **Samples and tools** | [tools](https://github.com/ellisnet/CodeBrix.Sdl3/tree/main/tools) · [sdl3-native-tools](https://github.com/ellisnet/CodeBrix.Sdl3/tree/main/sdl3-native-tools) |
+| **This site** | [CodeBrix.Sdl3](libraries/CodeBrix.Sdl3.md) |
 
 ### CodeBrix.ServiceLocator
 
@@ -534,6 +644,18 @@ The curriculum for this repository is the [CodeBrix.Platform guide](platform/REA
 | **Samples and tools** | None |
 | **This site** | [CodeBrix.SvgParse](libraries/CodeBrix.SvgParse.md) |
 
+### CodeBrix.Swarm
+
+| | |
+| --- | --- |
+| **GitHub** | [ellisnet/CodeBrix.Swarm](https://github.com/ellisnet/CodeBrix.Swarm) |
+| **Packages** | [`CodeBrix.Swarm.Queen.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Swarm.Queen.MitLicenseForever) - the coordinator<br>[`CodeBrix.Swarm.Hive.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Swarm.Hive.MitLicenseForever) - the per-host member<br>[`CodeBrix.Swarm.Worker.MitLicenseForever`](https://www.nuget.org/packages/CodeBrix.Swarm.Worker.MitLicenseForever) - one Worker process; all three are released together at the same version |
+| **Documents** | [README.md](https://github.com/ellisnet/CodeBrix.Swarm/blob/main/README.md) · [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.Swarm/blob/main/README-INDEX.txt) · [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Swarm/blob/main/THIRD-PARTY-NOTICES.txt) · [EXTRAS-README.txt](https://github.com/ellisnet/CodeBrix.Swarm/blob/main/EXTRAS-README.txt) |
+| **AGENT-README.txt** | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Swarm/blob/main/AGENT-README.txt) for the Queen · [src/CodeBrix.Swarm.Hive/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Swarm/blob/main/src/CodeBrix.Swarm.Hive/AGENT-README.txt) for the Hive · [src/CodeBrix.Swarm.Worker/AGENT-README.txt](https://github.com/ellisnet/CodeBrix.Swarm/blob/main/src/CodeBrix.Swarm.Worker/AGENT-README.txt) for the Worker |
+| **Tests** | [tests](https://github.com/ellisnet/CodeBrix.Swarm/tree/main/tests) |
+| **Samples and tools** | [samples](https://github.com/ellisnet/CodeBrix.Swarm/tree/main/samples) |
+| **This site** | [CodeBrix.Swarm](libraries/CodeBrix.Swarm.md) |
+
 ### CodeBrix.Templating
 
 | | |
@@ -581,6 +703,18 @@ The curriculum for this repository is the [CodeBrix.Platform guide](platform/REA
 | **Tests** | [tests](https://github.com/ellisnet/CodeBrix.Texinfo/tree/main/tests) |
 | **Samples and tools** | None |
 | **This site** | [CodeBrix.Texinfo](libraries/CodeBrix.Texinfo.md) |
+
+### CodeBrix.TomlParse
+
+| | |
+| --- | --- |
+| **GitHub** | [ellisnet/CodeBrix.TomlParse](https://github.com/ellisnet/CodeBrix.TomlParse) |
+| **Packages** | [`CodeBrix.TomlParse.BsdLicenseForever`](https://www.nuget.org/packages/CodeBrix.TomlParse.BsdLicenseForever) |
+| **Documents** | [README.md](https://github.com/ellisnet/CodeBrix.TomlParse/blob/main/README.md) · [README-INDEX.txt](https://github.com/ellisnet/CodeBrix.TomlParse/blob/main/README-INDEX.txt) · [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.TomlParse/blob/main/THIRD-PARTY-NOTICES.txt) |
+| **AGENT-README.txt** | [AGENT-README.txt](https://github.com/ellisnet/CodeBrix.TomlParse/blob/main/AGENT-README.txt) |
+| **Tests** | [tests](https://github.com/ellisnet/CodeBrix.TomlParse/tree/main/tests) |
+| **Samples and tools** | None |
+| **This site** | [CodeBrix.TomlParse](libraries/CodeBrix.TomlParse.md) |
 
 ### CodeBrix.VideoPlayback
 
@@ -683,7 +817,7 @@ from all of its applications.
 | **Documents** | [README.md](https://github.com/ellisnet/CodeBrix.Samples/blob/main/README.md) · [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Samples/blob/main/THIRD-PARTY-NOTICES.txt) |
 | **License** | Apache License 2.0 |
 | **Blueprints** | [BLUEPRINTS-Index.md](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BLUEPRINTS-Index.md) and the topic files listed below |
-| **Applications** | [BrixInvaders](https://github.com/ellisnet/CodeBrix.Samples/tree/main/BrixInvaders) · [CodeBrixVideoTool](https://github.com/ellisnet/CodeBrix.Samples/tree/main/CodeBrixVideoTool) · [DRAKON.Brix](https://github.com/ellisnet/CodeBrix.Samples/tree/main/DRAKON.Brix) · [GameEngineMusicDemo](https://github.com/ellisnet/CodeBrix.Samples/tree/main/GameEngineMusicDemo) · [GitHubIssueFinder](https://github.com/ellisnet/CodeBrix.Samples/tree/main/GitHubIssueFinder) · [InannaRosette](https://github.com/ellisnet/CodeBrix.Samples/tree/main/InannaRosette) · [JustBetweenUs](https://github.com/ellisnet/CodeBrix.Samples/tree/main/JustBetweenUs) · [KenneyAssetBrowser](https://github.com/ellisnet/CodeBrix.Samples/tree/main/KenneyAssetBrowser) · [MediaPlayerDemo](https://github.com/ellisnet/CodeBrix.Samples/tree/main/MediaPlayerDemo) · [NotionDocumentCreator](https://github.com/ellisnet/CodeBrix.Samples/tree/main/NotionDocumentCreator) · [PainDiagram](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PainDiagram) · [PalmVisualizer](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PalmVisualizer) · [PdfSideBySide](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PdfSideBySide) · [PicoScope.Brix](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PicoScope.Brix) · [Pinta.Brix](https://github.com/ellisnet/CodeBrix.Samples/tree/main/Pinta.Brix) · [PolyHavenBrowser](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PolyHavenBrowser) · [PolyHavenBrowser_viewer_only](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PolyHavenBrowser_viewer_only) · [RedisSetupTool](https://github.com/ellisnet/CodeBrix.Samples/tree/main/RedisSetupTool) · [SimpleCbxVideoPlayer](https://github.com/ellisnet/CodeBrix.Samples/tree/main/SimpleCbxVideoPlayer) · [WebcamPainter](https://github.com/ellisnet/CodeBrix.Samples/tree/main/WebcamPainter) · [WebcamViewer](https://github.com/ellisnet/CodeBrix.Samples/tree/main/WebcamViewer) · [WikipediaPublisher](https://github.com/ellisnet/CodeBrix.Samples/tree/main/WikipediaPublisher) |
+| **Applications** | [BrixInvaders](https://github.com/ellisnet/CodeBrix.Samples/tree/main/BrixInvaders) · [CodeBrixVideoTool](https://github.com/ellisnet/CodeBrix.Samples/tree/main/CodeBrixVideoTool) · [DRAKON.Brix](https://github.com/ellisnet/CodeBrix.Samples/tree/main/DRAKON.Brix) · [GameEngineMusicDemo](https://github.com/ellisnet/CodeBrix.Samples/tree/main/GameEngineMusicDemo) · [GitHubIssueFinder](https://github.com/ellisnet/CodeBrix.Samples/tree/main/GitHubIssueFinder) · [GoddessTempleDiscovery](https://github.com/ellisnet/CodeBrix.Samples/tree/main/GoddessTempleDiscovery) · [InannaRosette](https://github.com/ellisnet/CodeBrix.Samples/tree/main/InannaRosette) · [JustBetweenUs](https://github.com/ellisnet/CodeBrix.Samples/tree/main/JustBetweenUs) · [KenneyAssetBrowser](https://github.com/ellisnet/CodeBrix.Samples/tree/main/KenneyAssetBrowser) · [MediaPlayerDemo](https://github.com/ellisnet/CodeBrix.Samples/tree/main/MediaPlayerDemo) · [NotionDocumentCreator](https://github.com/ellisnet/CodeBrix.Samples/tree/main/NotionDocumentCreator) · [PainDiagram](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PainDiagram) · [PalmVisualizer](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PalmVisualizer) · [PdfSideBySide](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PdfSideBySide) · [PicoScope.Brix](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PicoScope.Brix) · [Pinta.Brix](https://github.com/ellisnet/CodeBrix.Samples/tree/main/Pinta.Brix) · [PolyHavenBrowser](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PolyHavenBrowser) · [PolyHavenBrowser_viewer_only](https://github.com/ellisnet/CodeBrix.Samples/tree/main/PolyHavenBrowser_viewer_only) · [RedisSetupTool](https://github.com/ellisnet/CodeBrix.Samples/tree/main/RedisSetupTool) · [SimpleCbxVideoPlayer](https://github.com/ellisnet/CodeBrix.Samples/tree/main/SimpleCbxVideoPlayer) · [WebcamPainter](https://github.com/ellisnet/CodeBrix.Samples/tree/main/WebcamPainter) · [WebcamViewer](https://github.com/ellisnet/CodeBrix.Samples/tree/main/WebcamViewer) · [WikipediaPublisher](https://github.com/ellisnet/CodeBrix.Samples/tree/main/WikipediaPublisher) |
 | **This site** | [Reference applications](samples/README.md) · [Blueprints](samples/blueprints.md) |
 
 <details>

@@ -600,7 +600,7 @@ runtime-identifier list instead, and must keep the `runtimes/` folder the build 
 assemblies.
 
 The reference application in [CodeBrix.Samples](https://github.com/ellisnet/CodeBrix.Samples) is
-[InannaRosette](https://github.com/ellisnet/CodeBrix.Samples/tree/main/InannaRosette), which composes a
+[InannaOctaquetra](https://github.com/ellisnet/CodeBrix.Samples/tree/main/InannaOctaquetra), which composes a
 hand-placed, multi-page report with `XGraphics` rather than through the document model: it grows its own page
 cursor for margins and breaks, draws as `XGraphicsPath` geometry the same vector art its pages draw on screen,
 and registers an `EmbeddedFontResolver` per face name from fonts embedded in its own library, so the finished

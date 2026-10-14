@@ -436,7 +436,7 @@ The repository contains no sample applications, demo apps, tools, scripts or opt
 downloads. It is a single font asset package plus the test project that guards it.
 
 The reference application in [CodeBrix.Samples](https://github.com/ellisnet/CodeBrix.Samples) is
-[InannaRosette](https://github.com/ellisnet/CodeBrix.Samples/tree/main/InannaRosette), which names this
+[InannaOctaquetra](https://github.com/ellisnet/CodeBrix.Samples/tree/main/InannaOctaquetra), which names this
 package's URI as its application-wide default text font and exposes the regular and bold faces as `FontFamily`
 resources that every text style uses, then embeds its own copies of the same faces in the PDF report it
 composes through [CodeBrix.PdfDocuments](CodeBrix.PdfDocuments.md), so the report reads the same on a machine

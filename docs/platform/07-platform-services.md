@@ -1760,7 +1760,7 @@ The [AppSettings add-in page](add-ins/AppSettings.md) has the full API surface.
 | Open a link from the game engine thread | [BrixInvaders LauncherLinkOpener](https://github.com/ellisnet/CodeBrix.Samples/blob/main/BrixInvaders/src/libs/BrixInvaders.Game/Links/LauncherLinkOpener.cs) |
 | Follow the desktop's light or dark preference | [GitHubIssueFinder MainPage code-behind](https://github.com/ellisnet/CodeBrix.Samples/blob/main/GitHubIssueFinder/src/GitHubIssueFinder.UI/Views/MainPage.xaml.cs) |
 | A platform service with a no-op default | [Pinta.Brix IClipboardService](https://github.com/ellisnet/CodeBrix.Samples/blob/main/Pinta.Brix/src/libs/Pinta.Brix.Engine/Services/IClipboardService.cs) |
-| Dialogs the page builds so they keep the application's own look | [InannaRosette IReadingDialogBridge](https://github.com/ellisnet/CodeBrix.Samples/blob/main/InannaRosette/src/InannaRosette.Core/Services/IReadingDialogBridge.cs) |
+| Dialogs the page builds so they keep the application's own look | [InannaOctaquetra IReadingDialogBridge](https://github.com/ellisnet/CodeBrix.Samples/blob/main/InannaOctaquetra/src/InannaOctaquetra.Core/Services/IReadingDialogBridge.cs) |
 | Invalidate a canvas from a view model | [WebcamPainter MainPage code-behind](https://github.com/ellisnet/CodeBrix.Samples/blob/main/WebcamPainter/src/WebcamPainter.UI/Views/MainPage.xaml.cs) |
 | Marshal a repeating timer into a headless model | [Pinta.Brix ITimerService](https://github.com/ellisnet/CodeBrix.Samples/blob/main/Pinta.Brix/src/libs/Pinta.Brix.Engine/Services/ITimerService.cs) |
 | Set the cursor from a model-owned descriptor | [Pinta.Brix PintaCanvas](https://github.com/ellisnet/CodeBrix.Samples/blob/main/Pinta.Brix/src/libs/Pinta.Brix.Controls/PintaCanvas.cs) |
